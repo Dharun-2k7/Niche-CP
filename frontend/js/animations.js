@@ -164,6 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // D. Sticky Transformation Engine (8 Stages)
     if (window.innerWidth > 768) {
         const slides = gsap.utils.toArray('.success-slide');
+        const evolutionFill = document.getElementById('evolutionFill');
+        const evolutionLabel = document.getElementById('evolutionLabel');
         
         if (slides.length > 0) {
             ScrollTrigger.create({
@@ -171,7 +173,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 start: "top top",
                 end: "+=700%",
                 pin: ".success-sticky-container",
-                scrub: true
+                scrub: true,
+                onUpdate: (self) => {
+                    const progress = self.progress;
+                    const currentStage = Math.min(Math.floor(progress * slides.length) + 1, slides.length);
+                    if (evolutionFill) evolutionFill.style.width = (currentStage / slides.length * 100) + '%';
+                    if (evolutionLabel) evolutionLabel.textContent = `Stage ${currentStage} / ${slides.length}`;
+                }
             });
             
             const step = 100 / slides.length;

@@ -66,6 +66,39 @@
         </div>
     </header>
 
+    <!-- Product Showcase -->
+    <section class="section-container">
+        <h2 class="display-font text-center" style="font-size: 48px; margin-bottom: 20px;">What You Can Do <span class="gradient-text">Today</span></h2>
+        <p class="text-center" style="color: var(--text-muted); max-width: 650px; margin: 0 auto 60px; font-size: 18px;">Not a promise. Not a vision. These are the tools available to you the moment you sign up.</p>
+        <div class="bento-grid product-grid">
+            <div class="bento-card span-2">
+                <span class="bento-icon">📋</span>
+                <h3>Problem Arena</h3>
+                <p>Curated, difficulty-graded problems organized by topic. Structured progression from arrays to segment trees — not random practice.</p>
+            </div>
+            <div class="bento-card span-2">
+                <span class="bento-icon">🏁</span>
+                <h3>Contest Arena</h3>
+                <p>Weekly timed contests with ICPC-style scoring. Real leaderboards, real pressure, real growth. Penalty-based ranking just like the real thing.</p>
+            </div>
+            <div class="bento-card span-1">
+                <span class="bento-icon">🔄</span>
+                <h3>Reverse Coding</h3>
+                <p>Given outputs, discover the hidden logic. A unique challenge format that trains pattern recognition and deductive reasoning.</p>
+            </div>
+            <div class="bento-card span-1">
+                <span class="bento-icon">⚡</span>
+                <h3>Code Golf</h3>
+                <p>Solve problems in the fewest characters possible. A competitive, fun format that sharpens language mastery.</p>
+            </div>
+            <div class="bento-card span-2">
+                <span class="bento-icon">📊</span>
+                <h3>Performance Dashboard</h3>
+                <p>Track your skill growth with heatmaps, difficulty distribution charts, and weakness identification. Know exactly where to focus next.</p>
+            </div>
+        </div>
+    </section>
+
     <!-- Bento Grid Section -->
     <section id="bento" class="section-container">
         <h2 class="display-font" style="font-size: 40px; margin-bottom: 40px;">System Core</h2>
@@ -248,49 +281,115 @@
     <section class="success-timeline-wrapper">
         <div class="success-sticky-container">
             <h2 class="display-font text-center" style="font-size: 48px; margin-bottom: 10px; position: relative; z-index: 10;">The <span class="gradient-text">Transformation</span> Engine</h2>
-            <p class="text-center" style="color: var(--text-muted); margin-bottom: 40px; position: relative; z-index: 10;">You don't just learn to code. You evolve into a different kind of thinker.</p>
+            <p class="text-center" style="color: var(--text-muted); margin-bottom: 30px; position: relative; z-index: 10;">Scroll to witness the evolution of an engineer.</p>
+            
+            <!-- Progress Bar -->
+            <div class="evolution-progress" style="position: relative; z-index: 10;">
+                <div class="evolution-bar"><div class="evolution-fill" id="evolutionFill"></div></div>
+                <div class="evolution-label" id="evolutionLabel">Stage 1 / 8</div>
+            </div>
             
             <div class="success-slides">
                 <div class="success-slide">
                     <div class="slide-year">Stage 01</div>
-                    <h3 class="display-font">Untrained Thinker</h3>
-                    <p>You know syntax but freeze at open-ended problems. You Google solutions instead of deriving them. Every unfamiliar problem feels impossible. This is where most students stay forever.</p>
+                    <h3 class="display-font">Curious Beginner</h3>
+                    <p>You know syntax but freeze at open-ended problems. You Google solutions instead of deriving them. The gap between "knowing a language" and "solving problems" feels infinite.</p>
+                    <div class="tag-cloud" style="margin-top: 20px; justify-content: center;"><span>Syntax</span><span>Loops</span><span>Conditionals</span></div>
                 </div>
                 <div class="success-slide">
                     <div class="slide-year">Stage 02</div>
-                    <h3 class="display-font">Curious Learner</h3>
-                    <p>You start asking "why does this work?" instead of "what's the answer?" You begin to see patterns in arrays, strings, and sorting. The fog starts lifting.</p>
+                    <h3 class="display-font">Pattern Explorer</h3>
+                    <p>You start asking "why" instead of "what." You begin recognizing that array problems share structures. Sorting isn't just a function — it's a strategy.</p>
+                    <div class="tag-cloud" style="margin-top: 20px; justify-content: center;"><span>Arrays</span><span>Strings</span><span>Sorting</span><span>Searching</span></div>
                 </div>
                 <div class="success-slide">
                     <div class="slide-year">Stage 03</div>
                     <h3 class="display-font">Consistent Solver</h3>
-                    <p>Daily practice becomes non-negotiable. You solve problems not for grades but for the satisfaction of cracking logic. Binary search and two pointers become instinct.</p>
+                    <p>Daily practice becomes non-negotiable. You solve problems not for grades but for the discipline of cracking logic. Two pointers and binary search become instinct.</p>
+                    <div class="tag-cloud" style="margin-top: 20px; justify-content: center;"><span>Binary Search</span><span>Two Pointers</span><span>Prefix Sums</span><span>Hashing</span></div>
                 </div>
                 <div class="success-slide">
                     <div class="slide-year">Stage 04</div>
                     <h3 class="display-font">Competitive Programmer</h3>
-                    <p>You enter contests. You experience the pressure of a ticking clock. You learn that speed without accuracy is worthless. Graphs, trees, and recursion are no longer abstract concepts.</p>
+                    <p>You enter contests. You experience the pressure of a ticking clock. Speed without accuracy is worthless. Graphs, trees, and recursion are no longer abstract.</p>
+                    <div class="tag-cloud" style="margin-top: 20px; justify-content: center;"><span>Recursion</span><span>Trees</span><span>Graphs</span><span>BFS/DFS</span></div>
                 </div>
                 <div class="success-slide">
                     <div class="slide-year">Stage 05</div>
-                    <h3 class="display-font">Systematic Problem Solver</h3>
-                    <p>You stop guessing. You decompose every problem into subproblems, identify constraints, select paradigms, and verify edge cases before writing a single line of code.</p>
+                    <h3 class="display-font">Algorithmic Thinker</h3>
+                    <p>You stop guessing paradigms. You decompose problems into subproblems, identify constraints, select approaches, and verify edge cases before writing code.</p>
+                    <div class="tag-cloud" style="margin-top: 20px; justify-content: center;"><span>Dynamic Programming</span><span>Greedy</span><span>Segment Trees</span></div>
                 </div>
                 <div class="success-slide">
                     <div class="slide-year">Stage 06</div>
-                    <h3 class="display-font">Interview-Ready Engineer</h3>
+                    <h3 class="display-font">Systematic Engineer</h3>
                     <p>You walk into technical interviews with confidence. You communicate your approach clearly. You handle follow-ups. You optimize on the fly. Interviewers notice.</p>
+                    <div class="tag-cloud" style="margin-top: 20px; justify-content: center;"><span>System Design Thinking</span><span>Optimization</span><span>Communication</span></div>
                 </div>
                 <div class="success-slide">
                     <div class="slide-year">Stage 07</div>
                     <h3 class="display-font">Industry-Ready Builder</h3>
                     <p>Your problem-solving discipline translates directly into production code. You write systems that scale. You debug issues others cannot see. You ship with precision.</p>
+                    <div class="tag-cloud" style="margin-top: 20px; justify-content: center;"><span>Production Code</span><span>Scalability</span><span>Debugging</span></div>
                 </div>
                 <div class="success-slide">
                     <div class="slide-year">Stage 08</div>
-                    <h3 class="display-font">Tech Leader</h3>
+                    <h3 class="display-font">Technical Leader</h3>
                     <p>You mentor others. You architect solutions. You make decisions under ambiguity. The thinking discipline you built through thousands of problems now defines your career.</p>
+                    <div class="tag-cloud" style="margin-top: 20px; justify-content: center;"><span>Architecture</span><span>Mentorship</span><span>Leadership</span></div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why NicheCP? -->
+    <section class="section-container">
+        <h2 class="display-font text-center" style="font-size: 48px; margin-bottom: 20px;">Why <span class="gradient-text">NicheCP?</span></h2>
+        <p class="text-center" style="color: var(--text-muted); max-width: 650px; margin: 0 auto 60px; font-size: 18px;">There are thousands of coding platforms. Here's what makes this one fundamentally different.</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="bento-card"><h3 style="color: var(--text-muted); font-size: 16px; margin-bottom: 8px;">Traditional Platforms</h3><p style="font-size: 20px; color: var(--text-primary);">Random problem sets</p></div>
+            <div class="bento-card" style="border-color: var(--primary-accent);"><h3 style="color: var(--primary-accent); font-size: 16px; margin-bottom: 8px;">NicheCP</h3><p style="font-size: 20px;">Structured growth roadmaps</p></div>
+            <div class="bento-card"><h3 style="color: var(--text-muted); font-size: 16px; margin-bottom: 8px;">Traditional Platforms</h3><p style="font-size: 20px; color: var(--text-primary);">Ratings as the only metric</p></div>
+            <div class="bento-card" style="border-color: var(--primary-accent);"><h3 style="color: var(--primary-accent); font-size: 16px; margin-bottom: 8px;">NicheCP</h3><p style="font-size: 20px;">Holistic skill tracking & analytics</p></div>
+            <div class="bento-card"><h3 style="color: var(--text-muted); font-size: 16px; margin-bottom: 8px;">Traditional Platforms</h3><p style="font-size: 20px; color: var(--text-primary);">Solve and forget</p></div>
+            <div class="bento-card" style="border-color: var(--primary-accent);"><h3 style="color: var(--primary-accent); font-size: 16px; margin-bottom: 8px;">NicheCP</h3><p style="font-size: 20px;">Learn → Practice → Reflect → Master</p></div>
+            <div class="bento-card"><h3 style="color: var(--text-muted); font-size: 16px; margin-bottom: 8px;">Traditional Platforms</h3><p style="font-size: 20px; color: var(--text-primary);">Isolated individual grind</p></div>
+            <div class="bento-card" style="border-color: var(--primary-accent);"><h3 style="color: var(--primary-accent); font-size: 16px; margin-bottom: 8px;">NicheCP</h3><p style="font-size: 20px;">Community-driven accountability</p></div>
+        </div>
+    </section>
+
+    <!-- Impact In Numbers -->
+    <section class="section-container">
+        <h2 class="display-font text-center" style="font-size: 48px; margin-bottom: 60px;">Impact In <span class="gradient-text">Numbers</span></h2>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-number"><span class="counter" data-target="250">0</span>+</div><h3>Active Members</h3></div>
+            <div class="stat-card"><div class="stat-number"><span class="counter" data-target="1200">0</span>+</div><h3>Problems Solved</h3></div>
+            <div class="stat-card"><div class="stat-number"><span class="counter" data-target="40">0</span>+</div><h3>Contests Held</h3></div>
+            <div class="stat-card"><div class="stat-number"><span class="counter" data-target="500">0</span>+</div><h3>Weekly Submissions</h3></div>
+            <div class="stat-card"><div class="stat-number"><span class="counter" data-target="15">0</span>+</div><h3>Topics Covered</h3></div>
+            <div class="stat-card"><div class="stat-number"><span class="counter" data-target="3000">0</span>+</div><h3>Learning Hours</h3></div>
+        </div>
+    </section>
+
+    <!-- ICPC Identity -->
+    <section class="section-container">
+        <h2 class="display-font text-center" style="font-size: 48px; margin-bottom: 20px;">Powered by the <span class="gradient-text">ICPC</span> Philosophy</h2>
+        <p class="text-center" style="color: var(--text-muted); max-width: 700px; margin: 0 auto 60px; font-size: 18px; line-height: 1.8;">The International Collegiate Programming Contest is the world's oldest and most prestigious algorithmic competition. Our platform is built on its core principles.</p>
+        <div class="bento-grid values-grid">
+            <div class="bento-card span-2">
+                <span class="bento-icon">🌍</span>
+                <h3>Global Competition</h3>
+                <p>ICPC spans 3,000+ universities across 100+ countries. It is the proving ground where the world's best algorithmic minds compete. We train students to be ready for that stage.</p>
+            </div>
+            <div class="bento-card span-1">
+                <span class="bento-icon">👥</span>
+                <h3>Team-Based Solving</h3>
+                <p>ICPC is a team contest. Three minds, one computer. Communication, delegation, and trust are as important as code.</p>
+            </div>
+            <div class="bento-card span-1">
+                <span class="bento-icon">⏱️</span>
+                <h3>Time Pressure</h3>
+                <p>5 hours. 10+ problems. Penalty for every wrong submission. The format trains you to think fast and code right.</p>
             </div>
         </div>
     </section>

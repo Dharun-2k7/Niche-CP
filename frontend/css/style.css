@@ -337,3 +337,243 @@ h1, h2, h3, h4, h5, h6, .display-font {
     .span-2, .span-3, .span-4 { grid-column: span 1; }
     .title-massive { font-size: 48px; }
 }
+
+/* ==========================================
+   ECOSYSTEM EXPANSION STYLES
+   ========================================== */
+
+/* 1. Why CP Matters (Stats Grid) */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+.stat-card {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    transition: transform 0.3s, border-color 0.3s;
+}
+.stat-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--primary-accent);
+}
+.stat-number {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 64px;
+    font-weight: 800;
+    color: var(--primary-accent);
+    margin-bottom: 20px;
+    text-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+}
+.stat-card h3 { font-size: 24px; margin-bottom: 15px; }
+.stat-card p { color: var(--text-muted); line-height: 1.6; }
+
+/* 2. Learning Journey (Vertical Map) */
+.learning-journey {
+    position: relative;
+    padding-top: 100px;
+}
+.journey-map {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 0;
+}
+.journey-line {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+    width: 100px;
+    height: 100%;
+    z-index: 1;
+}
+.journey-phase {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 50%;
+    padding-right: 50px;
+    position: relative;
+    margin-bottom: 80px;
+    z-index: 2;
+}
+.journey-phase.right {
+    justify-content: flex-start;
+    margin-left: 50%;
+    padding-left: 50px;
+    padding-right: 0;
+}
+.phase-marker {
+    position: absolute;
+    right: -25px;
+    width: 50px; height: 50px;
+    background: var(--bg-base);
+    border: 2px solid var(--primary-accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary-accent);
+    z-index: 3;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+}
+.journey-phase.right .phase-marker {
+    left: -25px;
+    right: auto;
+}
+.phase-content {
+    width: 100%;
+    max-width: 350px;
+}
+.tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+.tag-cloud span {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+/* 3. Success Journey (Sticky Timeline) */
+.success-timeline-wrapper {
+    height: 400vh; /* creates scroll room for 4 slides */
+    position: relative;
+}
+.success-sticky-container {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background: var(--bg-base);
+}
+.success-slides {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    height: 400px;
+}
+.success-slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 60px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transform: translateY(100px);
+}
+.slide-year {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    color: var(--primary-accent);
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+.success-slide p {
+    color: var(--text-muted);
+    font-size: 18px;
+    line-height: 1.8;
+    margin-top: 20px;
+}
+
+/* 4. Career Pathway */
+.morphing-pathway {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 40px;
+    border-radius: 100px;
+    border: 1px solid var(--card-border);
+}
+.path-node {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px;
+    color: var(--text-muted);
+    transition: color 0.3s;
+}
+.path-arrow {
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 24px;
+}
+.path-node.highlight {
+    color: var(--primary-accent);
+    text-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+    font-weight: bold;
+}
+
+/* 5. Vision Section (Cinematic Scroll) */
+.vision-section {
+    padding: 200px 20px;
+    text-align: center;
+}
+.cinematic-text {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(32px, 5vw, 64px);
+    font-weight: 800;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.1); /* starts very dim */
+    margin-bottom: 20px;
+}
+
+/* 6. Community & Roadmap */
+.community-list {
+    list-style: none;
+    padding: 0;
+}
+.community-list li {
+    font-size: 18px;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.community-list li:last-child { border-bottom: none; }
+
+.roadmap-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.r-item {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 15px 20px;
+    border-radius: 12px;
+    border-left: 4px solid var(--primary-accent);
+    font-weight: 500;
+}
+
+/* Responsive Overrides for new elements */
+@media screen and (max-width: 768px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .journey-phase { width: 100%; justify-content: center; padding-right: 0; padding-left: 50px; margin-left: 0 !important; }
+    .journey-line { left: 25px; transform: none; width: 50px; }
+    .phase-marker { left: 0 !important; right: auto !important; }
+    .morphing-pathway { flex-direction: column; border-radius: 24px; padding: 30px; }
+    .path-arrow { transform: rotate(90deg); }
+    .success-slides { padding: 0 20px; }
+    .success-slide { padding: 30px; }
+}

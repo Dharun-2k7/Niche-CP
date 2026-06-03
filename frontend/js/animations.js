@@ -111,4 +111,116 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // =========================================================================
+    // 4. ECOSYSTEM EXPANSION ANIMATIONS
+    // =========================================================================
+
+    // A. Number Counters (Why CP Matters)
+    const counters = document.querySelectorAll('.counter');
+    counters.forEach(counter => {
+        gsap.to(counter, {
+            innerHTML: counter.getAttribute('data-target'),
+            snap: { innerHTML: 1 },
+            duration: 2,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: counter,
+                start: "top 85%"
+            }
+        });
+    });
+
+    // B. SVG Journey Line Drawing
+    const lineFill = document.querySelector('.journey-line-fill');
+    if (lineFill) {
+        gsap.set(lineFill, { strokeDasharray: 800, strokeDashoffset: 800 });
+        gsap.to(lineFill, {
+            strokeDashoffset: 0,
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".journey-map",
+                start: "top 60%",
+                end: "bottom 80%",
+                scrub: 1
+            }
+        });
+    }
+
+    // C. Journey Phase Reveals
+    gsap.utils.toArray('.journey-phase').forEach(phase => {
+        const isRight = phase.classList.contains('right');
+        gsap.from(phase, {
+            x: isRight ? 100 : -100,
+            opacity: 0,
+            duration: 1,
+            ease: "back.out(1.5)",
+            scrollTrigger: {
+                trigger: phase,
+                start: "top 85%"
+            }
+        });
+    });
+
+    // D. Sticky Success Timeline (Year 1 to 4)
+    if (window.innerWidth > 768) {
+        const slides = gsap.utils.toArray('.success-slide');
+        
+        if (slides.length > 0) {
+            // Pin the container
+            ScrollTrigger.create({
+                trigger: ".success-timeline-wrapper",
+                start: "top top",
+                end: "+=300%", // 3 scroll steps for 4 slides
+                pin: ".success-sticky-container",
+                scrub: true
+            });
+            
+            // Stagger reveal the slides based on scroll position
+            slides.forEach((slide, i) => {
+                const tl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: ".success-timeline-wrapper",
+                        start: `top+=${i * 100}% top`,
+                        end: `top+=${(i + 1) * 100}% top`,
+                        scrub: true
+                    }
+                });
+                
+                // Fade in and up, then fade out and up (except last one)
+                if (i === slides.length - 1) {
+                    tl.to(slide, { opacity: 1, y: 0, duration: 0.5 });
+                } else {
+                    tl.to(slide, { opacity: 1, y: 0, duration: 0.5 })
+                      .to(slide, { opacity: 0, y: -100, duration: 0.5 });
+                }
+            });
+        }
+    }
+
+    // E. Vision Section Cinematic Fade
+    gsap.utils.toArray('.cinematic-text').forEach(text => {
+        gsap.to(text, {
+            color: "rgba(255,255,255,1)",
+            scrollTrigger: {
+                trigger: text,
+                start: "top 80%",
+                end: "top 40%",
+                scrub: true
+            }
+        });
+    });
+
+    // F. Values Bento Grid
+    gsap.from(".values-grid .bento-card", {
+        scrollTrigger: {
+            trigger: ".values-grid",
+            start: "top 85%"
+        },
+        y: 100,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: "power3.out"
+    });
+
 });

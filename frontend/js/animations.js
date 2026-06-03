@@ -23,23 +23,35 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
         gsap.registerPlugin(ScrollTrigger);
 
-        const cube = document.getElementById('hero-3d-element');
-        if (cube) {
-            // As you scroll down, the cube rotates heavily and scales up
-            gsap.to(cube, {
-                scrollTrigger: {
-                    trigger: ".hero-section",
-                    start: "top top",
-                    end: "bottom top",
-                    scrub: 1 // smooth scrubbing
-                },
-                rotationX: 360,
-                rotationY: 720,
-                scale: 1.5,
-                y: 300, // moves down into the next section slightly
-                ease: "none"
-            });
-        }
+        // Staggered pop-up for Mission Cards
+        gsap.from(".mission-card", {
+            scrollTrigger: {
+                trigger: ".mission-grid",
+                start: "top 80%",
+                toggleActions: "play none none reverse"
+            },
+            y: 50,
+            opacity: 0,
+            scale: 0.9,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: "back.out(1.5)"
+        });
+
+        // Staggered pop-up for Event Cards
+        gsap.from(".event-card", {
+            scrollTrigger: {
+                trigger: ".events-container",
+                start: "top 80%",
+                toggleActions: "play none none reverse"
+            },
+            y: 50,
+            opacity: 0,
+            scale: 0.9,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: "back.out(1.5)"
+        });
     }
 
     // --- 3. Scroll Reveal Animation using Intersection Observer ---

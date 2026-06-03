@@ -39,8 +39,8 @@ h1, h2, h3, h4, h5, h6 {
     position: relative;
     z-index: 1;
     overflow-x: hidden;
-    background-color: #030305;
-    background-image: radial-gradient(circle at 50% 0%, rgba(30, 20, 50, 0.4) 0%, transparent 60%);
+    background-color: #0d0d12;
+    background-image: radial-gradient(circle at 50% 0%, rgba(30, 30, 40, 0.4) 0%, transparent 60%);
 }
 
 .landing-nav {
@@ -48,7 +48,7 @@ h1, h2, h3, h4, h5, h6 {
     justify-content: space-between;
     align-items: center;
     padding: 20px 60px;
-    background: rgba(3, 3, 5, 0.8);
+    background: rgba(13, 13, 18, 0.8);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     position: fixed;
@@ -149,43 +149,6 @@ h1, h2, h3, h4, h5, h6 {
     position: relative;
 }
 
-/* 3D Cube (Adidas/Apple style object) */
-.hero-3d-object {
-    position: absolute;
-    width: 200px;
-    height: 200px;
-    transform-style: preserve-3d;
-    z-index: 1;
-    opacity: 0.8;
-    pointer-events: none;
-    top: 50%; /* Positioned behind text initially */
-    transform: translateZ(-100px) rotateX(15deg) rotateY(45deg);
-}
-
-.cube-face {
-    position: absolute;
-    width: 200px;
-    height: 200px;
-    background: rgba(30, 20, 50, 0.4);
-    border: 2px solid rgba(255, 64, 129, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 40px;
-    font-weight: 800;
-    font-family: 'Outfit', monospace;
-    color: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(5px);
-    box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
-}
-
-.cube-front  { transform: translateZ(100px); }
-.cube-back   { transform: rotateY(180deg) translateZ(100px); }
-.cube-right  { transform: rotateY(90deg) translateZ(100px); }
-.cube-left   { transform: rotateY(-90deg) translateZ(100px); }
-.cube-top    { transform: rotateX(90deg) translateZ(100px); }
-.cube-bottom { transform: rotateX(-90deg) translateZ(100px); }
-
 .badge {
     border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 6px 16px;
@@ -236,12 +199,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .glass-container {
-    background: rgba(20, 20, 25, 0.6);
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
     padding: 60px;
     backdrop-filter: blur(20px);
     box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    transition: box-shadow 0.3s;
+}
+.glass-container:hover {
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
 }
 
 .glass-container p {
@@ -258,17 +225,18 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .mission-card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     padding: 40px 30px;
-    transition: transform 0.3s ease, border-color 0.3s;
+    transition: transform 0.3s ease, border-color 0.3s, box-shadow 0.3s;
     transform-style: preserve-3d;
     perspective: 1000px;
 }
 
 .mission-card:hover {
-    border-color: rgba(255, 64, 129, 0.3);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
 .icon-circle {
@@ -299,12 +267,18 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .event-card {
-    background: rgba(10, 10, 15, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 40px;
     position: relative;
     overflow: hidden;
+    transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.event-card:hover {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    transform: translateY(-5px);
 }
 
 .event-status {
@@ -326,7 +300,7 @@ h1, h2, h3, h4, h5, h6 {
 .main-footer {
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     padding: 80px 60px 40px;
-    background: #030305;
+    background: #0d0d12;
     margin-top: 80px;
 }
 
@@ -383,13 +357,13 @@ h1, h2, h3, h4, h5, h6 {
 
 .scroll-reveal {
     opacity: 0;
-    transform: translateY(40px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
+    transform: translateY(40px) scale(0.95);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .scroll-reveal.visible {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
 }
 
 
@@ -631,16 +605,6 @@ h1, h2, h3, h4, h5, h6 {
     .hero-subtitle {
         font-size: 16px;
     }
-    .hero-3d-object {
-        width: 120px; height: 120px;
-    }
-    .cube-face { width: 120px; height: 120px; font-size: 24px; }
-    .cube-front  { transform: translateZ(60px); }
-    .cube-back   { transform: rotateY(180deg) translateZ(60px); }
-    .cube-right  { transform: rotateY(90deg) translateZ(60px); }
-    .cube-left   { transform: rotateY(-90deg) translateZ(60px); }
-    .cube-top    { transform: rotateX(90deg) translateZ(60px); }
-    .cube-bottom { transform: rotateX(-90deg) translateZ(60px); }
 
     /* Sections */
     .section-padding {

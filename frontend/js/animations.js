@@ -161,32 +161,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // D. Sticky Success Timeline (Year 1 to 4)
+    // D. Sticky Transformation Engine (8 Stages)
     if (window.innerWidth > 768) {
         const slides = gsap.utils.toArray('.success-slide');
         
         if (slides.length > 0) {
-            // Pin the container
             ScrollTrigger.create({
                 trigger: ".success-timeline-wrapper",
                 start: "top top",
-                end: "+=300%", // 3 scroll steps for 4 slides
+                end: "+=700%",
                 pin: ".success-sticky-container",
                 scrub: true
             });
             
-            // Stagger reveal the slides based on scroll position
+            const step = 100 / slides.length;
             slides.forEach((slide, i) => {
                 const tl = gsap.timeline({
                     scrollTrigger: {
                         trigger: ".success-timeline-wrapper",
-                        start: `top+=${i * 100}% top`,
-                        end: `top+=${(i + 1) * 100}% top`,
+                        start: `top+=${i * step}% top`,
+                        end: `top+=${(i + 1) * step}% top`,
                         scrub: true
                     }
                 });
                 
-                // Fade in and up, then fade out and up (except last one)
                 if (i === slides.length - 1) {
                     tl.to(slide, { opacity: 1, y: 0, duration: 0.5 });
                 } else {

@@ -83,6 +83,8 @@ h1, h2, h3, h4, h5, h6, .display-font {
     -webkit-text-fill-color: transparent;
 }
 
+.text-center { text-align: center; }
+
 /* ================== CUSTOM CURSOR ================== */
 .custom-cursor {
     position: fixed;
@@ -448,7 +450,7 @@ h1, h2, h3, h4, h5, h6, .display-font {
 
 /* 3. Success Journey (Sticky Timeline) */
 .success-timeline-wrapper {
-    height: 400vh; /* creates scroll room for 4 slides */
+    height: 800vh; /* creates scroll room for 8 slides */
     position: relative;
 }
 .success-sticky-container {
@@ -576,4 +578,6 @@ h1, h2, h3, h4, h5, h6, .display-font {
     .path-arrow { transform: rotate(90deg); }
     .success-slides { padding: 0 20px; }
     .success-slide { padding: 30px; }
+    .community-section > div,
+    .section-container > div[style*='grid-template-columns: 1fr 1fr'] { grid-template-columns: 1fr !important; }
 }

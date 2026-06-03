@@ -448,61 +448,52 @@ h1, h2, h3, h4, h5, h6, .display-font {
     color: var(--text-muted);
 }
 
-/* 3. Success Journey (Sticky Timeline) */
-.success-timeline-wrapper {
-    height: 800vh; /* creates scroll room for 8 slides */
-    position: relative;
-}
-.success-sticky-container {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+/* 3. Transformation Engine (Horizontal Scroll) */
+.transform-wrapper {
     overflow: hidden;
-    background: var(--bg-base);
-}
-.success-slides {
     position: relative;
-    width: 100%;
-    max-width: 800px;
-    height: 400px;
+    z-index: 2;
 }
-.success-slide {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+.transform-header {
+    padding: 80px 40px 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+.transform-track {
+    display: flex;
+    gap: 24px;
+    padding: 0 40px 80px;
+    width: max-content;
+}
+.transform-card {
+    width: 360px;
+    min-height: 320px;
+    flex-shrink: 0;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 24px;
-    padding: 60px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    transform: translateY(100px);
+    padding: 40px;
+    transition: border-color 0.4s;
 }
-.success-slide:first-child {
-    opacity: 1;
-    transform: translateY(0);
+.transform-card:hover {
+    border-color: var(--card-border-hover);
 }
+.transform-card .tag-cloud {
+    margin-top: 20px;
+}
+.transform-card .slide-year,
 .slide-year {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 20px;
+    font-size: 16px;
     color: var(--primary-accent);
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     text-transform: uppercase;
     letter-spacing: 2px;
 }
-.success-slide p {
+.transform-card p {
     color: var(--text-muted);
-    font-size: 18px;
-    line-height: 1.8;
-    margin-top: 20px;
+    line-height: 1.7;
+    margin-top: 12px;
 }
 
 /* Evolution Progress Bar */
@@ -609,8 +600,9 @@ h1, h2, h3, h4, h5, h6, .display-font {
     .phase-marker { left: 0 !important; right: auto !important; }
     .morphing-pathway { flex-direction: column; border-radius: 24px; padding: 30px; }
     .path-arrow { transform: rotate(90deg); }
-    .success-slides { padding: 0 20px; }
-    .success-slide { padding: 30px; }
+    .transform-card { width: 300px; min-height: 280px; padding: 30px; }
+    .transform-header { padding: 60px 20px 20px; }
+    .transform-track { padding: 0 20px 60px; }
     .community-section > div,
     .section-container > div[style*='grid-template-columns: 1fr 1fr'] { grid-template-columns: 1fr !important; }
 }

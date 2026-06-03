@@ -161,46 +161,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // D. Sticky Transformation Engine (8 Stages)
-    if (window.innerWidth > 768) {
-        const slides = gsap.utils.toArray('.success-slide');
+    // D. Horizontal Scroll Transformation Engine
+    const transformTrack = document.querySelector('.transform-track');
+    if (transformTrack) {
         const evolutionFill = document.getElementById('evolutionFill');
         const evolutionLabel = document.getElementById('evolutionLabel');
-        
-        if (slides.length > 0) {
-            ScrollTrigger.create({
-                trigger: ".success-timeline-wrapper",
-                start: "top top",
-                end: "+=700%",
-                pin: ".success-sticky-container",
-                scrub: true,
+        const totalCards = document.querySelectorAll('.transform-card').length;
+
+        gsap.to(transformTrack, {
+            x: () => -(transformTrack.scrollWidth - window.innerWidth) + "px",
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".transform-wrapper",
+                pin: true,
+                scrub: 1,
+                end: () => "+=" + (transformTrack.scrollWidth - window.innerWidth),
+                invalidateOnRefresh: true,
                 onUpdate: (self) => {
-                    const progress = self.progress;
-                    const currentStage = Math.min(Math.floor(progress * slides.length) + 1, slides.length);
-                    if (evolutionFill) evolutionFill.style.width = (currentStage / slides.length * 100) + '%';
-                    if (evolutionLabel) evolutionLabel.textContent = `Stage ${currentStage} / ${slides.length}`;
+                    const stage = Math.min(Math.floor(self.progress * totalCards) + 1, totalCards);
+                    if (evolutionFill) evolutionFill.style.width = (stage / totalCards * 100) + '%';
+                    if (evolutionLabel) evolutionLabel.textContent = `Stage ${stage} / ${totalCards}`;
                 }
-            });
-            
-            const step = 100 / slides.length;
-            slides.forEach((slide, i) => {
-                const tl = gsap.timeline({
-                    scrollTrigger: {
-                        trigger: ".success-timeline-wrapper",
-                        start: `top+=${i * step}% top`,
-                        end: `top+=${(i + 1) * step}% top`,
-                        scrub: true
-                    }
-                });
-                
-                if (i === slides.length - 1) {
-                    tl.to(slide, { opacity: 1, y: 0, duration: 0.5 });
-                } else {
-                    tl.to(slide, { opacity: 1, y: 0, duration: 0.5 })
-                      .to(slide, { opacity: 0, y: -100, duration: 0.5 });
-                }
-            });
-        }
+            }
+        });
     }
 
     // E. Vision Section Cinematic Fade

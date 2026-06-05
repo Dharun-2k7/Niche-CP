@@ -247,6 +247,7 @@ h1, h2, h3, h4, h5, h6, .display-font {
     overflow: hidden;
     /* 3D setup */
     transform-style: preserve-3d;
+    will-change: transform, opacity;
     transition: border-color 0.4s, background 0.4s;
 }
 
@@ -416,6 +417,7 @@ h1, h2, h3, h4, h5, h6, .display-font {
     position: relative;
     margin-bottom: 80px;
     z-index: 2;
+    will-change: transform, opacity;
 }
 .journey-phase.right {
     justify-content: flex-start;

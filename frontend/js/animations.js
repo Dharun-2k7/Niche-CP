@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
     // Fix: Animate cards individually when they enter the viewport to eliminate lag
     // and make them responsive on mobile devices.
-    gsap.utils.toArray(".bento-card, .stat-card, .timeline-panel").forEach(card => {
+    gsap.utils.toArray(".bento-card:not(.phase-content), .stat-card, .timeline-panel").forEach(card => {
         gsap.from(card, {
             scrollTrigger: {
                 trigger: card,
@@ -152,13 +152,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // C. Journey Phase Reveals
+    // Fixed: Converted to vertical translation to prevent mobile horizontal overflow bugs
     gsap.utils.toArray('.journey-phase').forEach(phase => {
-        const isRight = phase.classList.contains('right');
         gsap.from(phase, {
-            x: isRight ? 100 : -100,
+            y: 40,
             opacity: 0,
-            duration: 1,
-            ease: "back.out(1.5)",
+            duration: 0.6,
+            ease: "power2.out",
             scrollTrigger: {
                 trigger: phase,
                 start: "top 85%"
@@ -173,15 +173,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const evolutionLabel = document.getElementById('evolutionLabel');
         const totalCards = document.querySelectorAll('.transform-card').length;
 
+        let isTicking = false;
         transformTrack.addEventListener('scroll', () => {
-            const maxScrollLeft = transformTrack.scrollWidth - transformTrack.clientWidth;
-            if (maxScrollLeft > 0) {
-                const scrollProgress = transformTrack.scrollLeft / maxScrollLeft;
-                const stage = Math.min(Math.floor(scrollProgress * (totalCards - 1)) + 1, totalCards);
-                if (evolutionFill) evolutionFill.style.width = (stage / totalCards * 100) + '%';
-                if (evolutionLabel) evolutionLabel.textContent = `Stage ${stage} / ${totalCards}`;
+            if (!isTicking) {
+                window.requestAnimationFrame(() => {
+                    const maxScrollLeft = transformTrack.scrollWidth - transformTrack.clientWidth;
+                    if (maxScrollLeft > 0) {
+                        const scrollProgress = transformTrack.scrollLeft / maxScrollLeft;
+                        const stage = Math.min(Math.floor(scrollProgress * (totalCards - 1)) + 1, totalCards);
+                        if (evolutionFill) evolutionFill.style.width = (stage / totalCards * 100) + '%';
+                        if (evolutionLabel) evolutionLabel.textContent = `Stage ${stage} / ${totalCards}`;
+                    }
+                    isTicking = false;
+                });
+                isTicking = true;
             }
-        });
+        }, { passive: true });
     }
 
     // E. Vision Section Cinematic Fade

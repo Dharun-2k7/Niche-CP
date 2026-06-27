@@ -31,15 +31,13 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
+    <!-- Hero Section (What is NicheCP?) -->
     <header class="hero" style="padding-top: 15vh;">
-        <!-- Floating Parallax Nodes (Keeping minimal) -->
+        <!-- Minimal Parallax Nodes -->
         <div class="parallax-nodes">
-            <!-- Node 1 -->
             <svg class="p-node node-1" style="position:absolute; top:20%; left:15%; width:40px; opacity:0.3;" viewBox="0 0 100 100" fill="none" stroke="var(--primary-accent)" stroke-width="2">
                 <polygon points="50,5 95,25 95,75 50,95 5,75 5,25" />
             </svg>
-            <!-- Node 2 -->
             <svg class="p-node node-2" style="position:absolute; top:70%; left:10%; width:30px; opacity:0.2;" viewBox="0 0 100 100" fill="none" stroke="var(--secondary-accent)" stroke-width="2">
                 <circle cx="50" cy="50" r="45" />
             </svg>
@@ -47,234 +45,220 @@
 
         <h1 class="title-massive hero-split" style="font-size: clamp(40px, 8vw, 80px); line-height: 1.1;">
             Amrita Nagercoil<br>
-            <span class="gradient-text">Competitive Programming</span>
+            <span class="gradient-text">ICPC Club</span>
         </h1>
         <p class="hero-subtitle" style="margin-top: 24px; max-width: 600px; text-align: left; margin-left: 0;">
-            A dedicated infrastructure for hosting campus coding contests, managing problem archives, and tracking student leaderboards.
+            The official competitive programming platform of the Amrita Nagercoil ICPC Club. A dedicated infrastructure for hosting campus contests, tracking progress, and building a problem-solving community.
         </p>
         <div class="hero-cta" style="margin-top: 40px; display: flex; align-items: center; gap: 20px; justify-content: flex-start;">
             <a href="arena.html" class="btn-magnetic">Enter Platform</a>
             <div style="font-size: 14px; color: var(--text-muted); display: flex; gap: 16px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 20px;">
-                <span>Active Users: 50+</span>
-                <span>Next Contest: Round 16</span>
+                <span>Active Members: 50+</span>
+                <span>Next Event: Tomorrow</span>
             </div>
         </div>
     </header>
 
-    <!-- Upcoming Contests -->
-    <section class="section-container" id="contests">
+    <!-- Event Calendar Preview (What events happen here?) -->
+    <section class="section-container" id="events">
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
-            <h2 class="display-font" style="font-size: 28px; margin: 0;">Upcoming Contests</h2>
-            <a href="#" style="color: var(--primary-accent); text-decoration: none; font-size: 14px;">View Archive →</a>
+            <h2 class="display-font" style="font-size: 28px; margin: 0;">Event Calendar</h2>
+            <a href="#" style="color: var(--primary-accent); text-decoration: none; font-size: 14px;">View Full Schedule →</a>
         </div>
         
         <div class="bento-grid">
-            <div class="bento-card span-2" style="border-left: 4px solid var(--primary-accent);">
-                <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Starts in 24:00:00</div>
-                <h3 style="font-size: 24px; margin-bottom: 12px;">Weekly Algorithm Sprint #16</h3>
-                <div style="display: flex; gap: 16px; font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">
-                    <span>⏱ 120 Minutes</span>
-                    <span>👥 45 Registered</span>
+            <!-- Major Upcoming Event -->
+            <div class="bento-card span-2 row-span-2" style="border-left: 4px solid var(--primary-accent);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+                    <div style="font-size: 12px; font-weight: 600; color: var(--background); background: var(--primary-accent); padding: 4px 12px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px;">Contest</div>
+                    <div style="font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums;">Starts in 24:00:00</div>
                 </div>
-                <a href="#" class="btn-magnetic" style="font-size: 14px; padding: 8px 16px;">Register</a>
+                <h3 style="font-size: 28px; margin-bottom: 12px;">Weekly Algorithm Sprint #16</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Standard algorithmic contest consisting of 5 problems. Ranked by time penalty and total solves. Rated for all participating members.</p>
+                <div style="display: flex; gap: 24px; font-size: 14px; color: var(--text-muted); margin-bottom: 30px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+                    <div><strong>Duration:</strong> 120 Mins</div>
+                    <div><strong>Registered:</strong> 45 Students</div>
+                </div>
+                <a href="#" class="btn-magnetic" style="font-size: 14px; padding: 10px 20px;">Register for Contest</a>
             </div>
             
+            <!-- Secondary Events -->
             <div class="bento-card span-2">
-                <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Starts in 3 Days</div>
-                <h3 style="font-size: 24px; margin-bottom: 12px;">Reverse Coding Challenge #4</h3>
-                <div style="display: flex; gap: 16px; font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">
-                    <span>⏱ 90 Minutes</span>
-                    <span>👥 32 Registered</span>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div style="font-size: 12px; font-weight: 600; color: var(--text-primary); border: 1px solid var(--border-color); padding: 2px 8px; border-radius: 4px; text-transform: uppercase;">Discussion</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">Wed, 5:00 PM</div>
                 </div>
-                <a href="#" class="btn-magnetic btn-ghost" style="font-size: 14px; padding: 8px 16px;">Register</a>
+                <h3 style="font-size: 18px; margin-bottom: 8px;">Editorial Walkthrough #15</h3>
+                <p style="color: var(--text-muted); font-size: 13px;">Post-contest discussion breaking down optimal solutions for last week's problems.</p>
+            </div>
+
+            <div class="bento-card span-1">
+                <div style="font-size: 12px; font-weight: 600; color: var(--text-primary); border: 1px solid var(--border-color); padding: 2px 8px; border-radius: 4px; text-transform: uppercase; margin-bottom: 12px; display: inline-block;">Practice</div>
+                <h3 style="font-size: 16px; margin-bottom: 8px;">ICPC Mock</h3>
+                <p style="color: var(--text-muted); font-size: 13px;">Team-based 5-hour practice session.</p>
+            </div>
+
+            <div class="bento-card span-1">
+                <div style="font-size: 12px; font-weight: 600; color: var(--text-primary); border: 1px solid var(--border-color); padding: 2px 8px; border-radius: 4px; text-transform: uppercase; margin-bottom: 12px; display: inline-block;">Special</div>
+                <h3 style="font-size: 16px; margin-bottom: 8px;">Reverse Coding</h3>
+                <p style="color: var(--text-muted); font-size: 13px;">Upcoming unique format contest.</p>
             </div>
         </div>
     </section>
 
-    <!-- Live Leaderboard & Rating System -->
-    <section class="section-container">
-        <div class="bento-grid">
-            <!-- Live Leaderboard -->
-            <div class="bento-card span-2 row-span-2">
-                <h3 style="font-size: 20px; margin-bottom: 16px;">Live Leaderboard</h3>
-                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Global campus rankings based on contest performance.</p>
-                
-                <table style="width: 100%; border-collapse: collapse; font-size: 14px; text-align: left;">
-                    <thead>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);">
-                            <th style="padding: 12px 0;">Rank</th>
-                            <th style="padding: 12px 0;">Handle</th>
-                            <th style="padding: 12px 0; text-align: right;">Rating</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                            <td style="padding: 12px 0; color: var(--primary-accent);">#1</td>
-                            <td style="padding: 12px 0; font-weight: 500;">codemaster99</td>
-                            <td style="padding: 12px 0; text-align: right; color: #ff6b6b;">2145</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                            <td style="padding: 12px 0;">#2</td>
-                            <td style="padding: 12px 0; font-weight: 500;">algo_wiz</td>
-                            <td style="padding: 12px 0; text-align: right; color: #ff9f43;">1980</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                            <td style="padding: 12px 0;">#3</td>
-                            <td style="padding: 12px 0; font-weight: 500;">byte_ninja</td>
-                            <td style="padding: 12px 0; text-align: right; color: #ff9f43;">1952</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                            <td style="padding: 12px 0;">#4</td>
-                            <td style="padding: 12px 0; font-weight: 500;">debug_king</td>
-                            <td style="padding: 12px 0; text-align: right; color: #0abde3;">1740</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 12px 0;">#5</td>
-                            <td style="padding: 12px 0; font-weight: 500;">null_pointer</td>
-                            <td style="padding: 12px 0; text-align: right; color: #0abde3;">1725</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <a href="#" style="display: inline-block; margin-top: 20px; font-size: 13px; color: var(--primary-accent); text-decoration: none;">View Full Standings →</a>
+    <!-- Club Mission (Who organizes this & Why?) -->
+    <section class="section-container why-cp-section">
+        <div style="max-width: 800px;">
+            <h2 class="display-font" style="font-size: 28px; margin-bottom: 16px;">Club Mission</h2>
+            <p style="color: var(--text-muted); font-size: 16px; line-height: 1.6; margin-bottom: 40px;">NicheCP is built and maintained by students. Our objective is strictly practical: to foster a robust problem-solving environment on campus through consistent practice and organized events.</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card" style="padding: 24px; text-align: left; border-top: 2px solid var(--primary-accent);">
+                <h3 style="font-size: 16px; margin-bottom: 8px;">Building Culture</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin: 0;">Establishing a campus environment where algorithmic problem-solving is a regular, community-driven activity.</p>
             </div>
-
-            <!-- Rating System -->
-            <div class="bento-card span-2">
-                <h3 style="font-size: 20px; margin-bottom: 12px;">Rating System</h3>
-                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">An ELO-based rating system updated automatically after every official contest.</p>
-                <div class="heatmap" style="margin-top: 0;">
-                    <div class="heatmap-node active"></div>
-                    <div class="heatmap-node"></div>
-                    <div class="heatmap-node active"></div>
-                    <div class="heatmap-node active"></div>
-                    <div class="heatmap-node"></div>
-                    <div class="heatmap-node active"></div>
-                    <div class="heatmap-node"></div>
-                    <div class="heatmap-node"></div>
-                    <div class="heatmap-node active"></div>
-                    <div class="heatmap-node active"></div>
-                    <div class="heatmap-node"></div>
-                    <div class="heatmap-node active"></div>
-                </div>
+            <div class="stat-card" style="padding: 24px; text-align: left; border-top: 2px solid var(--secondary-accent);">
+                <h3 style="font-size: 16px; margin-bottom: 8px;">Regular Participation</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin: 0;">Providing the infrastructure needed to host weekly contests, ensuring students have consistent opportunities to compete.</p>
             </div>
-
-            <!-- Platform Stats -->
-            <div class="bento-card span-1">
-                <div style="font-size: 32px; font-weight: 600; margin-bottom: 4px;">50+</div>
-                <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Active Students</div>
-            </div>
-            <div class="bento-card span-1">
-                <div style="font-size: 32px; font-weight: 600; margin-bottom: 4px;">15+</div>
-                <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Contests Hosted</div>
+            <div class="stat-card" style="padding: 24px; text-align: left; border-top: 2px solid #0abde3;">
+                <h3 style="font-size: 16px; margin-bottom: 8px;">ICPC Preparation</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin: 0;">Simulating the pressure, formats, and difficulty levels of the International Collegiate Programming Contest to prepare campus teams.</p>
             </div>
         </div>
     </section>
 
-    <!-- Contest Categories -->
+    <!-- Community Activities (What do we do?) -->
     <section class="section-container">
-        <h2 class="display-font" style="font-size: 28px; margin-bottom: 24px;">Contest Categories</h2>
+        <h2 class="display-font" style="font-size: 28px; margin-bottom: 24px;">Community Activities</h2>
         <div class="bento-grid values-grid">
             <div class="bento-card span-2">
-                <h3 style="font-size: 16px; margin-bottom: 8px;">Algorithm Contest</h3>
-                <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">Standard format consisting of multiple algorithmic problems of increasing difficulty. Ranked by problems solved and time penalties.</p>
+                <h3 style="font-size: 16px; margin-bottom: 8px;">Weekly Contest Nights</h3>
+                <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin: 0;">Regularly scheduled 2-hour algorithmic contests designed to maintain practice consistency and update internal leaderboards.</p>
             </div>
             <div class="bento-card span-2">
-                <h3 style="font-size: 16px; margin-bottom: 8px;">Reverse Coding</h3>
-                <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">Participants are provided with input/output pairs and executable binaries. The objective is to deduce and implement the hidden algorithm.</p>
+                <h3 style="font-size: 16px; margin-bottom: 8px;">Reverse Coding Events</h3>
+                <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin: 0;">Specialized contests where participants receive executable binaries and test cases, requiring them to reverse-engineer the logic.</p>
             </div>
             <div class="bento-card span-1">
                 <h3 style="font-size: 16px; margin-bottom: 8px;">Code Golf</h3>
-                <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">Implement valid solutions using the absolute minimum number of characters.</p>
+                <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin: 0;">Short events focused purely on writing valid solutions using the fewest characters possible.</p>
             </div>
             <div class="bento-card span-1">
-                <h3 style="font-size: 16px; margin-bottom: 8px;">Debugging Challenge</h3>
-                <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">Identify and fix logical errors in provided source code within strict time limits.</p>
+                <h3 style="font-size: 16px; margin-bottom: 8px;">Debugging Challenges</h3>
+                <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin: 0;">Time-pressured events where students must identify and fix logical errors in provided source code.</p>
             </div>
             <div class="bento-card span-2">
-                <h3 style="font-size: 16px; margin-bottom: 8px;">Speed Sprint</h3>
-                <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">Short-duration contests featuring straightforward problems. Optimized for fast implementation and typing speed.</p>
+                <h3 style="font-size: 16px; margin-bottom: 8px;">Editorial Walkthroughs</h3>
+                <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin: 0;">Post-contest community discussions breaking down the time complexities and optimal approaches for recent problem sets.</p>
             </div>
         </div>
     </section>
 
-    <!-- Platform Features -->
+    <!-- The Student Journey (How do I participate?) -->
+    <section class="section-container learning-journey">
+        <h2 class="display-font text-center" style="font-size: 28px; margin-bottom: 60px;">The Club Journey</h2>
+
+        <div class="journey-map">
+            <svg class="journey-line" viewBox="0 0 100 800" preserveAspectRatio="none">
+                <path d="M50,0 L50,800" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+                <path class="journey-line-fill" d="M50,0 L50,800" fill="none" stroke="var(--primary-accent)" stroke-width="4"/>
+            </svg>
+
+            <div class="journey-phase gs-reveal-left">
+                <div class="phase-marker" style="font-size: 14px;">1</div>
+                <div class="phase-content bento-card" style="padding: 24px;">
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">Join the Club</h3>
+                    <p style="font-size: 14px; color: var(--text-muted); margin: 0;">Register on NicheCP and integrate into the Amrita Nagercoil coding community.</p>
+                </div>
+            </div>
+
+            <div class="journey-phase right gs-reveal-right">
+                <div class="phase-marker" style="font-size: 14px;">2</div>
+                <div class="phase-content bento-card" style="padding: 24px;">
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">Participate in Contests</h3>
+                    <p style="font-size: 14px; color: var(--text-muted); margin: 0;">Compete in weekly sprints, reverse coding matches, and team battles.</p>
+                </div>
+            </div>
+
+            <div class="journey-phase gs-reveal-left">
+                <div class="phase-marker" style="font-size: 14px;">3</div>
+                <div class="phase-content bento-card" style="padding: 24px;">
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">Discuss Editorials</h3>
+                    <p style="font-size: 14px; color: var(--text-muted); margin: 0;">Attend post-contest walkthroughs to understand alternative approaches and up-solve missed problems.</p>
+                </div>
+            </div>
+
+            <div class="journey-phase right gs-reveal-right">
+                <div class="phase-marker" style="font-size: 14px;">4</div>
+                <div class="phase-content bento-card" style="padding: 24px;">
+                <h3 style="font-size: 18px; margin-bottom: 8px;">Improve Rating</h3>
+                    <p style="font-size: 14px; color: var(--text-muted); margin: 0;">Track your performance organically through the platform's ELO system as you consistently practice.</p>
+                </div>
+            </div>
+
+            <div class="journey-phase gs-reveal-left">
+                <div class="phase-marker" style="font-size: 14px;">5</div>
+                <div class="phase-content bento-card" style="padding: 24px; border-color: var(--primary-accent);">
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">Represent the College</h3>
+                    <p style="font-size: 14px; color: var(--text-muted); margin: 0;">Form teams, qualify through internal selections, and compete at regional ICPC and external events.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platform Capabilities (What does the software offer?) -->
     <section class="section-container community-section">
-        <h2 class="display-font" style="font-size: 28px; margin-bottom: 24px;">Platform Features</h2>
+        <h2 class="display-font" style="font-size: 28px; margin-bottom: 24px;">Platform Capabilities</h2>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
             <div class="bento-card">
-                <h3 style="font-size: 18px; margin-bottom: 16px;">Contest Management</h3>
+                <h3 style="font-size: 18px; margin-bottom: 12px;">Contest Experience</h3>
                 <ul class="community-list" style="font-size: 14px; color: var(--text-muted);">
                     <li style="margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">Live standings updated automatically upon submission</li>
-                    <li style="margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">Support for ICPC-style penalty calculation</li>
-                    <li style="margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">Clarification request system during active contests</li>
-                    <li style="margin-bottom: 12px;">Post-contest editorials and solution publishing</li>
+                    <li style="margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">Instant verdicts (Accepted, WA, TLE) during active matches</li>
+                    <li style="margin-bottom: 12px;">Clarification request system for communicating with setters</li>
                 </ul>
             </div>
             <div class="bento-card">
-                <h3 style="font-size: 18px; margin-bottom: 16px;">Problem Archive</h3>
+                <h3 style="font-size: 18px; margin-bottom: 12px;">Execution Infrastructure</h3>
                 <ul class="community-list" style="font-size: 14px; color: var(--text-muted);">
-                    <li style="margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">Persistent access to problems from past contests</li>
-                    <li style="margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">Tag-based filtering for targeted practice</li>
-                    <li style="margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">Detailed submission history and verdict logs</li>
-                    <li style="margin-bottom: 12px;">Access to peer solutions after contest completion</li>
+                    <li style="margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">Isolated Docker container provisioning for secure execution</li>
+                    <li style="margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">Concurrent multi-threaded test case evaluation</li>
+                    <li style="margin-bottom: 12px;">Precise tracking of execution time (ms) and memory footprint</li>
                 </ul>
             </div>
         </div>
     </section>
 
-    <!-- Contest Experience -->
-    <section class="section-container why-cp-section">
-        <h2 class="display-font" style="font-size: 28px; margin-bottom: 24px;">Contest Experience</h2>
-        <div class="stats-grid">
-            <div class="stat-card" style="padding: 24px; text-align: left;">
-                <h3 style="font-size: 16px; margin-bottom: 8px;">Live Standings</h3>
-                <p style="color: var(--text-muted); font-size: 14px; margin: 0;">Track real-time rank changes across the participant pool during active contests.</p>
-            </div>
-            <div class="stat-card" style="padding: 24px; text-align: left;">
-                <h3 style="font-size: 16px; margin-bottom: 8px;">Instant Verdicts</h3>
-                <p style="color: var(--text-muted); font-size: 14px; margin: 0;">Immediate feedback on submissions, including Accepted, Wrong Answer, and Time Limit Exceeded.</p>
-            </div>
-            <div class="stat-card" style="padding: 24px; text-align: left;">
-                <h3 style="font-size: 16px; margin-bottom: 8px;">Resource Profiling</h3>
-                <p style="color: var(--text-muted); font-size: 14px; margin: 0;">Precise tracking of execution time (ms) and memory footprint (KB) for every submission.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Execution Pipeline -->
+    <!-- Community Statistics -->
     <section class="section-container">
-        <h2 class="display-font" style="font-size: 28px; margin-bottom: 30px;">Execution Pipeline</h2>
-        <div class="morphing-pathway" style="border-radius: 12px; padding: 40px; flex-direction: column; gap: 16px; max-width: 600px;">
-            <div class="path-node" style="font-size: 15px; text-align: left; width: 100%;"><strong>1. Submission</strong> — Secure source code upload</div>
-            <div class="path-arrow" style="transform: rotate(90deg); margin: 4px 0; opacity: 0.3;">↓</div>
-            <div class="path-node" style="font-size: 15px; text-align: left; width: 100%;"><strong>2. Sandbox</strong> — Isolated Docker container provisioning</div>
-            <div class="path-arrow" style="transform: rotate(90deg); margin: 4px 0; opacity: 0.3;">↓</div>
-            <div class="path-node" style="font-size: 15px; text-align: left; width: 100%;"><strong>3. Execution</strong> — Concurrent test case evaluation</div>
-            <div class="path-arrow" style="transform: rotate(90deg); margin: 4px 0; opacity: 0.3;">↓</div>
-            <div class="path-node" style="font-size: 15px; text-align: left; width: 100%;"><strong>4. Evaluation</strong> — Output diffing and resource profiling</div>
-            <div class="path-arrow" style="transform: rotate(90deg); margin: 4px 0; opacity: 0.3;">↓</div>
-            <div class="path-node highlight" style="font-size: 15px; text-align: left; width: 100%; border-color: var(--primary-accent);"><strong>5. Verdict</strong> — Final result generation</div>
-        </div>
-    </section>
-
-    <!-- About NicheCP -->
-    <section class="vision-section" style="padding: 80px 20px; background: rgba(0,0,0,0.1); border-top: 1px solid rgba(255,255,255,0.05); margin-top: 60px;">
-        <div class="vision-content" style="max-width: 800px; margin: 0 auto; text-align: left;">
-            <h2 class="display-font" style="font-size: 24px; margin-bottom: 20px;">About NicheCP</h2>
-            <p style="font-size: 16px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px;">
-                NicheCP is a competitive programming platform developed specifically for the Amrita Nagercoil community.
-            </p>
-            <p style="font-size: 16px; color: var(--text-muted); line-height: 1.6;">
-                It serves as the technical infrastructure for campus programming clubs to host internal contests, maintain historical archives of problems, and track student ratings over time. By providing an authentic competitive environment, NicheCP prepares students for global algorithmic competitions.
-            </p>
+        <h2 class="display-font text-center" style="font-size: 28px; margin-bottom: 40px;">Community Statistics</h2>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+            <div class="bento-card" style="text-align: center; padding: 30px 20px;">
+                <div style="font-size: 36px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">50+</div>
+                <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Club Members</div>
+            </div>
+            <div class="bento-card" style="text-align: center; padding: 30px 20px;">
+                <div style="font-size: 36px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">15+</div>
+                <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Internal Contests</div>
+            </div>
+            <div class="bento-card" style="text-align: center; padding: 30px 20px;">
+                <div style="font-size: 36px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">120+</div>
+                <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Problems Curated</div>
+            </div>
+            <div class="bento-card" style="text-align: center; padding: 30px 20px;">
+                <div style="font-size: 36px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">8</div>
+                <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">ICPC Teams Formed</div>
+            </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="footer" style="padding: 30px 20px; border-top: 1px solid rgba(255,255,255,0.05);">
+    <footer class="footer" style="padding: 30px 20px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 60px;">
         <div style="max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
             <div class="nav-brand" style="font-size: 16px; letter-spacing: 1px;">NicheCP</div>
-            <div style="color: var(--text-muted); font-size: 13px;">Amrita Nagercoil Competitive Programming © 2026</div>
+            <div style="color: var(--text-muted); font-size: 13px;">Amrita Nagercoil ICPC Club © 2026</div>
         </div>
     </footer>
 

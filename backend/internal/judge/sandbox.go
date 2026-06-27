@@ -47,6 +47,14 @@ func RunSecurely(code, language, input string) (*SandboxResult, error) {
 		image = "gcc:12"
 		// Needs compile step first, then run
 		runCmd = []string{"sh", "-c", "g++ /workspace/main.cpp -o /workspace/main && /workspace/main"}
+	case "c":
+		filename = "main.c"
+		image = "gcc:12"
+		runCmd = []string{"sh", "-c", "gcc /workspace/main.c -o /workspace/main && /workspace/main"}
+	case "java":
+		filename = "Main.java"
+		image = "openjdk:17-jdk-slim"
+		runCmd = []string{"sh", "-c", "javac /workspace/Main.java && java -cp /workspace Main"}
 	default:
 		return nil, fmt.Errorf("unsupported language: %s", language)
 	}

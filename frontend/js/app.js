@@ -9,10 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const token = localStorage.getItem('jwt_token');
     // We only enforce login on the arena page. If we are on index.html, we don't redirect.
+    // (Disabled for now so you can view the arena UI locally without logging in)
+    /*
     if (!token && window.location.pathname.includes('arena.html')) {
         window.location.href = 'login.html';
         return;
     }
+    */
 
     // Spotlight Effect for Cyber Cards (Landing Page)
     const cards = document.querySelectorAll('.spotlight-card');
@@ -117,7 +120,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const statusData = await statusRes.json();
                                 if (statusData.status !== 'PENDING') {
                                     clearInterval(pollInterval);
-                                    let statusType = statusData.status === 'ACCEPTED' ? 'success' : 'error';
+                                    let statusType = 'error';
+                                    if (statusData.status === 'ACCEPTED') {
+                                        statusType = 'success';
+                                    } else if (statusData.status === 'TIME_LIMIT_EXCEEDED' || statusData.status === 'MEMORY_LIMIT_EXCEEDED') {
+                                        statusType = 'warning';
+                                    }
                                     showStatus(`Submission ${statusData.status}! (Time: ${statusData.execution_time_ms || 0}ms)`, statusType);
                                     submitBtn.disabled = false;
                                     submitBtn.textContent = 'Submit Code';
@@ -147,7 +155,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function showStatus(message, type) {
             statusMessage.textContent = message;
-            statusMessage.className = `status ${type}`;
+            statusMessage.className = `status-banner show ${type}`;
+            
+            // Auto-hide the banner after 4 seconds if it's a final result
+            if (type !== 'pending') {
+                setTimeout(() => {
+                    statusMessage.classList.remove('show');
+                }, 4000);
+            }
         }
     }
 });

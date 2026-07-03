@@ -47,6 +47,12 @@ func main() {
 	r.GET("/api/auth/google/callback", api.GoogleCallback)
 	r.POST("/api/auth/register", api.RegisterUser)
 	r.POST("/api/auth/login", api.LoginUser)
+	
+	// New Auth Flows
+	r.POST("/api/auth/otp/send", api.SendOTP)
+	r.POST("/api/auth/otp/verify", api.VerifyOTP)
+	r.POST("/api/auth/password/forgot", api.ForgotPassword)
+	r.POST("/api/auth/password/reset", api.ResetPassword)
 
 	// Protected Routes
 	protected := r.Group("/api")

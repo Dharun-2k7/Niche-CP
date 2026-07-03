@@ -110,17 +110,27 @@
 <body>
 
     <div class="login-container">
-        <h1 class="login-title">Reset Password</h1>
-        <p class="login-subtitle">We'll send you an email to reset it.</p>
+        <h1 class="login-title" id="title">Reset Password</h1>
+        <p class="login-subtitle" id="subtitle">We'll send you an email to reset it.</p>
 
         <div id="successBox" class="success-msg"></div>
 
         <form id="resetForm">
-            <div class="input-group">
-                <label>Email</label>
-                <input type="email" id="email" required>
+            <div id="emailSection">
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required>
+                </div>
             </div>
-            <button type="submit" class="google-btn" style="background: linear-gradient(90deg, #b388ff 0%, #ff4081 100%); color: white;">
+
+            <div id="passwordSection" style="display: none;">
+                <div class="input-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPassword">
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="google-btn" style="background: linear-gradient(90deg, #b388ff 0%, #ff4081 100%); color: white;">
                 Send Reset Link
             </button>
         </form>
@@ -129,12 +139,67 @@
     </div>
 
     <script>
-        document.getElementById('resetForm').addEventListener('submit', (e) => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        
+        const title = document.getElementById('title');
+        const subtitle = document.getElementById('subtitle');
+        const btn = document.getElementById('submitBtn');
+        const emailSection = document.getElementById('emailSection');
+        const passwordSection = document.getElementById('passwordSection');
+        const emailInput = document.getElementById('email');
+        const passInput = document.getElementById('newPassword');
+
+        if (token) {
+            title.textContent = 'Set New Password';
+            subtitle.textContent = 'Enter your new secure password below.';
+            emailSection.style.display = 'none';
+            emailInput.removeAttribute('required');
+            passwordSection.style.display = 'block';
+            passInput.setAttribute('required', 'true');
+            btn.textContent = 'Update Password';
+        }
+
+        document.getElementById('resetForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const successBox = document.getElementById('successBox');
+            successBox.style.color = '#ff3232'; // Default to error color
+            successBox.style.display = 'none';
             
-            // Mock functionality for MVP
-            successBox.textContent = 'If an account exists, a reset link has been sent.';
+            try {
+                if (token) {
+                    // Reset Password Flow
+                    const new_password = passInput.value;
+                    const res = await fetch('http://localhost:8080/api/auth/password/reset', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token, new_password })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        successBox.style.color = '#00ffcc';
+                        successBox.textContent = data.message;
+                        setTimeout(() => window.location.href = 'login.html', 2000);
+                    } else throw new Error(data.error);
+                } else {
+                    // Forgot Password Flow
+                    const email = emailInput.value;
+                    const res = await fetch('http://localhost:8080/api/auth/password/forgot', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        successBox.style.color = '#00ffcc';
+                        successBox.textContent = data.message;
+                        emailInput.value = '';
+                    } else throw new Error(data.error);
+                }
+            } catch (err) {
+                successBox.style.color = '#ff3232';
+                successBox.textContent = err.message || 'Server connection failed.';
+            }
             successBox.style.display = 'block';
         });
     </script>

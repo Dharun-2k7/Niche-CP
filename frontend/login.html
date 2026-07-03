@@ -141,12 +141,28 @@
                 <label>Email</label>
                 <input type="email" id="email" required>
             </div>
-            <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="password" required>
+            <div id="passwordSection">
+                <div class="input-group">
+                    <label style="display: flex; justify-content: space-between;">
+                        Password
+                        <a href="reset.html" style="color: #ff4081; text-decoration: none; font-size: 12px;">Forgot?</a>
+                    </label>
+                    <input type="password" id="password" required>
+                </div>
             </div>
-            <button type="submit" class="google-btn" style="background: linear-gradient(90deg, #b388ff 0%, #ff4081 100%); color: white;">
+
+            <div id="otpSection" style="display: none;">
+                <div class="input-group">
+                    <label>6-Digit OTP</label>
+                    <input type="text" id="otpCode" placeholder="Enter OTP from email" maxlength="6">
+                </div>
+            </div>
+
+            <button type="submit" id="mainSubmitBtn" class="google-btn" style="background: linear-gradient(90deg, #b388ff 0%, #ff4081 100%); color: white; margin-bottom: 10px;">
                 Sign In
+            </button>
+            <button type="button" id="toggleOtpBtn" class="google-btn" style="background: rgba(255,255,255,0.1); color: white;">
+                Login with OTP instead
             </button>
         </form>
 
@@ -166,30 +182,91 @@
     </div>
 
     <script>
+        let isOtpMode = false;
+        let otpSent = false;
+
+        document.getElementById('toggleOtpBtn').addEventListener('click', () => {
+            isOtpMode = !isOtpMode;
+            const toggleBtn = document.getElementById('toggleOtpBtn');
+            const mainBtn = document.getElementById('mainSubmitBtn');
+            const passSec = document.getElementById('passwordSection');
+            const otpSec = document.getElementById('otpSection');
+            const passInput = document.getElementById('password');
+
+            if (isOtpMode) {
+                toggleBtn.textContent = 'Login with Password instead';
+                mainBtn.textContent = 'Send OTP';
+                passSec.style.display = 'none';
+                passInput.removeAttribute('required');
+                otpSent = false;
+                otpSec.style.display = 'none';
+            } else {
+                toggleBtn.textContent = 'Login with OTP instead';
+                mainBtn.textContent = 'Sign In';
+                passSec.style.display = 'block';
+                passInput.setAttribute('required', 'true');
+                otpSec.style.display = 'none';
+            }
+        });
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const otpCode = document.getElementById('otpCode').value;
             const errorBox = document.getElementById('errorBox');
             
+            errorBox.style.display = 'none';
+            errorBox.style.color = '#ff3232';
+
             try {
-                const res = await fetch('http://localhost:8080/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                
-                const data = await res.json();
-                
-                if (res.ok) {
-                    localStorage.setItem('jwt_token', data.token);
-                    window.location.href = 'arena.html';
+                if (!isOtpMode) {
+                    // Standard Login
+                    const res = await fetch('http://localhost:8080/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        localStorage.setItem('jwt_token', data.token);
+                        window.location.href = 'arena.html';
+                    } else throw new Error(data.error);
                 } else {
-                    errorBox.textContent = data.error;
-                    errorBox.style.display = 'block';
+                    // OTP Flow
+                    if (!otpSent) {
+                        // Request OTP
+                        const res = await fetch('http://localhost:8080/api/auth/otp/send', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            otpSent = true;
+                            document.getElementById('otpSection').style.display = 'block';
+                            document.getElementById('mainSubmitBtn').textContent = 'Verify & Login';
+                            errorBox.style.color = '#00ffcc';
+                            errorBox.textContent = data.message;
+                            errorBox.style.display = 'block';
+                        } else throw new Error(data.error);
+                    } else {
+                        // Verify OTP
+                        const res = await fetch('http://localhost:8080/api/auth/otp/verify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, otp: otpCode })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            localStorage.setItem('jwt_token', data.token);
+                            window.location.href = 'arena.html';
+                        } else throw new Error(data.error);
+                    }
                 }
             } catch (err) {
-                errorBox.textContent = 'Server connection failed.';
+                errorBox.style.color = '#ff3232';
+                errorBox.textContent = err.message || 'Server connection failed.';
                 errorBox.style.display = 'block';
             }
         });

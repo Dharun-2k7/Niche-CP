@@ -108,78 +108,66 @@
 <body data-theme="quantum">
     <div class="noise-bg" style="opacity: 0.4;"></div>
 
-    <nav class="navbar" style="padding: 12px 40px; border-bottom: 1px solid rgba(255,255,255,0.05); background: var(--bg-base);">
-        <a href="index.html" style="text-decoration: none; color: inherit;">
-            <div class="nav-brand" style="font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">NicheCP</div>
+    <!-- Unified Navigation -->
+    <nav class="navbar">
+        <a href="index.html" style="text-decoration: none; color: inherit;" class="nav-brand">
+            <div>NicheCP</div>
         </a>
-        <div style="display: flex; gap: 8px; align-items: center;">
+        
+        <div class="nav-links">
             <a href="index.html" class="nav-link">Home</a>
+            <a href="contests.html" class="nav-link">Contests</a>
+            <a href="index.html#problems" class="nav-link">Problems</a>
             <a href="arena.html" class="nav-link">Arena</a>
+            <a href="index.html#resources" class="nav-link">Resources</a>
         </div>
+
         <div class="nav-controls">
             <button class="btn-ghost" onclick="logout()" style="padding: 8px 16px; font-size: 13px; border-radius: 6px;">Sign Out</button>
         </div>
     </nav>
 
-    <div class="profile-container">
-        <!-- Left Sidebar: Identity -->
-        <div class="module-card profile-header">
-            <h2 id="userName">Loading...</h2>
-            <p id="userEmail">Loading...</p>
+    <main class="app-container">
+        <div class="campus-card">
+            <h1 class="campus-title skeleton-box" id="userName" style="width: 200px; display: inline-block;"></h1>
+            <p class="campus-subtitle skeleton-box" id="userEmail" style="width: 250px; display: inline-block; margin-bottom: 20px;"></p>
             
-            <div style="margin-bottom: 10px;">
-                <span class="badge" style="background: rgba(255,255,255,0.1); color: white;" id="userRollNo">Roll No</span>
-                <span class="badge" style="background: rgba(255,255,255,0.1); color: white;" id="userBatch">Batch</span>
+            <div style="margin-bottom: 30px;">
+                <span class="skeleton-box" id="userBatch" style="width: 80px; display: inline-block; padding: 4px 12px; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 12px;"></span>
+                <span class="skeleton-box" id="userRollNo" style="width: 80px; display: inline-block; padding: 4px 12px; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 12px; margin-left: 8px;"></span>
             </div>
 
-            <div id="verifyStatus" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <h3 style="font-size: 14px; margin-bottom: 10px;">College Integration</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 24px;">
+                <div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Institution</div>
+                    <div style="font-size: 15px; font-weight: 500;">Amrita Vishwa Vidyapeetham</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Platform Rating</div>
+                    <div style="font-size: 15px; font-weight: 500; color: #10b981;">Standard</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Problems Solved</div>
+                    <div class="skeleton-box" id="statSolved" style="width: 40px; font-size: 15px; font-weight: 500;"></div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 24px;">
                 <div id="unverifiedBox">
-                    <span class="badge unverified">Unverified</span>
-                    <p style="font-size: 12px; color: var(--text-muted); margin: 10px 0;">Connect your Outlook email for official contests.</p>
-                    <input type="email" id="collegeEmailInput" placeholder="college_email@am.students.amrita.edu" style="width: 100%; padding: 8px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px; margin-bottom: 10px;">
-                    <button class="btn-magnetic" id="verifyBtn" style="width: 100%; padding: 8px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer;">Send OTP to Outlook</button>
-                    <p id="verifyMsg" style="font-size: 11px; color: #ff4d4d; margin-top: 5px; display: none;"></p>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Link your amrita.edu email to participate in official campus contests.</p>
+                    <div style="display: flex; gap: 8px; max-width: 400px;">
+                        <input type="email" id="collegeEmailInput" placeholder="college_email@am.students.amrita.edu" style="flex: 1; padding: 8px 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 6px;">
+                        <button class="btn-ghost" id="verifyBtn" style="padding: 8px 16px; font-size: 13px; border-radius: 6px;">Verify</button>
+                    </div>
+                    <p id="verifyMsg" style="font-size: 12px; color: #ff4d4d; margin-top: 8px; display: none;"></p>
                 </div>
-                <div id="verifiedBox" style="display: none;">
-                    <span class="badge verified">Verified ✓</span>
-                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 10px;" id="verifiedEmailText"></p>
-                </div>
-            </div>
-
-            <div class="stat-grid">
-                <div class="stat-box">
-                    <span id="statContests">4</span>
-                    <label>Contests</label>
-                </div>
-                <div class="stat-box">
-                    <span id="statSolved">15</span>
-                    <label>Solved</label>
+                <div id="verifiedBox" style="display: none; display: flex; align-items: center; gap: 12px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#10b981" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="9 12 11 14 15 10"></polyline></svg>
+                    <span id="verifiedEmailText" style="font-size: 14px; font-weight: 500;"></span>
                 </div>
             </div>
         </div>
-
-        <!-- Right Content: Analytics -->
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div class="module-card">
-                <h3 style="font-size: 16px; margin-bottom: 10px;">Solving Activity</h3>
-                <p style="font-size: 12px; color: var(--text-muted);">Your submission density over the last year.</p>
-                
-                <div class="heatmap-container" id="heatmap">
-                    <!-- Mock generated by JS -->
-                </div>
-            </div>
-
-            <div class="module-card">
-                <h3 style="font-size: 16px; margin-bottom: 10px;">Topic Proficiency (Radar)</h3>
-                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">Based on your 15 solved problems.</p>
-                
-                <div class="chart-container">
-                    <canvas id="topicRadarChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
+    </main>
 
     <script>
         // Redirect if not logged in
@@ -202,16 +190,28 @@
                 
                 if (res.ok) {
                     const data = await res.json();
-                    document.getElementById('userName').textContent = data.name;
-                    document.getElementById('userEmail').textContent = data.email;
-                    document.getElementById('userRollNo').textContent = data.roll_no || 'No Roll No';
-                    document.getElementById('userBatch').textContent = data.batch || 'No Batch';
-                    document.getElementById('statSolved').textContent = data.total_solved || 0;
+                    
+                    const updateField = (id, value) => {
+                        const el = document.getElementById(id);
+                        if(el) {
+                            el.textContent = value;
+                            el.classList.remove('skeleton-box');
+                            el.style.width = 'auto';
+                            el.style.height = 'auto';
+                        }
+                    };
+
+                    updateField('userName', data.name);
+                    updateField('userEmail', data.email);
+                    updateField('userRollNo', data.roll_no || 'No Roll No');
+                    updateField('userBatch', data.batch || 'No Batch');
+                    
+                    const solvedEl = document.getElementById('statSolved');
+                    if (solvedEl) solvedEl.textContent = data.total_solved || 0;
 
                     if (data.is_college_verified) {
                         document.getElementById('unverifiedBox').style.display = 'none';
-                        document.getElementById('verifiedBox').style.display = 'block';
-                        document.getElementById('verifiedEmailText').textContent = data.college_email;
+                        document.getElementById('verifiedBox').style.display = 'flex';
                     }
                 }
             } catch (e) {
@@ -241,71 +241,20 @@
                     
                     const data = await res.json();
                     if (res.ok) {
-                        msg.style.color = '#00ffcc';
-                        msg.textContent = 'OTP Sent! Check your Outlook mail. (OTP UI verification not fully built yet, see terminal logs to simulate)';
+                        msg.style.color = '#10b981';
+                        msg.textContent = 'OTP Sent! Check your Outlook mail.';
                         msg.style.display = 'block';
                         document.getElementById('verifyBtn').textContent = 'Send again';
                     } else {
                         msg.style.color = '#ff4d4d';
                         msg.textContent = data.error;
                         msg.style.display = 'block';
-                        document.getElementById('verifyBtn').textContent = 'Send OTP to Outlook';
+                        document.getElementById('verifyBtn').textContent = 'Verify';
                     }
                 } catch(err) {
                     msg.style.color = '#ff4d4d';
                     msg.textContent = 'Failed to connect';
                     msg.style.display = 'block';
-                }
-            });
-
-            // Mock Heatmap Generation (52 weeks * 7 days roughly)
-            const heatmap = document.getElementById('heatmap');
-            for (let i = 0; i < 364; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'heat-cell';
-                
-                // Randomly assign levels to make it look active recently
-                if (i > 300) {
-                    if (Math.random() > 0.6) cell.setAttribute('data-level', Math.floor(Math.random() * 3) + 1);
-                } else {
-                    if (Math.random() > 0.95) cell.setAttribute('data-level', '1');
-                }
-                
-                heatmap.appendChild(cell);
-            }
-
-            // Render Radar Chart using Chart.js
-            const ctx = document.getElementById('topicRadarChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['Dynamic Programming', 'Graph Theory', 'Data Structures', 'Math', 'Strings', 'Greedy'],
-                    datasets: [{
-                        label: 'Proficiency Score',
-                        data: [65, 80, 90, 70, 50, 85],
-                        backgroundColor: 'rgba(0, 240, 255, 0.2)',
-                        borderColor: 'rgba(0, 240, 255, 1)',
-                        pointBackgroundColor: 'rgba(0, 240, 255, 1)',
-                        borderWidth: 2,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                            pointLabels: {
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                font: { size: 12, family: "'Outfit', sans-serif" }
-                            },
-                            ticks: { display: false, min: 0, max: 100 }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
                 }
             });
         });

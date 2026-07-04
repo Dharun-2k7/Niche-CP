@@ -8,6 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const token = localStorage.getItem('jwt_token');
+
+    // Update Navbar if logged in
+    const authContainer = document.getElementById('authNavContainer');
+    if (token && authContainer) {
+        authContainer.innerHTML = `<a href="profile.html" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; border-radius: 6px; text-decoration: none;">Profile</a>`;
+    }
+
     // We only enforce login on the arena page. If we are on index.html, we don't redirect.
     // (Disabled for now so you can view the arena UI locally without logging in)
     /*
@@ -105,6 +112,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         submitBtn.addEventListener('click', async () => {
+            if (!token) {
+                showStatus('You must be signed in to submit code to the Judge.', 'error');
+                return;
+            }
+
             const code = monacoEditor ? monacoEditor.getValue() : '';
             const language = languageSelect.value;
 
@@ -159,17 +171,18 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         } catch (e) {
                             clearInterval(pollInterval);
-                            showStatus('Error checking status.', 'error');
+                            showStatus(`Status Check Error: ${e.message}`, 'error');
                             submitBtn.disabled = false;
                             submitBtn.textContent = 'Submit Code';
                         }
                     }, 1000);
                     return; // Don't re-enable button yet
                 } else {
-                    showStatus(`Error: ${data.error}`, 'error');
+                    showStatus(`Judge Error: ${data.error}`, 'error');
                 }
             } catch (err) {
-                showStatus('Failed to connect to backend server. Is it running on :8080?', 'error');
+                console.error("Submit Fetch Error:", err);
+                showStatus(`Network Error: ${err.message}. Is backend running?`, 'error');
             } finally {
                 // If it didn't return early due to polling, re-enable
                 if (submitBtn.textContent !== 'Processing...') {

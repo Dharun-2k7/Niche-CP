@@ -8,28 +8,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar" style="padding: 12px 40px; border-bottom: 1px solid rgba(255,255,255,0.05); background: var(--bg-base);">
-        <a href="index.html" style="text-decoration: none; color: inherit;">
-            <div class="nav-brand" style="font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">NicheCP</div>
+    <!-- Unified Navigation -->
+    <nav class="navbar">
+        <a href="index.html" style="text-decoration: none; color: inherit;" class="nav-brand">
+            <div>NicheCP</div>
         </a>
         
-        <div style="display: flex; gap: 8px; align-items: center;">
+        <div class="nav-links">
             <a href="index.html" class="nav-link">Home</a>
-            <a href="#" class="nav-link" style="color: var(--primary-accent);">Arena</a>
-            <a href="#" class="nav-link">Leaderboard</a>
+            <a href="contests.html" class="nav-link">Contests</a>
+            <a href="index.html#problems" class="nav-link">Problems</a>
+            <a href="arena.html" class="nav-link active">Arena</a>
+            <a href="index.html#resources" class="nav-link">Resources</a>
         </div>
 
         <div class="nav-controls">
             <div id="authNavContainer">
-                <a href="profile.html" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; border-radius: 6px; text-decoration: none;">Profile</a>
+                <a href="login.html" class="btn-magnetic" style="padding: 8px 16px; font-size: 13px; border-radius: 6px;">Sign In</a>
             </div>
         </div>
     </nav>
-    <main class="container">
-        <header class="hero" style="min-height: auto; padding: 120px 20px 0;">
-            <h1>Reverse Coding <span>Duel</span></h1>
-            <p>Guess the hidden logic. Write the code. Defeat the judge.</p>
-        </header>
+    <main class="app-container">
+        <h1 class="display-font" style="font-size: 32px; font-weight: 700; margin-bottom: 32px;">Arena: The Hidden Sequence</h1>
 
         <section class="problem-arena">
             <div class="problem-statement glass-panel">

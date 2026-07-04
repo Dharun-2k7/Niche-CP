@@ -52,6 +52,7 @@ func SubmitCode(c *gin.Context) {
 			  VALUES ($1, $2, $3, $4, 'PENDING') RETURNING id`
 	err = db.DB.QueryRow(query, userID, req.ProblemID, req.Code, req.Language).Scan(&submissionID)
 	if err != nil {
+		fmt.Printf("DB Error in SubmitCode: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save submission"})
 		return
 	}

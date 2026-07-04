@@ -95,7 +95,9 @@
                 <div class="theme-dot" data-set="aurora" title="Aurora"></div>
                 <div class="theme-dot" data-set="solar" title="Solar"></div>
             </div>
-            <a href="login.html" class="btn-magnetic" style="padding: 8px 16px; font-size: 13px; border-radius: 6px;">Sign In</a>
+            <div id="authNavContainer">
+                <a href="login.html" class="btn-magnetic" style="padding: 8px 16px; font-size: 13px; border-radius: 6px;">Sign In</a>
+            </div>
         </div>
     </nav>
 
@@ -469,5 +471,23 @@
     <!-- Scripts -->
     <script src="js/interactions.js"></script>
     <script src="js/animations.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Handle OAuth token in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenFromUrl = urlParams.get('token');
+            if (tokenFromUrl) {
+                localStorage.setItem('jwt_token', tokenFromUrl);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // Update Navbar if logged in
+            const token = localStorage.getItem('jwt_token');
+            const authContainer = document.getElementById('authNavContainer');
+            if (token && authContainer) {
+                authContainer.innerHTML = `<a href="profile.html" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; border-radius: 6px; text-decoration: none;">Profile</a>`;
+            }
+        });
+    </script>
 </body>
 </html>

@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -97,8 +98,8 @@ func GoogleCallback(c *gin.Context) {
 
 	// For a simple SPA, we can set the JWT in an HTTP-only cookie, 
 	// or redirect back to the frontend with the token in the URL fragment (hash).
-	// We will redirect back to the frontend's arena page and pass the token securely.
-	c.Redirect(http.StatusTemporaryRedirect, "/arena.html?token="+jwtToken)
+	// We will redirect back to the frontend's home page (on port 3000) and pass the token securely.
+	c.Redirect(http.StatusTemporaryRedirect, "http://localhost:3000/index.html?token="+jwtToken)
 }
 
 // --- Standard Authentication ---
@@ -107,6 +108,9 @@ type RegisterRequest struct {
 	Name     string `json:"name" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
+	RollNo   string `json:"roll_no" binding:"required"`
+	Batch    string `json:"batch" binding:"required"`
+	OTP      string `json:"otp" binding:"required,len=6"`
 }
 
 func RegisterUser(c *gin.Context) {
@@ -116,6 +120,17 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
+	// Verify OTP
+	key := fmt.Sprintf("register_otp:%s", req.Email)
+	storedOTP, err := db.RedisClient.Get(context.Background(), key).Result()
+	if err != nil || storedOTP != req.OTP {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired OTP."})
+		return
+	}
+
+	// Clear OTP after successful use
+	db.RedisClient.Del(context.Background(), key)
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
@@ -124,9 +139,9 @@ func RegisterUser(c *gin.Context) {
 
 	var userID int
 	err = db.DB.QueryRow(`
-		INSERT INTO users (name, email, password_hash) 
-		VALUES ($1, $2, $3) RETURNING id
-	`, req.Name, req.Email, string(hashedPassword)).Scan(&userID)
+		INSERT INTO users (name, email, password_hash, roll_no, batch) 
+		VALUES ($1, $2, $3, $4, $5) RETURNING id
+	`, req.Name, req.Email, string(hashedPassword), req.RollNo, req.Batch).Scan(&userID)
 
 	if err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "Email already exists"})

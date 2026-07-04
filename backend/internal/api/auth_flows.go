@@ -66,6 +66,39 @@ func SendOTP(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "OTP sent successfully to your email."})
 }
 
+// SendRegisterOTP generates an OTP for new user registration and emails it
+func SendRegisterOTP(c *gin.Context) {
+	var req OTPSendRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Verify user DOES NOT exist
+	var userID int
+	err := db.DB.QueryRow(`SELECT id FROM users WHERE email = $1`, req.Email).Scan(&userID)
+	if err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "An account with this email already exists."})
+		return
+	}
+
+	otp := generateOTP()
+	key := fmt.Sprintf("register_otp:%s", req.Email)
+
+	// Store in Redis with 10-minute TTL (longer for registration to fill form)
+	err = db.RedisClient.Set(context.Background(), key, otp, 10*time.Minute).Err()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate OTP"})
+		return
+	}
+
+	// Send Email
+	body := fmt.Sprintf("Welcome to NicheCP!\n\nYour Registration OTP is: %s\n\nThis code will expire in 10 minutes.", otp)
+	go mailer.SendEmail(req.Email, "NicheCP Registration Code", body)
+
+	c.JSON(http.StatusOK, gin.H{"message": "OTP sent successfully to your email."})
+}
+
 type OTPVerifyRequest struct {
 	Email string `json:"email" binding:"required,email"`
 	OTP   string `json:"otp" binding:"required,len=6"`

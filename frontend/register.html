@@ -138,11 +138,25 @@
                 <input type="email" id="email" required>
             </div>
             <div class="input-group">
+                <label>Roll Number</label>
+                <input type="text" id="rollNo" required placeholder="e.g., CB.EN.U4CYS22000">
+            </div>
+            <div class="input-group">
+                <label>Batch</label>
+                <input type="text" id="batch" required placeholder="e.g., 2022-2026">
+            </div>
+            <div class="input-group">
                 <label>Password</label>
                 <input type="password" id="password" required minlength="6">
             </div>
-            <button type="submit" class="google-btn" style="background: linear-gradient(90deg, #b388ff 0%, #ff4081 100%); color: white; margin-top: 10px;">
-                Create Account
+            <div id="otpSection" style="display: none;">
+                <div class="input-group">
+                    <label>6-Digit OTP</label>
+                    <input type="text" id="otpCode" placeholder="Enter OTP sent to email" maxlength="6">
+                </div>
+            </div>
+            <button type="submit" id="mainSubmitBtn" class="google-btn" style="background: linear-gradient(90deg, #b388ff 0%, #ff4081 100%); color: white; margin-top: 10px;">
+                Send OTP & Continue
             </button>
         </form>
 
@@ -150,39 +164,80 @@
     </div>
 
     <script>
+        let otpSent = false;
+
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
+            const rollNo = document.getElementById('rollNo').value;
+            const batch = document.getElementById('batch').value;
             const password = document.getElementById('password').value;
+            const otpCode = document.getElementById('otpCode').value;
             
             const errorBox = document.getElementById('errorBox');
             const successBox = document.getElementById('successBox');
+            const mainBtn = document.getElementById('mainSubmitBtn');
+            const otpSec = document.getElementById('otpSection');
+
             errorBox.style.display = 'none';
             successBox.style.display = 'none';
             
             try {
-                const res = await fetch('http://localhost:8080/api/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password })
-                });
-                
-                const data = await res.json();
-                
-                if (res.ok) {
-                    successBox.textContent = data.message + ' Redirecting to login...';
-                    successBox.style.display = 'block';
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
+                if (!otpSent) {
+                    // 1. Send OTP Request
+                    mainBtn.textContent = 'Sending...';
+                    mainBtn.disabled = true;
+
+                    const res = await fetch('http://localhost:8080/api/auth/register-otp/send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+                    
+                    const data = await res.json();
+                    
+                    if (res.ok) {
+                        otpSent = true;
+                        otpSec.style.display = 'block';
+                        document.getElementById('otpCode').setAttribute('required', 'true');
+                        mainBtn.textContent = 'Verify & Create Account';
+                        successBox.textContent = data.message;
+                        successBox.style.display = 'block';
+                    } else {
+                        throw new Error(data.error);
+                    }
                 } else {
-                    errorBox.textContent = data.error;
-                    errorBox.style.display = 'block';
+                    // 2. Verify OTP & Register
+                    mainBtn.textContent = 'Verifying...';
+                    mainBtn.disabled = true;
+
+                    const res = await fetch('http://localhost:8080/api/auth/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, email, password, roll_no: rollNo, batch, otp: otpCode })
+                    });
+                    
+                    const data = await res.json();
+                    
+                    if (res.ok) {
+                        successBox.textContent = data.message + ' Redirecting to login...';
+                        successBox.style.display = 'block';
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                    } else {
+                        throw new Error(data.error);
+                    }
                 }
             } catch (err) {
-                errorBox.textContent = 'Server connection failed.';
+                errorBox.textContent = err.message || 'Server connection failed.';
                 errorBox.style.display = 'block';
+            } finally {
+                if (mainBtn.textContent !== 'Verify & Create Account' && !otpSent) {
+                     mainBtn.textContent = 'Send OTP & Continue';
+                }
+                mainBtn.disabled = false;
             }
         });
     </script>

@@ -230,7 +230,7 @@
                     const data = await res.json();
                     if (res.ok) {
                         localStorage.setItem('jwt_token', data.token);
-                        window.location.href = 'arena.html';
+                        window.location.href = 'index.html';
                     } else throw new Error(data.error);
                 } else {
                     // OTP Flow
@@ -260,7 +260,7 @@
                         const data = await res.json();
                         if (res.ok) {
                             localStorage.setItem('jwt_token', data.token);
-                            window.location.href = 'arena.html';
+                            window.location.href = 'index.html';
                         } else throw new Error(data.error);
                     }
                 }

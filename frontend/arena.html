@@ -8,13 +8,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="glow-bg"></div>
-    <nav class="navbar">
-        <div class="logo">Niche<span>CP</span></div>
-        <div class="nav-links">
-            <a href="#" class="active">Arena</a>
-            <a href="#">Leaderboard</a>
-            <a href="#">Profile</a>
+    <nav class="navbar" style="padding: 12px 40px; border-bottom: 1px solid rgba(255,255,255,0.05); background: var(--bg-base);">
+        <a href="index.html" style="text-decoration: none; color: inherit;">
+            <div class="nav-brand" style="font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">NicheCP</div>
+        </a>
+        
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="#" class="nav-link" style="color: var(--primary-accent);">Arena</a>
+            <a href="#" class="nav-link">Leaderboard</a>
+        </div>
+
+        <div class="nav-controls">
+            <div id="authNavContainer">
+                <a href="profile.html" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; border-radius: 6px; text-decoration: none;">Profile</a>
+            </div>
         </div>
     </nav>
     <main class="container">
@@ -54,9 +62,7 @@
                         <button id="submitBtn" class="cyber-btn">Submit Code</button>
                     </div>
                 </div>
-                <textarea id="codeEditor" spellcheck="false">def solve(n):
-    # Write your logic here
-    pass</textarea>
+                <div id="codeEditorContainer" style="height: 400px; width: 100%; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-bottom: 20px;"></div>
                 
                 <div class="custom-input-section">
                     <h3>Custom Input</h3>
@@ -70,6 +76,8 @@
             </div>
         </section>
     </main>
+    <!-- Monaco Editor Loader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

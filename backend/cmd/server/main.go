@@ -51,6 +51,7 @@ func main() {
 	// New Auth Flows
 	r.POST("/api/auth/otp/send", api.SendOTP)
 	r.POST("/api/auth/otp/verify", api.VerifyOTP)
+	r.POST("/api/auth/register-otp/send", api.SendRegisterOTP)
 	r.POST("/api/auth/password/forgot", api.ForgotPassword)
 	r.POST("/api/auth/password/reset", api.ResetPassword)
 
@@ -59,6 +60,8 @@ func main() {
 	protected.Use(middleware.RequireAuth())
 	{
 		protected.POST("/submit", api.SubmitCode)
+		protected.GET("/profile", api.GetProfile)
+		protected.POST("/profile/verify-college-email", api.VerifyCollegeEmail)
 	}
 
 	// Start Server

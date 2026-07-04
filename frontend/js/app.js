@@ -32,15 +32,41 @@ document.addEventListener('DOMContentLoaded', () => {
     // Arena Logic (Only runs if elements exist)
     const submitBtn = document.getElementById('submitBtn');
     const runBtn = document.getElementById('runBtn');
-    const codeEditor = document.getElementById('codeEditor');
     const languageSelect = document.getElementById('language');
     const statusMessage = document.getElementById('statusMessage');
     const customInput = document.getElementById('customInput');
     const terminalOutput = document.getElementById('terminalOutput');
 
+    // Initialize Monaco Editor if we are on arena.html
+    let monacoEditor = null;
+    const editorContainer = document.getElementById('codeEditorContainer');
+    if (editorContainer && window.require) {
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            monacoEditor = monaco.editor.create(editorContainer, {
+                value: 'def solve(n):\n    # Write your logic here\n    pass',
+                language: 'python',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                minimap: { enabled: false },
+                fontSize: 14,
+                fontFamily: "'JetBrains Mono', 'Courier New', monospace"
+            });
+            
+            // Handle language change
+            languageSelect.addEventListener('change', (e) => {
+                let lang = e.target.value;
+                if (lang === 'cpp') lang = 'cpp';
+                else if (lang === 'go') lang = 'go';
+                else lang = 'python';
+                monaco.editor.setModelLanguage(monacoEditor.getModel(), lang);
+            });
+        });
+    }
+
     if (runBtn && submitBtn) {
         runBtn.addEventListener('click', async () => {
-            const code = codeEditor.value;
+            const code = monacoEditor ? monacoEditor.getValue() : '';
             const language = languageSelect.value;
             const input = customInput.value;
 
@@ -79,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         submitBtn.addEventListener('click', async () => {
-            const code = codeEditor.value;
+            const code = monacoEditor ? monacoEditor.getValue() : '';
             const language = languageSelect.value;
 
             if (!code.trim()) {

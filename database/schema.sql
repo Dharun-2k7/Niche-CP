@@ -4,6 +4,10 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255), -- Nullable for OAuth users
     role VARCHAR(50) DEFAULT 'student',
+    roll_no VARCHAR(50),
+    batch VARCHAR(50),
+    college_email VARCHAR(255),
+    is_college_verified BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

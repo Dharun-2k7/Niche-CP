@@ -37,6 +37,9 @@ func main() {
 		c.Next()
 	})
 
+	// Serve static uploads
+	r.Static("/uploads", "./uploads")
+
 	// Public Routes
 	r.GET("/health", api.HealthCheck)
 	r.GET("/api/submissions/:id", api.GetSubmissionStatus)
@@ -61,7 +64,12 @@ func main() {
 	{
 		protected.POST("/submit", api.SubmitCode)
 		protected.GET("/profile", api.GetProfile)
+		protected.PUT("/profile", api.UpdateProfile)
+		protected.POST("/profile/upload-dp", api.UploadProfilePicture)
 		protected.POST("/profile/verify-college-email", api.VerifyCollegeEmail)
+		protected.POST("/profile/verify-otp", api.VerifyCollegeEmailOTP)
+		protected.POST("/profile/cf/init", api.InitCFVerification)
+		protected.POST("/profile/cf/verify", api.VerifyCF)
 	}
 
 	// Start Server

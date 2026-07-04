@@ -12,7 +12,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update Navbar if logged in
     const authContainer = document.getElementById('authNavContainer');
     if (token && authContainer) {
-        authContainer.innerHTML = `<a href="profile.html" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; border-radius: 6px; text-decoration: none;">Profile</a>`;
+        if (window.location.pathname.includes('profile.html')) {
+            authContainer.innerHTML = `<button class="btn-ghost" onclick="logout()" style="padding: 8px 16px; font-size: 13px; border-radius: 6px;">Sign Out</button>`;
+        } else {
+            authContainer.innerHTML = `<a href="profile.html" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; border-radius: 6px; text-decoration: none;">Profile</a>`;
+        }
+    }
+
+    // Theme Switcher Logic
+    const themeBtns = document.querySelectorAll('.theme-dot');
+    if (themeBtns.length > 0) {
+        themeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const theme = btn.getAttribute('data-set');
+                document.body.setAttribute('data-theme', theme);
+                themeBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                localStorage.setItem('nichecp_theme', theme);
+            });
+        });
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('nichecp_theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+            const activeBtn = document.querySelector(`.theme-dot[data-set="${savedTheme}"]`);
+            if (activeBtn) {
+                themeBtns.forEach(b => b.classList.remove('active'));
+                activeBtn.classList.add('active');
+            }
+        }
     }
 
     // We only enforce login on the arena page. If we are on index.html, we don't redirect.

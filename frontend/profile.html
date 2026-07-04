@@ -123,53 +123,291 @@
         </div>
 
         <div class="nav-controls">
-            <button class="btn-ghost" onclick="logout()" style="padding: 8px 16px; font-size: 13px; border-radius: 6px;">Sign Out</button>
+            <div class="theme-switcher">
+                <div class="theme-dot active" data-set="quantum" style="cursor: pointer;"></div>
+                <div class="theme-dot" data-set="aurora" style="cursor: pointer;"></div>
+                <div class="theme-dot" data-set="solar" style="cursor: pointer;"></div>
+            </div>
+            <div id="authNavContainer">
+                <button class="btn-ghost" onclick="logout()" style="padding: 8px 16px; font-size: 13px; border-radius: 6px;">Sign Out</button>
+            </div>
         </div>
     </nav>
 
-    <main class="app-container">
-        <div class="campus-card">
-            <h1 class="campus-title skeleton-box" id="userName" style="width: 200px; display: inline-block;"></h1>
-            <p class="campus-subtitle skeleton-box" id="userEmail" style="width: 250px; display: inline-block; margin-bottom: 20px;"></p>
+    <main class="app-container repovive-layout">
+        <!-- LEFT SIDEBAR -->
+        <div class="repovive-sidebar">
+            <div style="margin-bottom: 16px;">
+                <img id="sidebarAvatarImg" src="https://via.placeholder.com/280x280/1a1a1c/ffffff?text=N" alt="Profile" style="width: 100%; border-radius: 12px; aspect-ratio: 1; object-fit: cover; background: #1a1a1c;">
+            </div>
             
-            <div style="margin-bottom: 30px;">
-                <span class="skeleton-box" id="userBatch" style="width: 80px; display: inline-block; padding: 4px 12px; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 12px;"></span>
-                <span class="skeleton-box" id="userRollNo" style="width: 80px; display: inline-block; padding: 4px 12px; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 12px; margin-left: 8px;"></span>
+            <button class="btn-ghost" onclick="openEditModal()" style="width: 100%; padding: 12px; font-size: 13px; border-radius: 8px; display: flex; justify-content: center; align-items: center; gap: 8px; background: rgba(255,255,255,0.03);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                Edit Personal
+            </button>
+            
+            <div style="margin-top: 16px;">
+                <h1 class="skeleton-box" id="sidebarName" style="font-size: 18px; margin-bottom: 4px;"></h1>
+                <p class="skeleton-box" id="sidebarSubtitle" style="font-size: 13px; color: var(--text-muted); margin: 0;"></p>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 24px;">
-                <div>
-                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Institution</div>
-                    <div style="font-size: 15px; font-weight: 500;">Amrita Vishwa Vidyapeetham</div>
-                </div>
-                <div>
-                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Platform Rating</div>
-                    <div style="font-size: 15px; font-weight: 500; color: #10b981;">Standard</div>
-                </div>
-                <div>
-                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Problems Solved</div>
-                    <div class="skeleton-box" id="statSolved" style="width: 40px; font-size: 15px; font-weight: 500;"></div>
-                </div>
+            <div class="vertical-menu">
+                <button class="menu-item active" onclick="switchMenu('overview')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    Overview
+                </button>
+                <button class="menu-item" onclick="switchMenu('achievements')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17"></path></svg>
+                    Analysis
+                </button>
+                <button class="menu-item" onclick="switchMenu('competitive')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                    Competitive
+                </button>
             </div>
+        </div>
 
-            <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 24px;">
-                <div id="unverifiedBox">
-                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Link your amrita.edu email to participate in official campus contests.</p>
-                    <div style="display: flex; gap: 8px; max-width: 400px;">
-                        <input type="email" id="collegeEmailInput" placeholder="college_email@am.students.amrita.edu" style="flex: 1; padding: 8px 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 6px;">
-                        <button class="btn-ghost" id="verifyBtn" style="padding: 8px 16px; font-size: 13px; border-radius: 6px;">Verify</button>
+        <!-- RIGHT CONTENT -->
+        <div class="repovive-content">
+            
+            <!-- OVERVIEW TAB -->
+            <div id="tab-overview" class="tab-content active">
+                <div style="margin-bottom: 40px;">
+                    <div style="display: inline-block; padding: 4px 10px; background: rgba(255, 179, 0, 0.1); color: #ffb300; font-size: 11px; font-weight: 700; border-radius: 12px; margin-bottom: 12px;">CAMPUS</div>
+                    <h1 class="golden-name" id="mainName">Loading...</h1>
+                    <p style="font-size: 16px; color: var(--text-muted); margin: 0;" id="mainSubtitle">Student @ Amrita Vishwa Vidyapeetham</p>
+                </div>
+
+                <div style="margin-bottom: 40px;">
+                    <h3 style="font-size: 18px; margin-bottom: 16px;">Education</h3>
+                    <div class="campus-card" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02);">
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                            <div style="width: 48px; height: 48px; background: #831d30; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white;">
+                                AV
+                            </div>
+                            <div>
+                                <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">Amrita Vishwa Vidyapeetham</div>
+                                <div style="font-size: 13px; color: var(--text-muted);">amrita.edu &middot; India</div>
+                            </div>
+                        </div>
+                        
+                        <div id="verifiedBox" style="display: none; align-items: center; gap: 8px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#3b82f6" stroke="#fff" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><polyline points="9 12 11 14 15 10"></polyline></svg>
+                        </div>
+                        
+                        <div id="unverifiedBox">
+                            <button class="btn-ghost" onclick="document.getElementById('verifyInputDiv').style.display='block'" style="padding: 6px 12px; font-size: 12px; border-radius: 4px; color: #ff4d4d; border: 1px solid rgba(255,77,77,0.3);">Connect</button>
+                        </div>
                     </div>
-                    <p id="verifyMsg" style="font-size: 12px; color: #ff4d4d; margin-top: 8px; display: none;"></p>
+                    
+                    <div id="verifyInputDiv" style="display: none; margin-top: 12px; background: rgba(0,0,0,0.3); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Link amrita.edu email for official campus verification.</p>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="email" id="collegeEmailInput" placeholder="college_email@am.students.amrita.edu" style="flex: 1; padding: 8px 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 6px; font-size: 13px;">
+                            <button class="btn-primary" id="verifyBtn" style="padding: 8px 16px; font-size: 12px; border-radius: 6px;">Verify</button>
+                        </div>
+                        <div id="otpInputDiv" style="display: none; margin-top: 12px; gap: 8px;">
+                            <input type="text" id="otpInput" placeholder="Enter OTP" style="flex: 1; padding: 8px 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 6px; font-size: 13px; letter-spacing: 2px;">
+                            <button class="btn-primary" id="submitOtpBtn" style="padding: 8px 16px; font-size: 12px; border-radius: 6px;">Submit OTP</button>
+                        </div>
+                        <p id="verifyMsg" style="font-size: 12px; color: #ff4d4d; margin-top: 8px; display: none;"></p>
+                    </div>
                 </div>
-                <div id="verifiedBox" style="display: none; display: flex; align-items: center; gap: 12px;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#10b981" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="9 12 11 14 15 10"></polyline></svg>
-                    <span id="verifiedEmailText" style="font-size: 14px; font-weight: 500;"></span>
+
+                <div>
+                    <h3 style="font-size: 18px; margin-bottom: 16px;">Details</h3>
+                    <div class="campus-card" style="padding: 0; background: transparent;">
+                        <div class="campus-list-item">
+                            <div style="display: flex; align-items: center; gap: 12px; color: var(--text-muted);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Roll Number</div>
+                            <div style="font-size: 14px; font-family: monospace;" id="nicheRollNumberStat">--</div>
+                        </div>
+                        <div class="campus-list-item">
+                            <div style="display: flex; align-items: center; gap: 12px; color: var(--text-muted);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> NicheCP Solved</div>
+                            <div style="font-size: 14px; color: #ffb300; font-weight: 600;" id="nicheSolvedStat">0</div>
+                        </div>
+                        <div class="campus-list-item">
+                            <div style="display: flex; align-items: center; gap: 12px; color: var(--text-muted);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Batch</div>
+                            <div style="font-size: 14px; font-family: monospace;" id="nicheBatchStat">--</div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <!-- ACHIEVEMENTS TAB -->
+            <div id="tab-achievements" class="tab-content">
+                <div class="campus-card" style="text-align: center; padding: 60px 20px;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1" style="margin-bottom: 16px;"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">No Achievements Yet</h3>
+                    <p style="color: var(--text-muted); font-size: 14px;">Participate in campus contests to earn badges.</p>
+                </div>
+            </div>
+
+            <!-- COMPETITIVE TAB (Codeforces) -->
+            <div id="tab-competitive" class="tab-content">
+                <div style="margin-bottom: 40px;">
+                    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Contest rating</h3>
+                    <div style="display: flex; gap: 32px; align-items: center;">
+                        <div>
+                            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Current</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #ffb300;" id="nichecpCurrentRating">--</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Peak</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #ffb300;" id="nichecpPeakRating">--</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Contests</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #e0e0e0;" id="nichecpContestsCount">--</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Rank</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #e0e0e0;" id="nichecpRank">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px;">
+                    <!-- Codeforces Card -->
+                    <div class="campus-card" style="padding: 20px; background: rgba(255,255,255,0.02); position: relative; border-radius: 12px; margin-bottom: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                                <span style="font-size: 14px; font-weight: 600;">Codeforces</span>
+                            </div>
+                            <div style="background: #3b82f6; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                        </div>
+                        
+                        <div id="cfUnverified">
+                            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Connect your Codeforces account.</p>
+                            <div id="cfStep1">
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" id="cfHandleInput" placeholder="Handle" style="flex: 1; padding: 8px 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 6px; font-size: 13px;">
+                                    <button class="btn-primary" id="cfGenerateBtn" style="padding: 8px 12px; font-size: 12px; border-radius: 6px;">Connect</button>
+                                </div>
+                                <p id="cfGenerateMsg" style="font-size: 11px; color: #ff4d4d; margin-top: 8px; display: none;"></p>
+                            </div>
+
+                            <div id="cfStep2" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05);">
+                                <p style="font-size: 12px; margin-bottom: 8px; color: var(--text-muted);">Set <strong>First/Last Name</strong> to this string in <a href="https://codeforces.com/settings/social" target="_blank" style="color: var(--primary-accent);">CF settings</a>:</p>
+                                <div style="background: rgba(0, 0, 0, 0.3); border: 1px dashed rgba(255,255,255,0.2); padding: 8px; border-radius: 4px; text-align: center; font-family: monospace; font-size: 14px; color: white; letter-spacing: 1px; margin-bottom: 12px;" id="cfVerifyStringDisplay">Loading...</div>
+                                <button class="btn-primary" id="cfVerifyBtn" style="padding: 8px 12px; font-size: 12px; border-radius: 6px; width: 100%;">Verify Now</button>
+                                <p id="cfVerifyMsg" style="font-size: 11px; color: #ff4d4d; margin-top: 8px; text-align: center; display: none;"></p>
+                            </div>
+                        </div>
+
+                        <div id="cfVerified" style="display: none;">
+                            <div style="display: flex; gap: 8px; align-items: baseline; margin-bottom: 4px;">
+                                <span style="font-size: 16px; font-weight: 700; color: #10b981;" id="cfHandleDisplay">--</span>
+                                <span style="font-size: 16px; font-weight: 700; color: #10b981;" id="cfRating">--</span>
+                                <span style="font-size: 14px; font-weight: 600; color: #10b981;" id="cfRank">--</span>
+                            </div>
+                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+                                Peak <span style="color: #e0e0e0;" id="cfMaxRatingDisplay">--</span> &nbsp;&nbsp; Top <span style="color: #e0e0e0;">--%</span>
+                            </div>
+                            
+                            <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                <span style="color: #e0e0e0;" id="cfTotalSolvedDisplay">0 Solved</span> &nbsp;
+                                <span style="color: #10b981;" id="cfEasyDisplay">Easy 0</span> &nbsp;
+                                <span style="color: #f59e0b;" id="cfMediumDisplay">Medium 0</span> &nbsp;
+                                <span style="color: #ef4444;" id="cfHardDisplay">Hard 0</span>
+                            </div>
+                            <div style="height: 4px; display: flex; border-radius: 2px; overflow: hidden; margin-bottom: 16px;">
+                                <div style="background: #10b981; flex: 1;" id="cfBarEasy"></div>
+                                <div style="background: #f59e0b; flex: 1;" id="cfBarMedium"></div>
+                                <div style="background: #ef4444; flex: 1;" id="cfBarHard"></div>
+                            </div>
+                            <div style="text-align: right;">
+                                <button class="btn-ghost" style="padding: 4px 8px; font-size: 11px; color: var(--text-muted);">Disconnect</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LeetCode Card -->
+                    <div class="campus-card" style="padding: 20px; background: rgba(255,255,255,0.02); position: relative; border-radius: 12px; margin-bottom: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                                <span style="font-size: 14px; font-weight: 600;">LeetCode</span>
+                            </div>
+                        </div>
+                        <div style="font-size: 13px; color: var(--text-muted);">Coming Soon</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Recent contests (last 10)</h3>
+                    <div id="cfSubmissionsLoading" style="font-size: 13px; color: var(--text-muted);">Connect Codeforces to see contest history...</div>
+                    <table class="submissions-table" id="cfSubmissionsTable" style="width: 100%; border-collapse: collapse; display: none;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                                <th style="padding: 12px 0; text-align: left;">Contest</th>
+                                <th style="padding: 12px 0; text-align: right;">Rating</th>
+                                <th style="padding: 12px 0; text-align: right;">Delta</th>
+                                <th style="padding: 12px 0; text-align: right;">Rank</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cfSubmissionsBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </main>
 
+    <!-- EDIT PROFILE MODAL -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 24px; font-size: 20px;">Edit Profile</h2>
+            
+            <div class="form-group">
+                <label>Profile Picture</label>
+                <input type="file" id="dpInput" accept="image/*" class="form-input" style="padding: 8px;">
+            </div>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="editNameInput" class="form-input" placeholder="Your Name">
+            </div>
+
+            <div class="form-group">
+                <label>Personal Email</label>
+                <input type="email" id="editEmailInput" class="form-input" placeholder="you@gmail.com">
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 32px; justify-content: flex-end;">
+                <button class="btn-ghost" onclick="closeEditModal()" style="padding: 10px 20px; font-size: 14px; border-radius: 6px;">Cancel</button>
+                <button class="btn-primary" id="saveProfileBtn" style="padding: 10px 20px; font-size: 14px; border-radius: 6px;">Save Changes</button>
+            </div>
+            <p id="editMsg" style="font-size: 12px; margin-top: 12px; text-align: center; display: none;"></p>
+        </div>
+    </div>
+
     <script>
+        // Menu logic
+        function switchMenu(tabId) {
+            document.querySelectorAll('.menu-item').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.currentTarget.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        // Modal Logic
+        function openEditModal() {
+            document.getElementById('editModal').classList.add('active');
+            if(userProfileData) {
+                document.getElementById('editNameInput').value = userProfileData.name || '';
+                document.getElementById('editEmailInput').value = userProfileData.email || '';
+            }
+        }
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            document.getElementById('editMsg').style.display = 'none';
+        }
+
         // Redirect if not logged in
         const token = localStorage.getItem('jwt_token');
         if (!token) {
@@ -181,6 +419,8 @@
             window.location.href = 'index.html';
         }
 
+        let userProfileData = null;
+
         document.addEventListener('DOMContentLoaded', async () => {
             // Load Profile Data
             try {
@@ -189,7 +429,7 @@
                 });
                 
                 if (res.ok) {
-                    const data = await res.json();
+                    userProfileData = await res.json();
                     
                     const updateField = (id, value) => {
                         const el = document.getElementById(id);
@@ -197,28 +437,106 @@
                             el.textContent = value;
                             el.classList.remove('skeleton-box');
                             el.style.width = 'auto';
-                            el.style.height = 'auto';
                         }
                     };
 
-                    updateField('userName', data.name);
-                    updateField('userEmail', data.email);
-                    updateField('userRollNo', data.roll_no || 'No Roll No');
-                    updateField('userBatch', data.batch || 'No Batch');
-                    
-                    const solvedEl = document.getElementById('statSolved');
-                    if (solvedEl) solvedEl.textContent = data.total_solved || 0;
+                    updateField('sidebarName', userProfileData.name);
+                    updateField('mainName', userProfileData.name);
+                    updateField('sidebarSubtitle', "Student @ Amrita Vishwa Vidyapeetham");
+                    updateField('nicheBatchStat', userProfileData.batch || 'No Batch');
 
-                    if (data.is_college_verified) {
+                    // Extract Roll Number from Email
+                    let rollNumber = '--';
+                    if (userProfileData.email && userProfileData.email.includes('@')) {
+                        rollNumber = userProfileData.email.split('@')[0].toUpperCase();
+                    }
+                    updateField('nicheRollNumberStat', rollNumber);
+                    
+                    if(userProfileData.profile_picture_url) {
+                        document.getElementById('sidebarAvatarImg').src = userProfileData.profile_picture_url;
+                    } else {
+                        const initial = userProfileData.name ? userProfileData.name.charAt(0).toUpperCase() : 'N';
+                        document.getElementById('sidebarAvatarImg').src = `https://via.placeholder.com/280x280/1a1a1c/ffffff?text=${initial}`;
+                    }
+                    
+                    if (userProfileData.is_college_verified) {
                         document.getElementById('unverifiedBox').style.display = 'none';
                         document.getElementById('verifiedBox').style.display = 'flex';
                     }
+
+                    // Handle Codeforces State
+                    if (userProfileData.is_cf_verified && userProfileData.cf_handle) {
+                        document.getElementById('cfUnverified').style.display = 'none';
+                        document.getElementById('cfVerified').style.display = 'block';
+                        fetchCFData(userProfileData.cf_handle);
+                    } else {
+                        document.getElementById('cfUnverified').style.display = 'block';
+                        document.getElementById('cfVerified').style.display = 'none';
+                        if (userProfileData.cf_verify_string) {
+                            document.getElementById('cfStep1').style.display = 'none';
+                            document.getElementById('cfStep2').style.display = 'block';
+                            document.getElementById('cfVerifyStringDisplay').textContent = userProfileData.cf_verify_string;
+                        }
+                    }
+
+                    // Init Chart (if it exists)
+                    initSolvedChart();
                 }
             } catch (e) {
                 console.error("Failed to load profile:", e);
             }
 
-            // Verify Email Logic
+            // Save Profile Data (Modal)
+            document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+                const btn = document.getElementById('saveProfileBtn');
+                const msg = document.getElementById('editMsg');
+                const name = document.getElementById('editNameInput').value;
+                const email = document.getElementById('editEmailInput').value;
+                const dpFile = document.getElementById('dpInput').files[0];
+
+                btn.textContent = 'Saving...';
+                
+                try {
+                    // Update Name and Email
+                    const res = await fetch('http://localhost:8080/api/profile', {
+                        method: 'PUT',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ name, email })
+                    });
+                    
+                    if (!res.ok) {
+                        throw new Error('Failed to update profile details');
+                    }
+
+                    // Update DP if selected
+                    if (dpFile) {
+                        const formData = new FormData();
+                        formData.append('profile_picture', dpFile);
+                        
+                        const dpRes = await fetch('http://localhost:8080/api/profile/upload-dp', {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}` },
+                            body: formData
+                        });
+                        
+                        if (!dpRes.ok) {
+                            throw new Error('Failed to upload picture');
+                        }
+                    }
+
+                    window.location.reload();
+                } catch(err) {
+                    msg.style.color = '#ff4d4d';
+                    msg.textContent = err.message;
+                    msg.style.display = 'block';
+                    btn.textContent = 'Save Changes';
+                }
+            });
+
+            // Verify College Email Logic
             document.getElementById('verifyBtn').addEventListener('click', async () => {
                 const email = document.getElementById('collegeEmailInput').value;
                 const msg = document.getElementById('verifyMsg');
@@ -245,6 +563,7 @@
                         msg.textContent = 'OTP Sent! Check your Outlook mail.';
                         msg.style.display = 'block';
                         document.getElementById('verifyBtn').textContent = 'Send again';
+                        document.getElementById('otpInputDiv').style.display = 'flex';
                     } else {
                         msg.style.color = '#ff4d4d';
                         msg.textContent = data.error;
@@ -255,9 +574,228 @@
                     msg.style.color = '#ff4d4d';
                     msg.textContent = 'Failed to connect';
                     msg.style.display = 'block';
+                    document.getElementById('verifyBtn').textContent = 'Verify';
+                }
+            });
+
+            document.getElementById('submitOtpBtn').addEventListener('click', async () => {
+                const otp = document.getElementById('otpInput').value;
+                const email = document.getElementById('collegeEmailInput').value;
+                const msg = document.getElementById('verifyMsg');
+                if(!otp) { msg.textContent = 'Enter OTP'; msg.style.display = 'block'; return; }
+                
+                try {
+                    document.getElementById('submitOtpBtn').textContent = 'Verifying...';
+                    const res = await fetch('http://localhost:8080/api/profile/verify-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ email, otp })
+                    });
+                    const data = await res.json();
+                    if(res.ok) {
+                        window.location.reload();
+                    } else {
+                        msg.style.color = '#ff4d4d';
+                        msg.textContent = data.error;
+                        msg.style.display = 'block';
+                        document.getElementById('submitOtpBtn').textContent = 'Submit OTP';
+                    }
+                } catch(e) {
+                    msg.style.color = '#ff4d4d';
+                    msg.textContent = 'Network error';
+                    msg.style.display = 'block';
+                    document.getElementById('submitOtpBtn').textContent = 'Submit OTP';
+                }
+            });
+
+            // Init CF Logic
+            document.getElementById('cfGenerateBtn').addEventListener('click', async () => {
+                const handle = document.getElementById('cfHandleInput').value;
+                const msg = document.getElementById('cfGenerateMsg');
+                if(!handle) { msg.textContent = 'Enter handle'; msg.style.display = 'block'; return; }
+                
+                try {
+                    const res = await fetch('http://localhost:8080/api/profile/cf/init', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ handle })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        document.getElementById('cfStep1').style.display = 'none';
+                        document.getElementById('cfStep2').style.display = 'block';
+                        document.getElementById('cfVerifyStringDisplay').textContent = data.verify_string;
+                    } else {
+                        msg.textContent = data.error; msg.style.display = 'block';
+                    }
+                } catch(err) {
+                    msg.textContent = 'Network Error'; msg.style.display = 'block';
+                }
+            });
+
+            // Verify CF Logic
+            document.getElementById('cfVerifyBtn').addEventListener('click', async () => {
+                const btn = document.getElementById('cfVerifyBtn');
+                const msg = document.getElementById('cfVerifyMsg');
+                btn.textContent = 'Verifying with Codeforces...';
+                try {
+                    const res = await fetch('http://localhost:8080/api/profile/cf/verify', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        msg.textContent = data.error; msg.style.display = 'block';
+                        btn.textContent = 'I have updated my profile. Verify Now';
+                    }
+                } catch(err) {
+                    msg.textContent = 'Network Error'; msg.style.display = 'block';
+                    btn.textContent = 'I have updated my profile. Verify Now';
                 }
             });
         });
+
+        // Fetch CF Data directly from browser
+        async function fetchCFData(handle) {
+            try {
+                // Fetch User Info
+                const res = await fetch(`https://codeforces.com/api/user.info?handles=${handle}`);
+                const data = await res.json();
+                if(data.status === 'OK') {
+                    const u = data.result[0];
+                    document.getElementById('cfHandleDisplay').textContent = u.handle;
+                    document.getElementById('cfRating').textContent = (u.rating || 'Unrated').toLocaleString();
+                    document.getElementById('cfRank').textContent = u.rank ? u.rank.charAt(0).toUpperCase() + u.rank.slice(1) : 'Unrated';
+                    document.getElementById('cfMaxRatingDisplay').textContent = (u.maxRating || 'Unrated').toLocaleString();
+                    
+                    // Color formatting for ratings (simplified CF colors)
+                    const colorMap = (rating) => {
+                        if(!rating) return 'var(--text-muted)';
+                        if(rating < 1200) return '#a0a0a0'; // Newbie
+                        if(rating < 1400) return '#10b981'; // Pupil
+                        if(rating < 1600) return '#00cccc'; // Specialist
+                        if(rating < 1900) return '#3b82f6'; // Expert
+                        if(rating < 2100) return '#a855f7'; // CM
+                        if(rating < 2300) return '#ffb300'; // Master
+                        if(rating < 2400) return '#ffb300'; // IM
+                        if(rating < 2600) return '#ff3333'; // GM
+                        return '#ff0000'; // LGM
+                    };
+                    const currentColor = colorMap(u.rating);
+                    document.getElementById('cfHandleDisplay').style.color = currentColor;
+                    document.getElementById('cfRating').style.color = currentColor;
+                    document.getElementById('cfRank').style.color = currentColor;
+                }
+
+                // Fetch Submissions to calculate Solved Stats
+                const subRes = await fetch(`https://codeforces.com/api/user.status?handle=${handle}`);
+                const subData = await subRes.json();
+                
+                if(subData.status === 'OK') {
+                    // Calculate solved counts by difficulty
+                    const solvedProblems = new Set();
+                    let easy = 0, medium = 0, hard = 0;
+                    
+                    subData.result.forEach(sub => {
+                        if (sub.verdict === 'OK') {
+                            const pId = sub.problem.contestId + sub.problem.index;
+                            if (!solvedProblems.has(pId)) {
+                                solvedProblems.add(pId);
+                                const rating = sub.problem.rating;
+                                if (rating) {
+                                    if (rating < 1300) easy++;
+                                    else if (rating < 1900) medium++;
+                                    else hard++;
+                                } else {
+                                    // Default if no rating
+                                    easy++;
+                                }
+                            }
+                        }
+                    });
+                    
+                    const total = solvedProblems.size;
+                    document.getElementById('cfTotalSolvedDisplay').textContent = `${total} Solved`;
+                    document.getElementById('cfEasyDisplay').textContent = `Easy ${easy}`;
+                    document.getElementById('cfMediumDisplay').textContent = `Medium ${medium}`;
+                    document.getElementById('cfHardDisplay').textContent = `Hard ${hard}`;
+                    
+                    if (total > 0) {
+                        document.getElementById('cfBarEasy').style.flex = easy;
+                        document.getElementById('cfBarMedium').style.flex = medium;
+                        document.getElementById('cfBarHard').style.flex = hard;
+                    }
+                }
+
+                // Fetch Contest History
+                const ratingRes = await fetch(`https://codeforces.com/api/user.rating?handle=${handle}`);
+                const ratingData = await ratingRes.json();
+                document.getElementById('cfSubmissionsLoading').style.display = 'none';
+                
+                if(ratingData.status === 'OK' && ratingData.result.length > 0) {
+                    const tbody = document.getElementById('cfSubmissionsBody');
+                    document.getElementById('cfSubmissionsTable').style.display = 'table';
+                    
+                    // Get last 10 contests, reverse order
+                    const recentContests = ratingData.result.slice(-10).reverse();
+                    
+                    recentContests.forEach(contest => {
+                        const tr = document.createElement('tr');
+                        tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                        
+                        const timeStr = new Date(contest.ratingUpdateTimeSeconds * 1000).toLocaleDateString('en-US', {month: 'short', year: 'numeric'});
+                        const delta = contest.newRating - contest.oldRating;
+                        const deltaStr = delta > 0 ? `+${delta}` : `${delta}`;
+                        const deltaColor = delta > 0 ? '#10b981' : (delta < 0 ? '#ef4444' : 'var(--text-muted)');
+                        
+                        tr.innerHTML = `
+                            <td style="padding: 16px 0;">
+                                <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">${contest.contestName}</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">${timeStr} &middot; Codeforces</div>
+                            </td>
+                            <td style="padding: 16px 0; text-align: right; font-size: 14px; font-weight: 600;">${contest.newRating.toLocaleString()}</td>
+                            <td style="padding: 16px 0; text-align: right; font-size: 14px; font-weight: 600; color: ${deltaColor};">${deltaStr}</td>
+                            <td style="padding: 16px 0; text-align: right; font-size: 14px; font-weight: 600;">#${contest.rank.toLocaleString()}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } else if (ratingData.result.length === 0) {
+                    document.getElementById('cfSubmissionsLoading').style.display = 'block';
+                    document.getElementById('cfSubmissionsLoading').textContent = 'No contest history found.';
+                }
+            } catch(e) {
+                console.error("Failed to load CF data", e);
+                document.getElementById('cfSubmissionsLoading').textContent = "Failed to load from Codeforces API.";
+                document.getElementById('cfSubmissionsLoading').style.display = 'block';
+            }
+        }
+
+        function initSolvedChart() {
+            const ctx = document.getElementById('solvedChart');
+            if(!ctx) return;
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Easy', 'Medium', 'Hard'],
+                    datasets: [{
+                        data: [0, 0, 0], // Empty for now until they solve
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 0,
+                        cutout: '80%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    animation: { animateScale: true }
+                }
+            });
+        }
     </script>
+    <script src="js/app.js"></script>
 </body>
 </html>

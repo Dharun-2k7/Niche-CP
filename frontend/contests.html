@@ -58,67 +58,89 @@
         </div>
 
         <div class="nav-controls">
+            <div class="theme-switcher">
+                <div class="theme-dot active" data-set="quantum" style="cursor: pointer;"></div>
+                <div class="theme-dot" data-set="aurora" style="cursor: pointer;"></div>
+                <div class="theme-dot" data-set="solar" style="cursor: pointer;"></div>
+            </div>
             <div id="authNavContainer">
                 <a href="login.html" class="btn-magnetic" style="padding: 8px 16px; font-size: 13px; border-radius: 6px;">Sign In</a>
             </div>
         </div>
     </nav>
 
-    <main class="app-container">
-        <h1 class="display-font" style="font-size: 32px; font-weight: 700; margin-bottom: 32px;">Campus Contests</h1>
-        
-        <div class="campus-card">
-            <h2 class="campus-title" style="font-size: 18px;">Upcoming Contests</h2>
-            <p class="campus-subtitle">Scheduled examinations and competitive rounds for your campus.</p>
-            
-            <div class="campus-list">
-                <div class="campus-list-item">
-                    <div>
-                        <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">NicheCP Starter Round 4</div>
-                        <div style="font-size: 13px; color: var(--text-muted);">Sun, Jul 5 &bull; 8:05 PM (2:00 Hours)</div>
-                    </div>
-                    <div style="display: flex; gap: 16px; align-items: center;">
-                        <div style="font-size: 14px; font-family: monospace; color: var(--primary-accent);">Starts in 01:08:56</div>
-                        <button class="btn-ghost" style="padding: 6px 16px; font-size: 13px; border-radius: 6px;">Register</button>
-                    </div>
-                </div>
+    <main class="app-container" style="max-width: 1000px; padding: 40px 20px;">
+        <h1 class="display-font" style="font-size: 32px; font-weight: 700; margin-bottom: 8px;">Contests</h1>
 
-                <div class="campus-list-item">
-                    <div>
-                        <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">NicheCP Premier Round 6</div>
-                        <div style="font-size: 13px; color: var(--text-muted);">Sun, Jul 12 &bull; 8:05 PM (2:30 Hours)</div>
-                    </div>
-                    <div style="display: flex; gap: 16px; align-items: center;">
-                        <button class="btn-ghost" style="padding: 6px 16px; font-size: 13px; border-radius: 6px;">Register</button>
-                    </div>
-                </div>
+        <div class="repovive-contests-header">
+            <h2>Upcoming</h2>
+            <span>Length</span>
+        </div>
+
+        <div class="repovive-contest-row">
+            <div>
+                <div class="title">NicheCP Starter Round 4</div>
+                <div class="meta">Sun, Jul 5, 8:05 PM UTC+5:30</div>
+            </div>
+            <div class="length">2:00</div>
+            <div class="countdown">01:08:56:32</div>
+            <div class="actions">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <button class="btn-enter">Enter</button>
             </div>
         </div>
 
-        <div class="campus-card">
-            <h2 class="campus-title" style="font-size: 18px;">Past Contests</h2>
-            <p class="campus-subtitle">Previous examination rounds.</p>
-            
-            <div class="campus-list">
-                <div class="campus-list-item">
-                    <div>
-                        <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">NicheCP Standard Round 5</div>
-                        <div style="font-size: 13px; color: var(--text-muted);">Mon, Jun 29 &bull; 2:00 Hours</div>
-                    </div>
-                    <div>
-                        <button class="btn-ghost" style="padding: 6px 16px; font-size: 13px; border-radius: 6px; border-color: transparent;">View Rankings</button>
-                    </div>
-                </div>
+        <div class="repovive-contest-row">
+            <div>
+                <div class="title">NicheCP Premier Round 6</div>
+                <div class="meta">Sun, Jul 12, 8:05 PM UTC+5:30</div>
+            </div>
+            <div class="length">2:30</div>
+            <div class="countdown">08:08:56:32</div>
+            <div class="actions">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <button class="btn-enter">Enter</button>
+            </div>
+        </div>
 
-                <div class="campus-list-item">
-                    <div>
-                        <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">NicheCP Premier Round 5</div>
-                        <div style="font-size: 13px; color: var(--text-muted);">Sun, Jun 21 &bull; 2:30 Hours</div>
-                    </div>
-                    <div>
-                        <button class="btn-ghost" style="padding: 6px 16px; font-size: 13px; border-radius: 6px; border-color: transparent;">View Rankings</button>
-                    </div>
-                </div>
+        <div class="repovive-contests-header" style="margin-top: 60px;">
+            <h2>Previous</h2>
+            <span>Length</span>
+        </div>
+
+        <div class="repovive-contest-row" style="grid-template-columns: 2fr 1fr 2fr;">
+            <div>
+                <div class="title">NicheCP Standard Round 5</div>
+                <div class="meta">Mon, Jun 29, 8:05 PM UTC+5:30</div>
+            </div>
+            <div class="length">2:00</div>
+            <div class="actions">
+                <button>Ranking</button>
+                <button>Virtual</button>
+            </div>
+        </div>
+
+        <div class="repovive-contest-row" style="grid-template-columns: 2fr 1fr 2fr;">
+            <div>
+                <div class="title">NicheCP Premier Round 5</div>
+                <div class="meta">Sun, Jun 21, 8:05 PM UTC+5:30</div>
+            </div>
+            <div class="length">2:30</div>
+            <div class="actions">
+                <button>Ranking</button>
+                <button>Virtual</button>
+            </div>
+        </div>
+        
+        <div class="repovive-contest-row" style="grid-template-columns: 2fr 1fr 2fr;">
+            <div>
+                <div class="title">NicheCP Starter Round 3</div>
+                <div class="meta">Sun, Jun 14, 8:05 PM UTC+5:30</div>
+            </div>
+            <div class="length">2:00</div>
+            <div class="actions">
+                <button>Ranking</button>
+                <button>Virtual</button>
             </div>
         </div>
     </main>

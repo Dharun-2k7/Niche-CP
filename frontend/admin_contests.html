@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NicheCP | Admin - New Contest</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body data-theme="quantum">
+    <div class="noise-bg" style="opacity: 0.4;"></div>
+
+    <nav class="navbar">
+        <a href="index.html" style="text-decoration: none; color: inherit;" class="nav-brand">
+            <div>NicheCP <span style="color:var(--primary-accent); font-size:12px; margin-left:8px;">ADMIN</span></div>
+        </a>
+        
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="admin.html" class="nav-link">Admin</a>
+            <a href="admin_problems.html" class="nav-link">Problems</a>
+            <a href="admin_contests.html" class="nav-link active">Contests</a>
+        </div>
+
+        <div class="nav-controls">
+            <div id="authNavContainer"></div>
+        </div>
+    </nav>
+
+    <main class="app-container repovive-layout" style="margin-top: 40px; grid-template-columns: 1fr;">
+        <div class="module-card">
+            <h2>Create New Contest</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Initialize a contest container</p>
+            
+            <div class="form-group">
+                <label>Contest Title</label>
+                <input type="text" id="cTitle" class="form-input" placeholder="e.g. NicheCP Starter Round 6">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+                <div class="form-group">
+                    <label>Start Time</label>
+                    <input type="datetime-local" id="cStartTime" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Duration (Minutes)</label>
+                    <input type="number" id="cDuration" class="form-input" placeholder="120">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 16px;">
+                <label>Penalty Type</label>
+                <select id="cType" class="cyber-select form-input">
+                    <option value="ICPC">ICPC (Time + 20m penalty)</option>
+                    <option value="IOI">IOI (Partial Scoring)</option>
+                    <option value="CUSTOM">Custom (Base Scoring)</option>
+                </select>
+            </div>
+
+            <div style="margin-top: 24px; display: flex; align-items: center; gap: 16px;">
+                <button id="createContestBtn" class="btn-primary" style="padding: 10px 24px; font-size: 14px; border-radius: 6px;">Create Contest</button>
+                <span id="cMsg" style="font-size: 13px; display: none;"></span>
+            </div>
+            
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 16px;">
+                After creating the contest, note the Contest ID and use the "Problems" tab to link existing or new problems to it.
+            </p>
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        const token = localStorage.getItem('jwt_token');
+        if (!token) window.location.href = 'login.html';
+
+        document.getElementById('createContestBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('createContestBtn');
+            const msg = document.getElementById('cMsg');
+            
+            const title = document.getElementById('cTitle').value;
+            const startTimeStr = document.getElementById('cStartTime').value;
+            const durationStr = document.getElementById('cDuration').value;
+            const type = document.getElementById('cType').value;
+
+            if(!title || !startTimeStr || !durationStr) {
+                msg.style.color = '#ff4d4d';
+                msg.textContent = 'All fields are required.';
+                msg.style.display = 'inline-block';
+                return;
+            }
+
+            // Convert to RFC3339 for Postgres TIMESTAMP
+            const startTime = new Date(startTimeStr).toISOString();
+
+            btn.textContent = 'Creating...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('http://localhost:8080/api/admin/contests', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        type: type,
+                        start_time: startTime,
+                        duration_minutes: parseInt(durationStr)
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    msg.style.color = '#10b981';
+                    msg.textContent = `${data.message} (Contest ID: ${data.contest_id})`;
+                    msg.style.display = 'inline-block';
+                    
+                    document.querySelectorAll('.form-input').forEach(el => el.value = '');
+                } else {
+                    msg.style.color = '#ff4d4d';
+                    msg.textContent = data.error;
+                    msg.style.display = 'inline-block';
+                }
+            } catch(e) {
+                msg.style.color = '#ff4d4d';
+                msg.textContent = 'Network error';
+                msg.style.display = 'inline-block';
+            } finally {
+                btn.textContent = 'Create Contest';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

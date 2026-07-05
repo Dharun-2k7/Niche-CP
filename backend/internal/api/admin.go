@@ -43,10 +43,16 @@ func GetAllUsers(c *gin.Context) {
 }
 
 type CreateProblemRequest struct {
-	Title       string `json:"title" binding:"required"`
-	Description string `json:"description" binding:"required"`
-	TestCases   string `json:"test_cases" binding:"required"` // Expecting JSON string
-	ContestID   *int   `json:"contest_id"`
+	Title           string `json:"title" binding:"required"`
+	Difficulty      string `json:"difficulty"`
+	Tags            string `json:"tags"`             // JSON array string
+	Description     string `json:"description" binding:"required"`
+	InputFormat     string `json:"input_format"`
+	OutputFormat    string `json:"output_format"`
+	Constraints     string `json:"constraints"`
+	SampleTestcases string `json:"sample_testcases"` // JSON array string
+	HiddenTestcases string `json:"hidden_testcases" binding:"required"` // JSON array string
+	ContestID       *int   `json:"contest_id"`
 }
 
 func CreateProblem(c *gin.Context) {
@@ -56,18 +62,58 @@ func CreateProblem(c *gin.Context) {
 		return
 	}
 
+	if req.Tags == "" { req.Tags = "[]" }
+	if req.SampleTestcases == "" { req.SampleTestcases = "[]" }
+	if req.Difficulty == "" { req.Difficulty = "Medium" }
+
 	// Insert into DB
 	var problemID int
 	err := db.DB.QueryRow(`
-		INSERT INTO problems (title, description, test_cases, contest_id)
-		VALUES ($1, $2, $3::jsonb, $4)
+		INSERT INTO problems (title, difficulty, tags, description, input_format, output_format, constraints, sample_testcases, hidden_testcases)
+		VALUES ($1, $2, $3::jsonb, $4, $5, $6, $7, $8::jsonb, $9::jsonb)
 		RETURNING id
-	`, req.Title, req.Description, req.TestCases, req.ContestID).Scan(&problemID)
+	`, req.Title, req.Difficulty, req.Tags, req.Description, req.InputFormat, req.OutputFormat, req.Constraints, req.SampleTestcases, req.HiddenTestcases).Scan(&problemID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create problem"})
 		return
 	}
 
+	// Link to contest if provided
+	if req.ContestID != nil {
+		var orderIndex int
+		db.DB.QueryRow(`SELECT COALESCE(MAX(order_index), 0) + 1 FROM contest_problems WHERE contest_id = $1`, *req.ContestID).Scan(&orderIndex)
+		db.DB.Exec(`INSERT INTO contest_problems (contest_id, problem_id, order_index) VALUES ($1, $2, $3)`, *req.ContestID, problemID, orderIndex)
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Problem created successfully!", "problem_id": problemID})
+}
+
+type CreateContestRequest struct {
+	Title           string `json:"title" binding:"required"`
+	Type            string `json:"type" binding:"required"`
+	StartTime       string `json:"start_time" binding:"required"`
+	DurationMinutes int    `json:"duration_minutes" binding:"required"`
+}
+
+func CreateContest(c *gin.Context) {
+	var req CreateContestRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var contestID int
+	err := db.DB.QueryRow(`
+		INSERT INTO contests (title, type, start_time, duration_minutes)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id
+	`, req.Title, req.Type, req.StartTime, req.DurationMinutes).Scan(&contestID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create contest"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Contest created successfully!", "contest_id": contestID})
 }

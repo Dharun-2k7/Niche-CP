@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NicheCP | Contest Arena</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        .contest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--card-border);
+        }
+        .timer {
+            font-size: 24px;
+            font-weight: 800;
+            font-family: monospace;
+            color: #10b981;
+        }
+        .nav-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--card-border);
+            margin-top: 20px;
+        }
+        .nav-tab {
+            padding: 12px 24px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .nav-tab.active {
+            color: var(--primary-accent);
+            border-bottom: 2px solid var(--primary-accent);
+        }
+    </style>
+</head>
+<body data-theme="quantum">
+    <div class="contest-header">
+        <div>
+            <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Live Contest</div>
+            <div style="font-size: 18px; font-weight: 700;" id="contestTitle">Loading...</div>
+        </div>
+        <div class="timer" id="contestTimer">00:00:00</div>
+        <div>
+            <a href="contests.html" class="btn-ghost" style="text-decoration:none; padding:8px 16px;">Exit Contest</a>
+        </div>
+    </div>
+
+    <main class="app-container" style="max-width: 1200px; padding: 20px;">
+        <div class="nav-tabs">
+            <div class="nav-tab active">Problems</div>
+            <div class="nav-tab">My Submissions</div>
+            <div class="nav-tab">Standings</div>
+        </div>
+
+        <div style="margin-top: 24px;" id="problemsTab">
+            <div class="module-card">
+                <h3>Contest Problems</h3>
+                <p style="color:var(--text-muted); margin-bottom: 16px;">Select a problem to solve.</p>
+                <!-- This would be dynamically fetched based on contest_problems join table -->
+                <div style="border: 1px solid var(--card-border); border-radius: 8px;">
+                    <div style="display:flex; padding: 12px; border-bottom: 1px solid var(--card-border); color:var(--text-muted);">
+                        <div style="width: 50px;">#</div>
+                        <div style="flex: 1;">Problem Name</div>
+                        <div style="width: 100px;">Score</div>
+                    </div>
+                    <!-- Stub data for UI mockup -->
+                    <a href="problem.html?problem_id=1" style="display:flex; padding: 12px; text-decoration:none; color:inherit; border-bottom: 1px solid var(--card-border);">
+                        <div style="width: 50px; font-weight:700;">A</div>
+                        <div style="flex: 1; color: var(--primary-accent);">Graph BFS Traversal</div>
+                        <div style="width: 100px; color:var(--text-muted);">100</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

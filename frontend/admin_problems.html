@@ -32,27 +32,71 @@
     <main class="app-container repovive-layout" style="margin-top: 40px; grid-template-columns: 1fr;">
         <div class="module-card">
             <h2>Create New Problem</h2>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Upload a new problem to the contest engine</p>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Add a new problem to the independent Problem Bank</p>
             
-            <div class="form-group">
-                <label>Problem Title</label>
-                <input type="text" id="pTitle" class="form-input" placeholder="e.g. Graph BFS Traversal">
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label>Problem Title</label>
+                    <input type="text" id="pTitle" class="form-input" placeholder="e.g. Graph BFS Traversal">
+                </div>
+                <div class="form-group">
+                    <label>Difficulty</label>
+                    <select id="pDifficulty" class="cyber-select form-input">
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 16px;">
+                <label>Tags (Comma separated)</label>
+                <input type="text" id="pTags" class="form-input" placeholder="e.g. graph, bfs, short-path">
             </div>
 
             <div class="form-group" style="margin-top: 16px;">
                 <label>Problem Statement (Markdown/HTML)</label>
-                <textarea id="pDesc" class="form-input" style="height: 150px; resize: vertical;" placeholder="<p>Given an undirected graph...</p>"></textarea>
+                <textarea id="pDesc" class="form-input" style="height: 100px; resize: vertical;" placeholder="<p>Given an undirected graph...</p>"></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+                <div class="form-group">
+                    <label>Input Format</label>
+                    <textarea id="pInputFormat" class="form-input" style="height: 80px;" placeholder="First line N M..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Output Format</label>
+                    <textarea id="pOutputFormat" class="form-input" style="height: 80px;" placeholder="Print space-separated..."></textarea>
+                </div>
             </div>
 
             <div class="form-group" style="margin-top: 16px;">
-                <label>Hidden Test Cases (JSON Array)</label>
-                <textarea id="pTestCases" class="form-input" style="height: 150px; font-family: monospace; resize: vertical;" placeholder='[&#10;  {&#10;    "input": "3 2\n1 2\n2 3",&#10;    "expected_output": "1 2 3"&#10;  }&#10;]'></textarea>
+                <label>Constraints</label>
+                <textarea id="pConstraints" class="form-input" style="height: 60px;" placeholder="1 <= N <= 10^5"></textarea>
+            </div>
+
+            <div class="form-group" style="margin-top: 16px;">
+                <label>Sample Test Cases (JSON Array)</label>
+                <textarea id="pSampleTestCases" class="form-input" style="height: 100px; font-family: monospace; resize: vertical;" placeholder='[{"input": "...", "expected_output": "..."}]'></textarea>
+            </div>
+
+            <div class="form-group" style="margin-top: 16px;">
+                <label>Hidden Test Cases (JSON Array) <span style="color:red">*</span></label>
+                <textarea id="pHiddenTestCases" class="form-input" style="height: 150px; font-family: monospace; resize: vertical;" placeholder='[{"input": "...", "expected_output": "..."}]'></textarea>
                 <p style="font-size:12px; color:var(--text-muted); margin-top: 4px;">Must be a valid JSON array of objects with `input` and `expected_output`.</p>
             </div>
 
             <div class="form-group" style="margin-top: 16px;">
-                <label>Contest ID (Optional)</label>
-                <input type="number" id="pContestId" class="form-input" placeholder="Leave blank if practice problem">
+                <label>Problem Destination</label>
+                <select id="pDestination" class="cyber-select form-input">
+                    <option value="practice">Practice Problem (Independent)</option>
+                    <option value="contest">Link to Specific Contest (Enter ID below)</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="contestIdGroup" style="margin-top: 16px; display:none;">
+                <label>Contest ID</label>
+                <input type="number" id="pContestId" class="form-input" placeholder="e.g. 5">
             </div>
 
             <div style="margin-top: 24px; display: flex; align-items: center; gap: 16px;">
@@ -67,29 +111,36 @@
         const token = localStorage.getItem('jwt_token');
         if (!token) window.location.href = 'login.html';
 
-        function logout() {
-            localStorage.removeItem('jwt_token');
-            window.location.href = 'index.html';
-        }
+        document.getElementById('pDestination').addEventListener('change', (e) => {
+            document.getElementById('contestIdGroup').style.display = e.target.value === 'contest' ? 'block' : 'none';
+        });
 
         document.getElementById('createProblemBtn').addEventListener('click', async () => {
             const btn = document.getElementById('createProblemBtn');
             const msg = document.getElementById('pMsg');
+            
             const title = document.getElementById('pTitle').value;
+            const difficulty = document.getElementById('pDifficulty').value;
+            const tagsRaw = document.getElementById('pTags').value;
             const desc = document.getElementById('pDesc').value;
-            let testCases = document.getElementById('pTestCases').value;
+            const inputFormat = document.getElementById('pInputFormat').value;
+            const outputFormat = document.getElementById('pOutputFormat').value;
+            const constraints = document.getElementById('pConstraints').value;
+            let sampleCases = document.getElementById('pSampleTestCases').value;
+            let hiddenCases = document.getElementById('pHiddenTestCases').value;
+            const dest = document.getElementById('pDestination').value;
             const contestIdStr = document.getElementById('pContestId').value;
 
-            if(!title || !desc || !testCases) {
+            if(!title || !desc || !hiddenCases) {
                 msg.style.color = '#ff4d4d';
-                msg.textContent = 'Please fill all required fields';
+                msg.textContent = 'Title, Description, and Hidden Testcases are required fields.';
                 msg.style.display = 'inline-block';
                 return;
             }
 
-            // Validate JSON
             try {
-                JSON.parse(testCases);
+                if(sampleCases) JSON.parse(sampleCases);
+                JSON.parse(hiddenCases);
             } catch(e) {
                 msg.style.color = '#ff4d4d';
                 msg.textContent = 'Invalid JSON in test cases';
@@ -97,8 +148,11 @@
                 return;
             }
 
+            const tagsArr = tagsRaw ? tagsRaw.split(',').map(t => t.trim()) : [];
             let contestId = null;
-            if(contestIdStr) contestId = parseInt(contestIdStr);
+            if (dest === 'contest' && contestIdStr) {
+                contestId = parseInt(contestIdStr);
+            }
 
             btn.textContent = 'Publishing...';
             btn.disabled = true;
@@ -112,8 +166,14 @@
                     },
                     body: JSON.stringify({
                         title: title,
+                        difficulty: difficulty,
+                        tags: JSON.stringify(tagsArr),
                         description: desc,
-                        test_cases: testCases,
+                        input_format: inputFormat,
+                        output_format: outputFormat,
+                        constraints: constraints,
+                        sample_testcases: sampleCases || '[]',
+                        hidden_testcases: hiddenCases,
                         contest_id: contestId
                     })
                 });
@@ -124,9 +184,7 @@
                     msg.textContent = data.message;
                     msg.style.display = 'inline-block';
                     
-                    document.getElementById('pTitle').value = '';
-                    document.getElementById('pDesc').value = '';
-                    document.getElementById('pTestCases').value = '';
+                    document.querySelectorAll('.form-input').forEach(el => el.value = '');
                 } else {
                     msg.style.color = '#ff4d4d';
                     msg.textContent = data.error;

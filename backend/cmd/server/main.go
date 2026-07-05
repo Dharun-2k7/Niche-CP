@@ -59,7 +59,9 @@ func main() {
 	r.POST("/api/auth/password/reset", api.ResetPassword)
 	
 	// Problems Route
+	r.GET("/api/problems", api.GetAllProblems)
 	r.GET("/api/problems/:id", api.GetProblem)
+	r.GET("/api/contests", api.GetAllContests)
 
 	// Protected Routes
 	protected := r.Group("/api")
@@ -82,6 +84,7 @@ func main() {
 	{
 		admin.GET("/users", api.GetAllUsers)
 		admin.POST("/problems", api.CreateProblem)
+		admin.POST("/contests", api.CreateContest)
 	}
 
 	// Start Server

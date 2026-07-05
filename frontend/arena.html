@@ -3,12 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Niche CP - Reverse & Golf</title>
+    <title>NicheCP | Arena Hub</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        .problem-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .problem-row {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+        .problem-row:hover {
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+        .diff-tag {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .diff-easy { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .diff-medium { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .diff-hard { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+    </style>
 </head>
 <body data-theme="quantum">
-    <!-- Unified Navigation -->
+    <div class="noise-bg" style="opacity: 0.4;"></div>
+
     <nav class="navbar">
         <a href="index.html" style="text-decoration: none; color: inherit;" class="nav-brand">
             <div>NicheCP</div>
@@ -17,9 +54,7 @@
         <div class="nav-links">
             <a href="index.html" class="nav-link">Home</a>
             <a href="contests.html" class="nav-link">Contests</a>
-            <a href="index.html#problems" class="nav-link">Problems</a>
             <a href="arena.html" class="nav-link active">Arena</a>
-            <a href="index.html#resources" class="nav-link">Resources</a>
         </div>
 
         <div class="nav-controls">
@@ -33,97 +68,80 @@
             </div>
         </div>
     </nav>
-    <!-- 
-        NOTE FOR BACKEND INTEGRATION:
-        The content below (Subheader, Problem Statement, Constraints, etc.) 
-        should be dynamically fetched and rendered by JavaScript 
-        based on the problem ID in the URL (e.g., ?problem_id=1). 
-    -->
-    <div class="repovive-arena-subheader">
-        <div class="left">
-            <span class="id" id="problemIdDisplay">Loading...</span>
-            <span class="title" id="problemTitleDisplay">Please wait</span>
-            <span class="diff" id="problemDiffDisplay">--</span>
-        </div>
-        <div class="right">
-            <span id="problemRoundDisplay">Practice Mode</span>
-        </div>
-    </div>
 
-    <main class="repovive-arena-layout">
-        <div class="repovive-arena-left">
-            <div class="repovive-arena-tabs">
-                <div class="tab active">Statement</div>
+    <main class="app-container" style="max-width: 1000px; padding: 40px 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <h1 class="display-font" style="font-size: 32px; font-weight: 700; margin-bottom: 8px;">The Arena</h1>
+                <p style="color: var(--text-muted); font-size: 15px;">Discover practice problems from the independent Problem Bank.</p>
             </div>
-            <div class="repovive-arena-content" id="problemContentDisplay">
-                <p>Loading problem description...</p>
-            </div>
-        </div>
-        
-        <div class="repovive-arena-right">
-            <div class="editor-top">
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                    Editor
-                </div>
-                <select id="language" class="cyber-select" style="padding: 4px 12px; font-size: 12px; background: transparent; border: 1px solid rgba(255,255,255,0.1);">
-                    <option value="cpp">C++17</option>
-                    <option value="python">Python 3</option>
-                    <option value="go">Go</option>
+            <div style="display: flex; gap: 12px;">
+                <input type="text" class="cyber-select" placeholder="Search Tags..." style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; border-radius: 6px;">
+                <select class="cyber-select" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; border-radius: 6px;">
+                    <option>All Difficulties</option>
+                    <option>Easy</option>
+                    <option>Medium</option>
+                    <option>Hard</option>
                 </select>
             </div>
-            
-            <div class="editor-container" id="codeEditorContainer"></div>
-            
-            <div class="action-bar">
-                <button id="runBtn" class="btn-ghost" style="padding: 8px 20px; font-size: 13px; display: flex; align-items: center; gap: 8px; border:1px solid rgba(255,255,255,0.1);">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                    Run
-                </button>
-                <button id="submitBtn" style="padding: 8px 24px; font-size: 13px; background: #6366f1; color: white; border: none; border-radius: 4px; display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    Submit
-                </button>
-            </div>
-            <div class="terminal-pane">
-                <div style="margin-bottom: 8px; color: var(--text-muted);">>_ OUTPUT</div>
-                <textarea id="terminalOutput" readonly style="width:100%; height:100%; background:transparent; border:none; color:#e0e0e0; outline:none; font-family:inherit; resize:none;" placeholder="- run your code to see output -"></textarea>
-            </div>
-            <textarea id="customInput" style="display:none;"></textarea>
-            <div id="statusMessage" class="status-banner"></div>
+        </div>
+
+        <div class="problem-grid" id="problemList">
+            <div style="text-align:center; color: var(--text-muted); margin-top: 40px;">Fetching problems...</div>
         </div>
     </main>
-    <!-- Monaco Editor Loader -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.js"></script>
+
     <script src="js/app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const pid = urlParams.get('problem_id');
-            
-            if (pid) {
-                try {
-                    const res = await fetch(`http://localhost:8080/api/problems/${pid}`);
-                    if (res.ok) {
-                        const problem = await res.json();
-                        document.getElementById('problemIdDisplay').textContent = `NCP-${problem.id}`;
-                        document.getElementById('problemTitleDisplay').textContent = problem.title;
-                        document.getElementById('problemDiffDisplay').textContent = 'Dynamic';
-                        
-                        // Parse description (if it's HTML from the admin form)
-                        document.getElementById('problemContentDisplay').innerHTML = problem.description;
-                    } else {
-                        document.getElementById('problemTitleDisplay').textContent = 'Problem not found';
-                        document.getElementById('problemContentDisplay').innerHTML = '<p style="color:red;">Error loading problem.</p>';
-                    }
-                } catch(e) {
-                    document.getElementById('problemTitleDisplay').textContent = 'Network Error';
-                    document.getElementById('problemContentDisplay').innerHTML = '<p style="color:red;">Failed to connect to backend.</p>';
+            try {
+                const res = await fetch('http://localhost:8080/api/problems');
+                if (!res.ok) throw new Error('Failed to fetch');
+                const problems = await res.json();
+                
+                const list = document.getElementById('problemList');
+                list.innerHTML = '';
+                
+                if (problems.length === 0) {
+                    list.innerHTML = '<div style="text-align:center; color: var(--text-muted); margin-top: 40px;">No problems available.</div>';
+                    return;
                 }
-            } else {
-                document.getElementById('problemIdDisplay').textContent = '--';
-                document.getElementById('problemTitleDisplay').textContent = 'No Problem Selected';
-                document.getElementById('problemContentDisplay').innerHTML = '<p>Please select a problem from the Contests or Problems page.</p>';
+
+                problems.forEach(p => {
+                    const diffClass = p.difficulty ? `diff-${p.difficulty.toLowerCase()}` : 'diff-medium';
+                    const diffText = p.difficulty || 'Medium';
+                    
+                    let tagsHtml = '';
+                    try {
+                        const tags = JSON.parse(p.tags);
+                        if (tags && tags.length > 0) {
+                            tagsHtml = tags.map(t => `<span style="font-size:12px; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:4px; margin-right:6px;">${t}</span>`).join('');
+                        }
+                    } catch(e){}
+
+                    list.innerHTML += `
+                        <a href="problem.html?problem_id=${p.id}" class="problem-row">
+                            <div style="display:flex; align-items:center; gap:24px;">
+                                <div style="font-family:monospace; color:var(--text-muted); font-size:14px; width:60px;">NCP-${p.id}</div>
+                                <div>
+                                    <div style="font-size:16px; font-weight:600; margin-bottom:6px;">${p.title}</div>
+                                    <div style="display:flex; align-items:center;">
+                                        ${tagsHtml}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:24px;">
+                                <div class="diff-tag ${diffClass}">${diffText}</div>
+                                <div style="color:var(--text-muted); font-size:13px; display:flex; align-items:center; gap:4px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10.08 10.08 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                    Solve
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                });
+            } catch(e) {
+                document.getElementById('problemList').innerHTML = '<div style="text-align:center; color: #ff4d4d; margin-top: 40px;">Failed to load problems from backend.</div>';
             }
         });
     </script>

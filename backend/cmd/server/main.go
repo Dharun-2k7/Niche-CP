@@ -57,6 +57,9 @@ func main() {
 	r.POST("/api/auth/register-otp/send", api.SendRegisterOTP)
 	r.POST("/api/auth/password/forgot", api.ForgotPassword)
 	r.POST("/api/auth/password/reset", api.ResetPassword)
+	
+	// Problems Route
+	r.GET("/api/problems/:id", api.GetProblem)
 
 	// Protected Routes
 	protected := r.Group("/api")
@@ -68,8 +71,17 @@ func main() {
 		protected.POST("/profile/upload-dp", api.UploadProfilePicture)
 		protected.POST("/profile/verify-college-email", api.VerifyCollegeEmail)
 		protected.POST("/profile/verify-otp", api.VerifyCollegeEmailOTP)
+		protected.POST("/profile/verify-email-update", api.VerifyEmailUpdate)
 		protected.POST("/profile/cf/init", api.InitCFVerification)
 		protected.POST("/profile/cf/verify", api.VerifyCF)
+	}
+
+	// Admin Routes
+	admin := r.Group("/api/admin")
+	admin.Use(middleware.RequireAdmin())
+	{
+		admin.GET("/users", api.GetAllUsers)
+		admin.POST("/problems", api.CreateProblem)
 	}
 
 	// Start Server

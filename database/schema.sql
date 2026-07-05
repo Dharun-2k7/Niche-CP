@@ -8,6 +8,9 @@ CREATE TABLE IF NOT EXISTS users (
     batch VARCHAR(50),
     college_email VARCHAR(255),
     is_college_verified BOOLEAN DEFAULT FALSE,
+    pending_email VARCHAR(255),
+    email_verified BOOLEAN DEFAULT FALSE,
+    permissions JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -41,12 +41,12 @@
     -->
     <div class="repovive-arena-subheader">
         <div class="left">
-            <span class="id" id="problemIdDisplay">NCP-003</span>
-            <span class="title" id="problemTitleDisplay">Graph BFS Traversal</span>
-            <span class="diff" id="problemDiffDisplay">Medium</span>
+            <span class="id" id="problemIdDisplay">Loading...</span>
+            <span class="title" id="problemTitleDisplay">Please wait</span>
+            <span class="diff" id="problemDiffDisplay">--</span>
         </div>
         <div class="right">
-            <span id="problemRoundDisplay">Starter Round 5 &bull; Problem 2</span>
+            <span id="problemRoundDisplay">Practice Mode</span>
         </div>
     </div>
 
@@ -55,15 +55,8 @@
             <div class="repovive-arena-tabs">
                 <div class="tab active">Statement</div>
             </div>
-            <div class="repovive-arena-content">
-                <p>Given an undirected graph with <strong style="color:var(--primary-accent)">N</strong> nodes and <strong style="color:var(--primary-accent)">M</strong> edges, and a source node <strong style="color:var(--primary-accent)">S</strong>, print the BFS traversal order starting from S.</p>
-                <p>Nodes are numbered from <strong style="color:var(--primary-accent)">1</strong> to <strong style="color:var(--primary-accent)">N</strong>. If there are multiple valid traversal orders, print the lexicographically smallest one.</p>
-                
-                <div class="format-title">Input Format</div>
-                <div>First line: N M S<br>Next M lines: u v (edge between u and v)</div>
-
-                <div class="format-title">Output Format</div>
-                <div>Print space-separated node indices in BFS order.</div>
+            <div class="repovive-arena-content" id="problemContentDisplay">
+                <p>Loading problem description...</p>
             </div>
         </div>
         
@@ -103,5 +96,36 @@
     <!-- Monaco Editor Loader -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.js"></script>
     <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pid = urlParams.get('problem_id');
+            
+            if (pid) {
+                try {
+                    const res = await fetch(`http://localhost:8080/api/problems/${pid}`);
+                    if (res.ok) {
+                        const problem = await res.json();
+                        document.getElementById('problemIdDisplay').textContent = `NCP-${problem.id}`;
+                        document.getElementById('problemTitleDisplay').textContent = problem.title;
+                        document.getElementById('problemDiffDisplay').textContent = 'Dynamic';
+                        
+                        // Parse description (if it's HTML from the admin form)
+                        document.getElementById('problemContentDisplay').innerHTML = problem.description;
+                    } else {
+                        document.getElementById('problemTitleDisplay').textContent = 'Problem not found';
+                        document.getElementById('problemContentDisplay').innerHTML = '<p style="color:red;">Error loading problem.</p>';
+                    }
+                } catch(e) {
+                    document.getElementById('problemTitleDisplay').textContent = 'Network Error';
+                    document.getElementById('problemContentDisplay').innerHTML = '<p style="color:red;">Failed to connect to backend.</p>';
+                }
+            } else {
+                document.getElementById('problemIdDisplay').textContent = '--';
+                document.getElementById('problemTitleDisplay').textContent = 'No Problem Selected';
+                document.getElementById('problemContentDisplay').innerHTML = '<p>Please select a problem from the Contests or Problems page.</p>';
+            }
+        });
+    </script>
 </body>
 </html>

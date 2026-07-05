@@ -17,6 +17,17 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             authContainer.innerHTML = `<a href="profile.html" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; border-radius: 6px; text-decoration: none;">Profile</a>`;
         }
+
+        // Check if admin
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            if (payload.email === 'dharunkaarthick07@gmail.com') {
+                const navLinks = document.querySelector('.nav-links');
+                if (navLinks && !document.querySelector('a[href="admin.html"]')) {
+                    navLinks.innerHTML += `<a href="admin.html" class="nav-link" style="color:var(--primary-accent);">Admin</a>`;
+                }
+            }
+        } catch(e) {}
     }
 
     // Theme Switcher Logic
@@ -168,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        problem_id: 1, // Hardcoded for MVP (will be dynamic soon)
+                        problem_id: parseInt(new URLSearchParams(window.location.search).get('problem_id')) || 1,
                         code: code,
                         language: language
                     })

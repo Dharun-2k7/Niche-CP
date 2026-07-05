@@ -377,6 +377,14 @@
                 <input type="email" id="editEmailInput" class="form-input" placeholder="you@gmail.com">
             </div>
 
+            <div class="form-group" id="editEmailOtpGroup" style="display: none; margin-top: 16px;">
+                <label style="color: var(--primary-accent);">Enter OTP sent to your new email</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="editEmailOtpInput" class="form-input" placeholder="6-digit OTP" style="flex: 1;">
+                    <button class="btn-primary" id="submitEmailOtpBtn" style="padding: 10px 20px; font-size: 14px; border-radius: 6px;">Verify</button>
+                </div>
+            </div>
+
             <div style="display: flex; gap: 12px; margin-top: 32px; justify-content: flex-end;">
                 <button class="btn-ghost" onclick="closeEditModal()" style="padding: 10px 20px; font-size: 14px; border-radius: 6px;">Cancel</button>
                 <button class="btn-primary" id="saveProfileBtn" style="padding: 10px 20px; font-size: 14px; border-radius: 6px;">Save Changes</button>
@@ -406,6 +414,9 @@
         function closeEditModal() {
             document.getElementById('editModal').classList.remove('active');
             document.getElementById('editMsg').style.display = 'none';
+            document.getElementById('editEmailOtpGroup').style.display = 'none';
+            document.getElementById('saveProfileBtn').style.display = 'block';
+            document.getElementById('editEmailOtpInput').value = '';
         }
 
         // Redirect if not logged in
@@ -510,6 +521,8 @@
                     if (!res.ok) {
                         throw new Error('Failed to update profile details');
                     }
+                    
+                    const data = await res.json();
 
                     // Update DP if selected
                     if (dpFile) {
@@ -527,12 +540,61 @@
                         }
                     }
 
-                    window.location.reload();
+                    if (data.require_otp) {
+                        msg.style.color = '#10b981';
+                        msg.textContent = data.message;
+                        msg.style.display = 'block';
+                        document.getElementById('editEmailOtpGroup').style.display = 'block';
+                        btn.style.display = 'none'; // Hide save button while verifying
+                    } else {
+                        window.location.reload();
+                    }
                 } catch(err) {
                     msg.style.color = '#ff4d4d';
                     msg.textContent = err.message;
                     msg.style.display = 'block';
                     btn.textContent = 'Save Changes';
+                }
+            });
+
+            // Email Update OTP Submission
+            document.getElementById('submitEmailOtpBtn').addEventListener('click', async () => {
+                const btn = document.getElementById('submitEmailOtpBtn');
+                const msg = document.getElementById('editMsg');
+                const otp = document.getElementById('editEmailOtpInput').value;
+                
+                if(!otp) {
+                    msg.style.color = '#ff4d4d';
+                    msg.textContent = 'Please enter the OTP';
+                    msg.style.display = 'block';
+                    return;
+                }
+
+                btn.textContent = 'Verifying...';
+                try {
+                    const res = await fetch('http://localhost:8080/api/profile/verify-email-update', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ otp })
+                    });
+                    const data = await res.json();
+                    
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        msg.style.color = '#ff4d4d';
+                        msg.textContent = data.error || 'Invalid OTP';
+                        msg.style.display = 'block';
+                        btn.textContent = 'Verify';
+                    }
+                } catch(e) {
+                    msg.style.color = '#ff4d4d';
+                    msg.textContent = 'Network error';
+                    msg.style.display = 'block';
+                    btn.textContent = 'Verify';
                 }
             });
 

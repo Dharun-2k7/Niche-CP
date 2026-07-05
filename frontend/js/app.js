@@ -115,36 +115,57 @@ document.addEventListener('DOMContentLoaded', () => {
         runBtn.addEventListener('click', async () => {
             const code = monacoEditor ? monacoEditor.getValue() : '';
             const language = languageSelect.value;
-            const input = customInput.value;
-
+            
             if (!code.trim()) {
                 showStatus('Please enter some code.', 'error');
                 return;
             }
 
+            let runs = [];
+            if (customInput && customInput.value.trim()) {
+                runs.push({ input: customInput.value, expected: null });
+            } else if (window.currentProblemSamples && window.currentProblemSamples.length > 0) {
+                runs = window.currentProblemSamples.map(s => ({ input: s.input, expected: s.expected_output }));
+            } else {
+                runs.push({ input: '', expected: null });
+            }
+
             runBtn.disabled = true;
             runBtn.textContent = 'Running...';
-            terminalOutput.value = 'Executing...';
+            terminalOutput.value = '';
 
             try {
-                const response = await fetch('http://localhost:8080/api/run', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code, language, input })
-                });
+                for (let i = 0; i < runs.length; i++) {
+                    terminalOutput.value += `=== Test ${i+1} ===\n`;
+                    const response = await fetch('http://localhost:8080/api/run', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code, language, input: runs[i].input })
+                    });
 
-                const data = await response.json();
+                    const data = await response.json();
 
-                if (response.ok) {
-                    terminalOutput.value = data.output || 'No output';
-                    if (data.stderr) {
-                        terminalOutput.value += '\n\n[Errors]:\n' + data.stderr;
+                    if (response.ok) {
+                        const out = data.output || 'No output';
+                        terminalOutput.value += out + '\n';
+                        
+                        if (runs[i].expected !== null) {
+                            if (out.trim() === runs[i].expected.trim()) {
+                                terminalOutput.value += `\n[Result]: ✅ Passed\n\n`;
+                            } else {
+                                terminalOutput.value += `\n[Result]: ❌ Failed\n[Expected]: ${runs[i].expected}\n\n`;
+                            }
+                        }
+                        
+                        if (data.stderr) {
+                            terminalOutput.value += '[Errors]:\n' + data.stderr + '\n\n';
+                        }
+                    } else {
+                        terminalOutput.value += `Error: ${data.error}\n\n`;
                     }
-                } else {
-                    terminalOutput.value = `Error: ${data.error}`;
                 }
             } catch (err) {
-                terminalOutput.value = 'Failed to connect to backend server.';
+                terminalOutput.value += 'Failed to connect to backend server.\n';
             } finally {
                 runBtn.disabled = false;
                 runBtn.textContent = 'Run Code';

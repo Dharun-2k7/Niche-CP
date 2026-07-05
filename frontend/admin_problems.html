@@ -3,14 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NicheCP | Admin - New Problem</title>
+    <title>NicheCP | Admin - Problem Setter</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- EasyMDE for Markdown Editing -->
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    <style>
+        .wizard-section {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .wizard-section h3 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            color: var(--primary-accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tc-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 12px;
+            margin-bottom: 12px;
+            align-items: start;
+        }
+        .tc-row textarea {
+            height: 80px;
+            font-family: monospace;
+            resize: vertical;
+        }
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+        /* EasyMDE overrides for dark theme */
+        .editor-toolbar { border-color: var(--card-border); background: var(--card-bg); opacity: 0.9; }
+        .editor-toolbar > button { color: var(--text-color) !important; }
+        .editor-toolbar > button:hover, .editor-toolbar > button.active { background: rgba(255,255,255,0.1); }
+        .CodeMirror { background: rgba(0,0,0,0.3) !important; color: #e0e0e0 !important; border-color: var(--card-border) !important; font-family: monospace; }
+        .CodeMirror-cursor { border-left-color: white !important; }
+        
+        .advanced-field { display: none; }
+        body.advanced-mode .advanced-field { display: block; }
+        body.advanced-mode .ui-builder { display: none; }
+    </style>
 </head>
 <body data-theme="quantum">
     <div class="noise-bg" style="opacity: 0.4;"></div>
 
-    <!-- Unified Navigation -->
     <nav class="navbar">
         <a href="index.html" style="text-decoration: none; color: inherit;" class="nav-brand">
             <div>NicheCP <span style="color:var(--primary-accent); font-size:12px; margin-left:8px;">ADMIN</span></div>
@@ -20,6 +66,7 @@
             <a href="index.html" class="nav-link">Home</a>
             <a href="admin.html" class="nav-link">Admin</a>
             <a href="admin_problems.html" class="nav-link active">Problems</a>
+            <a href="admin_contests.html" class="nav-link">Contests</a>
         </div>
 
         <div class="nav-controls">
@@ -29,79 +76,127 @@
         </div>
     </nav>
 
-    <main class="app-container repovive-layout" style="margin-top: 40px; grid-template-columns: 1fr;">
-        <div class="module-card">
-            <h2>Create New Problem</h2>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Add a new problem to the independent Problem Bank</p>
+    <main class="app-container" style="max-width: 1000px; padding: 40px 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <div>
+                <h1 class="display-font" style="font-size: 32px; font-weight: 700; margin-bottom: 4px;">Problem Setter</h1>
+                <p style="color: var(--text-muted); font-size: 14px;">Author new problems for the independent Problem Bank.</p>
+            </div>
+            <div>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; color: var(--text-muted);">
+                    <input type="checkbox" id="advancedModeToggle" onchange="document.body.classList.toggle('advanced-mode', this.checked)">
+                    Advanced Mode (JSON)
+                </label>
+            </div>
+        </div>
+
+        <div class="module-card" style="padding: 32px;">
             
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
-                <div class="form-group">
-                    <label>Problem Title</label>
-                    <input type="text" id="pTitle" class="form-input" placeholder="e.g. Graph BFS Traversal">
+            <!-- STEP 1: Basic Details -->
+            <div class="wizard-section">
+                <h3>1. Basic Details</h3>
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label>Problem Title</label>
+                        <input type="text" id="pTitle" class="form-input" placeholder="e.g. Dijkstra's Shortest Path">
+                    </div>
+                    <div class="form-group">
+                        <label>Difficulty</label>
+                        <select id="pDifficulty" class="cyber-select form-input">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
                 </div>
+                <div class="form-group" style="margin-top: 16px;">
+                    <label>Tags (Comma separated)</label>
+                    <input type="text" id="pTags" class="form-input" placeholder="e.g. graphs, shortest-path, dijkstra">
+                </div>
+            </div>
+
+            <!-- STEP 2: Problem Statement -->
+            <div class="wizard-section">
+                <h3>2. Problem Statement</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Use Markdown to format your problem description. Math is supported via standard notation if frontend renderer is configured.</p>
                 <div class="form-group">
-                    <label>Difficulty</label>
-                    <select id="pDifficulty" class="cyber-select form-input">
-                        <option value="Easy">Easy</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Hard">Hard</option>
+                    <textarea id="pDescEditor"></textarea>
+                </div>
+            </div>
+
+            <!-- STEP 3: Formats & Constraints -->
+            <div class="wizard-section">
+                <h3>3. I/O Formats & Constraints</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label>Input Format</label>
+                        <textarea id="pInputFormat" class="form-input" style="height: 100px; resize:vertical;" placeholder="The first line contains N and M..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Output Format</label>
+                        <textarea id="pOutputFormat" class="form-input" style="height: 100px; resize:vertical;" placeholder="Print a single integer representing..."></textarea>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 16px;">
+                    <label>Constraints</label>
+                    <textarea id="pConstraints" class="form-input" style="height: 80px; resize:vertical;" placeholder="1 ≤ N ≤ 10^5"></textarea>
+                </div>
+            </div>
+
+            <!-- STEP 4: Sample Examples -->
+            <div class="wizard-section">
+                <h3>4. Public Examples</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">These test cases will be visible to students in the problem description.</p>
+                
+                <div class="ui-builder" id="sampleBuilderContainer">
+                    <div id="sampleRows"></div>
+                    <button class="btn-ghost btn-sm" onclick="addSampleRow()" style="margin-top: 8px;">+ Add Example</button>
+                </div>
+
+                <div class="advanced-field form-group">
+                    <label>Raw JSON (Sample Testcases)</label>
+                    <textarea id="pSampleTestCases" class="form-input" style="height: 120px; font-family: monospace;"></textarea>
+                </div>
+            </div>
+
+            <!-- STEP 5: Hidden Test Cases -->
+            <div class="wizard-section" style="border-color: rgba(239, 68, 68, 0.3);">
+                <h3 style="color: #ef4444;">5. Hidden Evaluation Test Cases</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">These are strictly used by the execution worker to evaluate correctness.</p>
+                
+                <div class="ui-builder" id="hiddenBuilderContainer">
+                    <div id="hiddenRows"></div>
+                    <button class="btn-ghost btn-sm" onclick="addHiddenRow()" style="margin-top: 8px; border-color: rgba(239, 68, 68, 0.3); color: #ef4444;">+ Add Test Case</button>
+                </div>
+
+                <div class="advanced-field form-group">
+                    <label>Raw JSON (Hidden Testcases)</label>
+                    <textarea id="pHiddenTestCases" class="form-input" style="height: 200px; font-family: monospace;"></textarea>
+                </div>
+            </div>
+
+            <!-- STEP 6: Destination -->
+            <div class="wizard-section">
+                <h3>6. Problem Destination</h3>
+                <div class="form-group">
+                    <label>Where should this problem be published?</label>
+                    <select id="pDestination" class="cyber-select form-input">
+                        <option value="practice">Practice Bank (Independent)</option>
+                        <option value="contest">Link to a Contest</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="contestSelectorGroup" style="margin-top: 16px; display:none;">
+                    <label>Select Contest</label>
+                    <select id="pContestId" class="cyber-select form-input">
+                        <option value="">Loading contests...</option>
                     </select>
                 </div>
             </div>
 
-            <div class="form-group" style="margin-top: 16px;">
-                <label>Tags (Comma separated)</label>
-                <input type="text" id="pTags" class="form-input" placeholder="e.g. graph, bfs, short-path">
-            </div>
-
-            <div class="form-group" style="margin-top: 16px;">
-                <label>Problem Statement (Markdown/HTML)</label>
-                <textarea id="pDesc" class="form-input" style="height: 100px; resize: vertical;" placeholder="<p>Given an undirected graph...</p>"></textarea>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
-                <div class="form-group">
-                    <label>Input Format</label>
-                    <textarea id="pInputFormat" class="form-input" style="height: 80px;" placeholder="First line N M..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Output Format</label>
-                    <textarea id="pOutputFormat" class="form-input" style="height: 80px;" placeholder="Print space-separated..."></textarea>
-                </div>
-            </div>
-
-            <div class="form-group" style="margin-top: 16px;">
-                <label>Constraints</label>
-                <textarea id="pConstraints" class="form-input" style="height: 60px;" placeholder="1 <= N <= 10^5"></textarea>
-            </div>
-
-            <div class="form-group" style="margin-top: 16px;">
-                <label>Sample Test Cases (JSON Array)</label>
-                <textarea id="pSampleTestCases" class="form-input" style="height: 100px; font-family: monospace; resize: vertical;" placeholder='[{"input": "...", "expected_output": "..."}]'></textarea>
-            </div>
-
-            <div class="form-group" style="margin-top: 16px;">
-                <label>Hidden Test Cases (JSON Array) <span style="color:red">*</span></label>
-                <textarea id="pHiddenTestCases" class="form-input" style="height: 150px; font-family: monospace; resize: vertical;" placeholder='[{"input": "...", "expected_output": "..."}]'></textarea>
-                <p style="font-size:12px; color:var(--text-muted); margin-top: 4px;">Must be a valid JSON array of objects with `input` and `expected_output`.</p>
-            </div>
-
-            <div class="form-group" style="margin-top: 16px;">
-                <label>Problem Destination</label>
-                <select id="pDestination" class="cyber-select form-input">
-                    <option value="practice">Practice Problem (Independent)</option>
-                    <option value="contest">Link to Specific Contest (Enter ID below)</option>
-                </select>
-            </div>
-
-            <div class="form-group" id="contestIdGroup" style="margin-top: 16px; display:none;">
-                <label>Contest ID</label>
-                <input type="number" id="pContestId" class="form-input" placeholder="e.g. 5">
-            </div>
-
-            <div style="margin-top: 24px; display: flex; align-items: center; gap: 16px;">
-                <button id="createProblemBtn" class="btn-primary" style="padding: 10px 24px; font-size: 14px; border-radius: 6px;">Publish Problem</button>
-                <span id="pMsg" style="font-size: 13px; display: none;"></span>
+            <div style="margin-top: 32px; display: flex; align-items: center; justify-content: flex-end; gap: 16px;">
+                <span id="pMsg" style="font-size: 14px; display: none;"></span>
+                <button id="createProblemBtn" class="btn-primary" style="padding: 12px 32px; font-size: 15px; border-radius: 8px;">Publish Problem</button>
             </div>
         </div>
     </main>
@@ -111,39 +206,133 @@
         const token = localStorage.getItem('jwt_token');
         if (!token) window.location.href = 'login.html';
 
-        document.getElementById('pDestination').addEventListener('change', (e) => {
-            document.getElementById('contestIdGroup').style.display = e.target.value === 'contest' ? 'block' : 'none';
+        // Initialize EasyMDE
+        const easyMDE = new EasyMDE({ 
+            element: document.getElementById('pDescEditor'),
+            spellChecker: false,
+            placeholder: "Type problem statement here in Markdown...",
+            status: false
         });
 
+        // UI Builder Logic
+        function createTcRowHTML(idPrefix, index) {
+            return `
+                <div class="tc-row" id="${idPrefix}_row_${index}">
+                    <div>
+                        <label style="font-size:12px; margin-bottom:4px; display:block;">Input</label>
+                        <textarea class="form-input ${idPrefix}-in" placeholder="Enter input text"></textarea>
+                    </div>
+                    <div>
+                        <label style="font-size:12px; margin-bottom:4px; display:block;">Expected Output</label>
+                        <textarea class="form-input ${idPrefix}-out" placeholder="Enter expected output text"></textarea>
+                    </div>
+                    <div style="padding-top: 24px;">
+                        <button class="btn-ghost btn-sm" onclick="document.getElementById('${idPrefix}_row_${index}').remove()" style="color:#ef4444; border-color:rgba(239, 68, 68, 0.2);">Remove</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        let sampleCounter = 0;
+        function addSampleRow() {
+            document.getElementById('sampleRows').insertAdjacentHTML('beforeend', createTcRowHTML('sample', sampleCounter++));
+        }
+
+        let hiddenCounter = 0;
+        function addHiddenRow() {
+            document.getElementById('hiddenRows').insertAdjacentHTML('beforeend', createTcRowHTML('hidden', hiddenCounter++));
+        }
+
+        // Initialize with one row each
+        addSampleRow();
+        addHiddenRow();
+
+        // Load Contests for Dropdown
+        document.getElementById('pDestination').addEventListener('change', async (e) => {
+            const group = document.getElementById('contestSelectorGroup');
+            if (e.target.value === 'contest') {
+                group.style.display = 'block';
+                try {
+                    const res = await fetch('http://localhost:8080/api/contests');
+                    const contests = await res.json();
+                    const select = document.getElementById('pContestId');
+                    select.innerHTML = '<option value="">Select a contest...</option>';
+                    contests.forEach(c => {
+                        select.innerHTML += `<option value="${c.id}">${c.title} (ID: ${c.id})</option>`;
+                    });
+                } catch (e) {
+                    document.getElementById('pContestId').innerHTML = '<option value="">Failed to load contests</option>';
+                }
+            } else {
+                group.style.display = 'none';
+            }
+        });
+
+        // Submit Logic
         document.getElementById('createProblemBtn').addEventListener('click', async () => {
             const btn = document.getElementById('createProblemBtn');
             const msg = document.getElementById('pMsg');
+            const isAdvanced = document.getElementById('advancedModeToggle').checked;
             
             const title = document.getElementById('pTitle').value;
             const difficulty = document.getElementById('pDifficulty').value;
             const tagsRaw = document.getElementById('pTags').value;
-            const desc = document.getElementById('pDesc').value;
+            const desc = easyMDE.value();
             const inputFormat = document.getElementById('pInputFormat').value;
             const outputFormat = document.getElementById('pOutputFormat').value;
             const constraints = document.getElementById('pConstraints').value;
-            let sampleCases = document.getElementById('pSampleTestCases').value;
-            let hiddenCases = document.getElementById('pHiddenTestCases').value;
             const dest = document.getElementById('pDestination').value;
             const contestIdStr = document.getElementById('pContestId').value;
 
-            if(!title || !desc || !hiddenCases) {
+            if(!title || !desc) {
                 msg.style.color = '#ff4d4d';
-                msg.textContent = 'Title, Description, and Hidden Testcases are required fields.';
+                msg.textContent = 'Title and Description are required.';
                 msg.style.display = 'inline-block';
                 return;
             }
 
+            let sampleCasesJson = '[]';
+            let hiddenCasesJson = '[]';
+
+            if (isAdvanced) {
+                sampleCasesJson = document.getElementById('pSampleTestCases').value || '[]';
+                hiddenCasesJson = document.getElementById('pHiddenTestCases').value || '[]';
+            } else {
+                // Construct JSON from UI Builders
+                const samples = [];
+                document.querySelectorAll('.tc-row').forEach(row => {
+                    if (row.id.startsWith('sample_')) {
+                        const inVal = row.querySelector('.sample-in').value;
+                        const outVal = row.querySelector('.sample-out').value;
+                        if (inVal.trim() || outVal.trim()) samples.push({input: inVal, expected_output: outVal});
+                    }
+                });
+                const hiddens = [];
+                document.querySelectorAll('.tc-row').forEach(row => {
+                    if (row.id.startsWith('hidden_')) {
+                        const inVal = row.querySelector('.hidden-in').value;
+                        const outVal = row.querySelector('.hidden-out').value;
+                        if (inVal.trim() || outVal.trim()) hiddens.push({input: inVal, expected_output: outVal});
+                    }
+                });
+                
+                sampleCasesJson = JSON.stringify(samples);
+                hiddenCasesJson = JSON.stringify(hiddens);
+
+                if (hiddens.length === 0) {
+                    msg.style.color = '#ff4d4d';
+                    msg.textContent = 'At least one hidden test case is required.';
+                    msg.style.display = 'inline-block';
+                    return;
+                }
+            }
+
             try {
-                if(sampleCases) JSON.parse(sampleCases);
-                JSON.parse(hiddenCases);
+                JSON.parse(sampleCasesJson);
+                JSON.parse(hiddenCasesJson);
             } catch(e) {
                 msg.style.color = '#ff4d4d';
-                msg.textContent = 'Invalid JSON in test cases';
+                msg.textContent = 'Invalid test cases data.';
                 msg.style.display = 'inline-block';
                 return;
             }
@@ -172,8 +361,8 @@
                         input_format: inputFormat,
                         output_format: outputFormat,
                         constraints: constraints,
-                        sample_testcases: sampleCases || '[]',
-                        hidden_testcases: hiddenCases,
+                        sample_testcases: sampleCasesJson,
+                        hidden_testcases: hiddenCasesJson,
                         contest_id: contestId
                     })
                 });
@@ -184,7 +373,13 @@
                     msg.textContent = data.message;
                     msg.style.display = 'inline-block';
                     
+                    // Reset UI
                     document.querySelectorAll('.form-input').forEach(el => el.value = '');
+                    easyMDE.value('');
+                    document.getElementById('sampleRows').innerHTML = '';
+                    document.getElementById('hiddenRows').innerHTML = '';
+                    addSampleRow();
+                    addHiddenRow();
                 } else {
                     msg.style.color = '#ff4d4d';
                     msg.textContent = data.error;

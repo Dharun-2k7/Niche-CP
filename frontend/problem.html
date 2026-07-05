@@ -85,11 +85,15 @@
                     Submit
                 </button>
             </div>
-            <div class="terminal-pane">
-                <div style="margin-bottom: 8px; color: var(--text-muted);">>_ OUTPUT</div>
-                <textarea id="terminalOutput" readonly style="width:100%; height:100%; background:transparent; border:none; color:#e0e0e0; outline:none; font-family:inherit; resize:none;" placeholder="- run your code to see output -"></textarea>
+            <div class="terminal-pane" style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="color: var(--text-muted); font-size: 13px;">>_ CUSTOM INPUT</div>
+                </div>
+                <textarea id="customInput" style="width:100%; height:50px; background:rgba(0,0,0,0.2); border:1px solid var(--card-border); border-radius:4px; color:#e0e0e0; padding:8px; font-family:monospace; resize:vertical;" placeholder="Enter custom input to run against..."></textarea>
+                
+                <div style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">>_ OUTPUT</div>
+                <textarea id="terminalOutput" readonly style="width:100%; flex: 1; min-height:80px; background:transparent; border:none; color:#e0e0e0; outline:none; font-family:inherit; resize:none;" placeholder="- run your code to see output -"></textarea>
             </div>
-            <textarea id="customInput" style="display:none;"></textarea>
             <div id="statusMessage" class="status-banner"></div>
         </div>
     </main>
@@ -122,6 +126,7 @@
                         try {
                             const samples = JSON.parse(problem.sample_testcases);
                             if (samples.length > 0) {
+                                window.currentProblemSamples = samples; // Store for app.js
                                 samples.forEach((s, i) => {
                                     sampleHtml += `
                                     <div class="format-title">Sample Input ${i+1}</div>

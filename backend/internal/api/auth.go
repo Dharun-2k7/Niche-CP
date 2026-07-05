@@ -16,6 +16,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func extractRollNumber(email string) string {
+	if strings.HasSuffix(email, "amrita.edu") {
+		parts := strings.Split(email, "@")
+		return strings.ToUpper(parts[0])
+	}
+	return ""
+}
+
 // Generate a random state string for CSRF protection
 func generateStateOauthCookie(c *gin.Context) string {
 	b := make([]byte, 16)
@@ -75,14 +83,17 @@ func GoogleCallback(c *gin.Context) {
 		return
 	}
 
+	// Auto-extract roll number if amrita.edu
+	rollNo := extractRollNumber(googleUser.Email)
+
 	// Find or Create user in DB
 	var userID int
 	err = db.DB.QueryRow(`
-		INSERT INTO users (name, email) 
-		VALUES ($1, $2) 
-		ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name 
+		INSERT INTO users (name, email, roll_no) 
+		VALUES ($1, $2, $3) 
+		ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, roll_no = COALESCE(users.roll_no, EXCLUDED.roll_no)
 		RETURNING id
-	`, googleUser.Name, googleUser.Email).Scan(&userID)
+	`, googleUser.Name, googleUser.Email, rollNo).Scan(&userID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to sync user to database"})
@@ -137,6 +148,10 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
+	if req.RollNo == "" {
+		req.RollNo = extractRollNumber(req.Email)
+	}
+
 	var userID int
 	err = db.DB.QueryRow(`
 		INSERT INTO users (name, email, password_hash, roll_no, batch) 
@@ -174,6 +189,12 @@ func LoginUser(c *gin.Context) {
 	if err := bcrypt.CompareHashAndPassword([]byte(*passwordHash), []byte(req.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
 		return
+	}
+
+	// Auto-update roll number if missing
+	rollNo := extractRollNumber(req.Email)
+	if rollNo != "" {
+		db.DB.Exec("UPDATE users SET roll_no = $1 WHERE id = $2 AND (roll_no IS NULL OR roll_no = '')", rollNo, userID)
 	}
 
 	jwtToken, err := auth.GenerateToken(userID, req.Email)

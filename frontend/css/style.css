@@ -1278,10 +1278,12 @@ h1, h2, h3, h4, h5, h6, .display-font {
     display: grid;
     grid-template-columns: 1fr 1fr;
     height: calc(100vh - 120px);
+    overflow: hidden;
 }
 .repovive-arena-left, .repovive-arena-right {
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 .repovive-arena-left {
     border-right: 1px solid rgba(255,255,255,0.05);
@@ -1345,7 +1347,9 @@ h1, h2, h3, h4, h5, h6, .display-font {
     background: rgba(20,20,22,0.8);
 }
 .repovive-arena-right .terminal-pane {
-    height: 120px;
+    height: auto;
+    min-height: 220px;
+    flex: 0 0 220px;
     background: #000;
     border-top: 1px solid rgba(255,255,255,0.05);
     padding: 12px 24px;

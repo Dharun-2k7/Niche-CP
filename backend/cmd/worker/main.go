@@ -54,7 +54,7 @@ func main() {
 
 		// Fetch hidden test cases from Postgres using problemID
 		var testCasesJSON string
-		err = db.DB.QueryRow("SELECT test_cases FROM problems WHERE id = $1", problemID).Scan(&testCasesJSON)
+		err = db.DB.QueryRow("SELECT hidden_testcases FROM problems WHERE id = $1", problemID).Scan(&testCasesJSON)
 		if err != nil {
 			log.Printf("Failed to fetch test cases for Problem %d: %v", problemID, err)
 			_, _ = db.DB.Exec("UPDATE submissions SET status = $1 WHERE id = $2", "INTERNAL_ERROR", submissionID)

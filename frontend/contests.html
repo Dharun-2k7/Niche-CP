@@ -5,152 +5,145 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NicheCP | Contests</title>
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        .ranking-card {
-            background: rgba(20, 20, 22, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        .ranking-header {
-            padding: 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 14px;
-            font-weight: 600;
-        }
-        .ranking-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .ranking-table th {
-            padding: 12px 16px;
-            text-align: left;
-            font-size: 11px;
-            color: var(--text-muted);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .ranking-table td {
-            padding: 12px 16px;
-            font-size: 13px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-        }
-        .ranking-table tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
-        }
+        body { background: #0d0d0f; } /* Darker background for contests list */
     </style>
 </head>
 <body data-theme="quantum">
-    <div class="noise-bg" style="opacity: 0.4;"></div>
 
-    <!-- Unified Navigation -->
-    <nav class="navbar">
-        <a href="index.html" style="text-decoration: none; color: inherit;" class="nav-brand">
-            <div>NicheCP</div>
-        </a>
-        
-        <div class="nav-links">
-            <a href="index.html" class="nav-link">Home</a>
-            <a href="contests.html" class="nav-link active">Contests</a>
-            <a href="index.html#problems" class="nav-link">Problems</a>
-            <a href="arena.html" class="nav-link">Arena</a>
-            <a href="index.html#resources" class="nav-link">Resources</a>
-        </div>
-
-        <div class="nav-controls">
-            <div class="theme-switcher">
-                <div class="theme-dot active" data-set="quantum" style="cursor: pointer;"></div>
-                <div class="theme-dot" data-set="aurora" style="cursor: pointer;"></div>
-                <div class="theme-dot" data-set="solar" style="cursor: pointer;"></div>
+    <!-- Navbar -->
+    <nav class="navbar" style="border-bottom: none; padding: 20px 40px; background: transparent;">
+        <div style="display:flex; align-items:center; gap:40px; flex:1;">
+            <div class="nav-brand" style="margin-right:20px;">[R]</div>
+            <div class="nav-links" style="justify-content:flex-start;">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="#" class="nav-link">Roadmaps</a>
+                <a href="contests.html" class="nav-link active">Contests</a>
+                <a href="index.html#problems" class="nav-link">Problems</a>
+                <a href="arena.html" class="nav-link">Arena</a>
+                <a href="#" class="nav-link" style="color: #f59e0b;">Premium</a>
             </div>
-            <div id="authNavContainer">
-                <a href="login.html" class="btn-magnetic" style="padding: 8px 16px; font-size: 13px; border-radius: 6px;">Sign In</a>
+        </div>
+        
+        <div class="nav-controls">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted); cursor:pointer;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <div style="width:32px; height:32px; background:#333; border-radius:50%; overflow:hidden;">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" style="width:100%; height:100%;">
             </div>
         </div>
     </nav>
 
-    <main class="app-container" style="max-width: 1000px; padding: 40px 20px;">
-        <h1 class="display-font" style="font-size: 32px; font-weight: 700; margin-bottom: 8px;">Contests</h1>
-
+    <main class="app-container" style="max-width: 1000px; padding-top: 20px;">
         <div id="contestsContainer">
-            <div style="text-align:center; color: var(--text-muted); margin-top: 40px;">Fetching contests...</div>
+            <div style="display:flex; flex-direction:column; gap:16px; margin-top:40px;">
+                <div class="skeleton" style="height: 80px; width: 100%;"></div>
+                <div class="skeleton" style="height: 80px; width: 100%;"></div>
+                <div class="skeleton" style="height: 80px; width: 100%;"></div>
+            </div>
         </div>
     </main>
 
-    <script src="js/app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('contestsContainer');
+            
             try {
-                const res = await fetch('http://localhost:8080/api/contests');
-                if (!res.ok) throw new Error('Fetch failed');
-                const contests = await res.json();
+                const response = await fetch('http://localhost:8080/api/contests');
+                if (!response.ok) throw new Error('Failed to fetch contests');
+                const data = await response.json();
                 
-                const container = document.getElementById('contestsContainer');
-                container.innerHTML = '';
-                
-                if (!contests || contests.length === 0) {
-                    container.innerHTML = '<div style="text-align:center; color: var(--text-muted); margin-top: 40px;">No contests scheduled.</div>';
-                    return;
-                }
-
                 const now = new Date();
-                const upcoming = [], live = [], past = [];
+                
+                const upcoming = [];
+                const past = [];
+                
+                // If it's returning a map/array wrapper
+                const contestList = data.contests || data || [];
 
-                contests.forEach(c => {
-                    const start = new Date(c.start_time);
-                    const end = new Date(start.getTime() + c.duration_minutes * 60000);
-                    
-                    if (now < start) upcoming.push({...c, start, end});
-                    else if (now >= start && now < end) live.push({...c, start, end});
-                    else past.push({...c, start, end});
+                contestList.forEach(c => {
+                    // strict UTC parsing
+                    const startTime = new Date(c.start_time);
+                    if (startTime > now) {
+                        upcoming.push(c);
+                    } else {
+                        past.push(c);
+                    }
                 });
 
-                const renderRow = (c, state) => {
-                    let actionBtn = '';
-                    let timeText = '';
-                    
-                    if (state === 'live') {
-                        actionBtn = `<a href="contest_arena.html?id=${c.id}" class="btn-enter" style="text-decoration:none; padding:8px 16px;">Enter</a>`;
-                        timeText = `<div style="color:#10b981; font-weight:600;">LIVE NOW</div>`;
-                    } else if (state === 'upcoming') {
-                        actionBtn = `<button disabled style="opacity:0.5; padding:8px 16px;">Starts Soon</button>`;
-                        timeText = `<div>${c.start.toLocaleString()}</div>`;
-                    } else {
-                        actionBtn = `<button class="btn-ghost" style="padding:8px 16px;">Virtual</button>`;
-                        timeText = `<div>Ended</div>`;
-                    }
+                let html = '';
 
-                    return `
-                        <div class="repovive-contest-row">
-                            <div>
-                                <div class="title">${c.title}</div>
-                                <div class="meta">${c.type} format &bull; ${c.duration_minutes} mins</div>
-                            </div>
-                            <div class="length">${timeText}</div>
-                            <div class="actions">
-                                ${actionBtn}
-                            </div>
+                // UPCOMING SECTION
+                if (upcoming.length > 0) {
+                    html += `
+                        <div class="contest-list-header">
+                            <div>UPCOMING</div>
+                            <div>LENGTH</div>
+                            <div></div>
                         </div>
                     `;
-                };
+                    upcoming.forEach(c => {
+                        const startTime = new Date(c.start_time);
+                        const dateStr = startTime.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+                        const h = Math.floor(c.duration_minutes / 60);
+                        const m = (c.duration_minutes % 60).toString().padStart(2, '0');
+                        
+                        html += `
+                            <div class="contest-row">
+                                <div>
+                                    <div class="contest-title">${c.title}</div>
+                                    <div class="contest-meta">${dateStr}</div>
+                                </div>
+                                <div class="contest-meta">${h}:${m}</div>
+                                <div class="contest-actions">
+                                    <div class="contest-countdown">06:08:44:02</div>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    <a href="contest_arena.html?id=${c.id}" class="btn-enter">Enter</a>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
 
-                let html = '';
-                if (live.length > 0) {
-                    html += `<div class="repovive-contests-header" style="color:#10b981; border-bottom-color:#10b981;"><h2>Live Now</h2></div>`;
-                    html += live.map(c => renderRow(c, 'live')).join('');
-                }
-                if (upcoming.length > 0) {
-                    html += `<div class="repovive-contests-header" style="margin-top: 40px;"><h2>Upcoming</h2></div>`;
-                    html += upcoming.map(c => renderRow(c, 'upcoming')).join('');
-                }
+                // PREVIOUS SECTION
                 if (past.length > 0) {
-                    html += `<div class="repovive-contests-header" style="margin-top: 40px;"><h2>Past Contests</h2></div>`;
-                    html += past.map(c => renderRow(c, 'past')).join('');
+                    html += `
+                        <div class="contest-list-header" style="margin-top: 60px;">
+                            <div>PREVIOUS</div>
+                            <div>LENGTH</div>
+                            <div></div>
+                        </div>
+                    `;
+                    past.forEach(c => {
+                        const startTime = new Date(c.start_time);
+                        const dateStr = startTime.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+                        const h = Math.floor(c.duration_minutes / 60);
+                        const m = (c.duration_minutes % 60).toString().padStart(2, '0');
+                        
+                        html += `
+                            <div class="contest-row">
+                                <div>
+                                    <div class="contest-title">${c.title}</div>
+                                    <div class="contest-meta">${dateStr}</div>
+                                </div>
+                                <div class="contest-meta">${h}:${m}</div>
+                                <div class="contest-actions">
+                                    <a href="#" class="contest-action-link">Ranking</a>
+                                    <a href="#" class="contest-action-link">Virtual</a>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                if (upcoming.length === 0 && past.length === 0) {
+                    html = `<div style="text-align:center; padding: 40px; color: var(--text-muted);">No contests found.</div>`;
                 }
 
                 container.innerHTML = html;
-            } catch(e) {
-                document.getElementById('contestsContainer').innerHTML = '<div style="text-align:center; color: #ff4d4d; margin-top: 40px;">Failed to load contests from backend.</div>';
+
+            } catch (err) {
+                container.innerHTML = `<div style="color: #ef4444; padding: 20px;">Error loading contests. Is the backend running?</div>`;
             }
         });
     </script>

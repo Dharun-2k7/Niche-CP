@@ -75,13 +75,14 @@ func GetAllContests(c *gin.Context) {
 	var contests []map[string]interface{}
 	for rows.Next() {
 		var id, duration int
-		var title, typeStr, startTime string
+		var title, typeStr string
+		var startTime time.Time
 		if err := rows.Scan(&id, &title, &typeStr, &startTime, &duration); err == nil {
 			contests = append(contests, map[string]interface{}{
 				"id":               id,
 				"title":            title,
 				"type":             typeStr,
-				"start_time":       startTime,
+				"start_time":       startTime.Format(time.RFC3339),
 				"duration_minutes": duration,
 			})
 		}
@@ -110,7 +111,7 @@ func RegisterForContest(c *gin.Context) {
 		return
 	}
 
-	now := time.Now()
+	now := time.Now().UTC()
 	if now.Before(regOpenTime) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Registration has not opened yet"})
 		return

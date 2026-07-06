@@ -20,6 +20,7 @@ func HealthCheck(c *gin.Context) {
 // SubmitRequest defines the JSON payload for a code submission
 type SubmitRequest struct {
 	ProblemID int    `json:"problem_id" binding:"required"`
+	ContestID *int   `json:"contest_id"`
 	Code      string `json:"code" binding:"required"`
 	Language  string `json:"language" binding:"required"`
 }
@@ -46,18 +47,26 @@ func SubmitCode(c *gin.Context) {
 		return
 	}
 
+	// 1.5 Validate ProblemID exists to avoid raw 500 DB constraint error
+	var exists bool
+	err = db.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM problems WHERE id = $1)", req.ProblemID).Scan(&exists)
+	if err != nil || !exists {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Problem not found"})
+		return
+	}
+
 	// 2. Insert into Postgres as PENDING
 	var submissionID int
-	query := `INSERT INTO submissions (user_id, problem_id, code, language, status) 
-			  VALUES ($1, $2, $3, $4, 'PENDING') RETURNING id`
-	err = db.DB.QueryRow(query, userID, req.ProblemID, req.Code, req.Language).Scan(&submissionID)
+	query := `INSERT INTO submissions (user_id, problem_id, contest_id, code, language, status) 
+			  VALUES ($1, $2, $3, $4, $5, 'PENDING') RETURNING id`
+	err = db.DB.QueryRow(query, userID, req.ProblemID, req.ContestID, req.Code, req.Language).Scan(&submissionID)
 	if err != nil {
 		fmt.Printf("DB Error in SubmitCode: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save submission"})
 		return
 	}
 
-	// 2. Push to Redis Queue
+	// 3. Push to Redis Queue
 	jobData, _ := json.Marshal(map[string]interface{}{
 		"submission_id": submissionID,
 		"code":          req.Code,
@@ -67,9 +76,9 @@ func SubmitCode(c *gin.Context) {
 
 	err = db.RedisClient.LPush(context.Background(), "submissions_queue", jobData).Err()
 	if err != nil {
-		// Log error, but don't fail the request since it's already in DB
-		// A background cron could sweep stuck 'PENDING' jobs later.
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to enqueue submission"})
+		// Rollback db insertion to prevent hanging submission
+		db.DB.Exec("DELETE FROM submissions WHERE id = $1", submissionID)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to enqueue submission, please try again."})
 		return
 	}
 

@@ -2,14 +2,27 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
 	"time"
 	"github.com/Dharun-2k7/online-coding-platform/internal/db"
 	"github.com/gin-gonic/gin"
 )
 
 func GetAllUsers(c *gin.Context) {
-	rows, err := db.DB.Query(`SELECT id, email, name, roll_no, batch, is_college_verified FROM users`)
+	pageStr := c.DefaultQuery("page", "1")
+	limitStr := c.DefaultQuery("limit", "50")
+	
+	page := 1
+	limit := 50
+	fmt.Sscanf(pageStr, "%d", &page)
+	fmt.Sscanf(limitStr, "%d", &limit)
+	if page < 1 { page = 1 }
+	if limit < 1 || limit > 100 { limit = 50 }
+	offset := (page - 1) * limit
+
+	rows, err := db.DB.Query(`SELECT id, email, name, roll_no, batch, is_college_verified FROM users ORDER BY id DESC LIMIT $1 OFFSET $2`, limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
 		return
@@ -106,19 +119,29 @@ func CreateContest(c *gin.Context) {
 		return
 	}
 
-	// Calculate registration_open_time if not provided
-	importTime, _ := time.Parse(time.RFC3339, req.StartTime)
-	regOpenTime := req.RegistrationOpenTime
-	if regOpenTime == "" {
-		regOpenTime = importTime.Add(-48 * time.Hour).Format(time.RFC3339)
+	importTime, err := time.Parse(time.RFC3339, req.StartTime)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid start_time format, must be RFC3339"})
+		return
+	}
+
+	var regOpenTime time.Time
+	if req.RegistrationOpenTime == "" {
+		regOpenTime = importTime.Add(-48 * time.Hour)
+	} else {
+		regOpenTime, err = time.Parse(time.RFC3339, req.RegistrationOpenTime)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid registration_open_time format, must be RFC3339"})
+			return
+		}
 	}
 
 	var contestID int
-	err := db.DB.QueryRow(`
+	err = db.DB.QueryRow(`
 		INSERT INTO contests (title, type, start_time, duration_minutes, registration_open_time)
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id
-	`, req.Title, req.Type, req.StartTime, req.DurationMinutes, regOpenTime).Scan(&contestID)
+	`, req.Title, req.Type, importTime.UTC(), req.DurationMinutes, regOpenTime.UTC()).Scan(&contestID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create contest"})
@@ -144,17 +167,28 @@ func UpdateContest(c *gin.Context) {
 		return
 	}
 
-	importTime, _ := time.Parse(time.RFC3339, req.StartTime)
-	regOpenTime := req.RegistrationOpenTime
-	if regOpenTime == "" {
-		regOpenTime = importTime.Add(-48 * time.Hour).Format(time.RFC3339)
+	importTime, err := time.Parse(time.RFC3339, req.StartTime)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid start_time format, must be RFC3339"})
+		return
+	}
+
+	var regOpenTime time.Time
+	if req.RegistrationOpenTime == "" {
+		regOpenTime = importTime.Add(-48 * time.Hour)
+	} else {
+		regOpenTime, err = time.Parse(time.RFC3339, req.RegistrationOpenTime)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid registration_open_time format, must be RFC3339"})
+			return
+		}
 	}
 
 	res, err := db.DB.Exec(`
 		UPDATE contests 
 		SET title = $1, type = $2, start_time = $3, duration_minutes = $4, registration_open_time = $5
 		WHERE id = $6
-	`, req.Title, req.Type, req.StartTime, req.DurationMinutes, regOpenTime, contestID)
+	`, req.Title, req.Type, importTime.UTC(), req.DurationMinutes, regOpenTime.UTC(), contestID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update contest"})
@@ -182,7 +216,11 @@ func UpdateUserPermissions(c *gin.Context) {
 		return
 	}
 
-	if req.Email == "dharunkaarthick07@gmail.com" {
+	superAdmin := os.Getenv("SUPER_ADMIN_EMAIL")
+	if superAdmin == "" {
+		superAdmin = "dharunkaarthick07@gmail.com"
+	}
+	if req.Email == superAdmin {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot modify permissions of the super admin."})
 		return
 	}

@@ -223,7 +223,8 @@ func VerifyCF(c *gin.Context) {
 	}
 
 	// Make request to Codeforces API
-	resp, err := http.Get("https://codeforces.com/api/user.info?handles=" + handle)
+	client := &http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Get("https://codeforces.com/api/user.info?handles=" + handle)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reach Codeforces API"})
 		return
@@ -415,7 +416,11 @@ func UploadProfilePicture(c *gin.Context) {
 	}
 
 	// Update DB with URL
-	picURL := "http://localhost:8080/uploads/" + filename // Assuming dev environment
+	backendURL := os.Getenv("BACKEND_URL")
+	if backendURL == "" {
+		backendURL = "http://localhost:8080"
+	}
+	picURL := backendURL + "/uploads/" + filename
 	_, err = db.DB.Exec(`UPDATE users SET profile_picture_url = $1 WHERE id = $2`, picURL, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile picture in database"})

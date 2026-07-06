@@ -196,6 +196,16 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.textContent = 'Processing...';
 
             try {
+                const contestId = new URLSearchParams(window.location.search).get('contest_id');
+                const submitBody = {
+                    problem_id: parseInt(new URLSearchParams(window.location.search).get('problem_id')) || 1,
+                    code: code,
+                    language: language
+                };
+                if (contestId) {
+                    submitBody.contest_id = parseInt(contestId);
+                }
+
                 // This URL points to our Go Backend
                 const response = await fetch('http://localhost:8080/api/submit', {
                     method: 'POST',
@@ -203,11 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({
-                        problem_id: parseInt(new URLSearchParams(window.location.search).get('problem_id')) || 1,
-                        code: code,
-                        language: language
-                    })
+                    body: JSON.stringify(submitBody)
                 });
 
                 const data = await response.json();
@@ -216,7 +222,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     showStatus(`Submission Queued! ID: ${data.submission_id}. Waiting for execution...`, 'pending');
                     
                     // Poll for status
+                    let pollCount = 0;
+                    const maxPolls = 100; // 100 seconds max wait
                     const pollInterval = setInterval(async () => {
+                        pollCount++;
+                        if (pollCount > maxPolls) {
+                            clearInterval(pollInterval);
+                            showStatus('Execution timed out. Please try again later.', 'error');
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Submit Code';
+                            return;
+                        }
+
                         try {
                             const statusRes = await fetch(`http://localhost:8080/api/submissions/${data.submission_id}`);
                             if (statusRes.ok) {

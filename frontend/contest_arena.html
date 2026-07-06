@@ -5,79 +5,320 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NicheCP | Contest Arena</title>
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        .contest-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 24px;
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--card-border);
+        body { margin: 0; overflow: hidden; background: #0d0d0f; }
+        
+        /* Custom scrollbar for panels */
+        .arena-panel-scroll {
+            overflow-y: auto;
+            flex: 1;
         }
-        .timer {
-            font-size: 24px;
-            font-weight: 800;
-            font-family: monospace;
-            color: #10b981;
+        .arena-panel-scroll::-webkit-scrollbar {
+            width: 4px;
         }
-        .nav-tabs {
-            display: flex;
-            border-bottom: 1px solid var(--card-border);
-            margin-top: 20px;
+        .arena-panel-scroll::-webkit-scrollbar-track {
+            background: transparent;
         }
-        .nav-tab {
-            padding: 12px 24px;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-weight: 600;
-        }
-        .nav-tab.active {
-            color: var(--primary-accent);
-            border-bottom: 2px solid var(--primary-accent);
+        .arena-panel-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
         }
     </style>
 </head>
 <body data-theme="quantum">
-    <div class="contest-header">
-        <div>
-            <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Live Contest</div>
-            <div style="font-size: 18px; font-weight: 700;" id="contestTitle">Loading...</div>
-        </div>
-        <div class="timer" id="contestTimer">00:00:00</div>
-        <div>
-            <a href="contests.html" class="btn-ghost" style="text-decoration:none; padding:8px 16px;">Exit Contest</a>
-        </div>
-    </div>
 
-    <main class="app-container" style="max-width: 1200px; padding: 20px;">
-        <div class="nav-tabs">
-            <div class="nav-tab active">Problems</div>
-            <div class="nav-tab">My Submissions</div>
-            <div class="nav-tab">Standings</div>
+    <div class="arena-wrapper">
+        <!-- Thin Left Sidebar -->
+        <div class="arena-sidebar">
+            <div style="margin-bottom: 20px; font-family: 'Space Grotesk', sans-serif; font-weight: bold; font-size: 18px; color: var(--text-primary);">[R]</div>
+            
+            <svg class="arena-sidebar-icon active" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            
+            <svg class="arena-sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+            
+            <svg class="arena-sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            
+            <svg class="arena-sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            
+            <div style="flex:1;"></div>
+            
+            <svg class="arena-sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
         </div>
 
-        <div style="margin-top: 24px;" id="problemsTab">
-            <div class="module-card">
-                <h3>Contest Problems</h3>
-                <p style="color:var(--text-muted); margin-bottom: 16px;">Select a problem to solve.</p>
-                <!-- This would be dynamically fetched based on contest_problems join table -->
-                <div style="border: 1px solid var(--card-border); border-radius: 8px;">
-                    <div style="display:flex; padding: 12px; border-bottom: 1px solid var(--card-border); color:var(--text-muted);">
-                        <div style="width: 50px;">#</div>
-                        <div style="flex: 1;">Problem Name</div>
-                        <div style="width: 100px;">Score</div>
+        <!-- Main Content -->
+        <div class="arena-content">
+            
+            <!-- Header / Breadcrumb -->
+            <div class="arena-header">
+                <a href="contests.html" style="color:var(--text-muted); text-decoration:none;">Contests</a>
+                <span>&gt;</span>
+                <span style="color:var(--text-primary); font-weight:500;" id="contestName">Loading...</span>
+            </div>
+
+            <!-- Main Grid Layout -->
+            <div class="arena-grid">
+                
+                <!-- Left Column (Problems & Bottom Panels) -->
+                <div class="arena-left-pane">
+                    
+                    <!-- Problems Panel -->
+                    <div class="arena-panel" style="flex: 2;">
+                        <div class="arena-panel-header">
+                            <div class="arena-panel-header-grid">
+                                <div>#</div>
+                                <div>TITLE</div>
+                                <div>POINTS</div>
+                                <div>SOLVED</div>
+                            </div>
+                        </div>
+                        <div class="arena-panel-scroll" id="problemsList">
+                            <!-- Stub Problems -->
+                            <a href="problem.html?problem_id=1" class="problem-row">
+                                <div class="status-circle solved"></div>
+                                <div style="display:flex; gap:16px; align-items:center;">
+                                    <span style="font-weight:600;">A</span>
+                                    <span>Different Parity</span>
+                                </div>
+                                <div>500</div>
+                                <div style="color:var(--text-muted);">96 / 98</div>
+                            </a>
+                            <a href="problem.html?problem_id=2" class="problem-row">
+                                <div class="status-circle solved"></div>
+                                <div style="display:flex; gap:16px; align-items:center;">
+                                    <span style="font-weight:600;">B</span>
+                                    <span>Balanced Trio</span>
+                                </div>
+                                <div>1000</div>
+                                <div style="color:var(--text-muted);">83 / 91</div>
+                            </a>
+                            <a href="problem.html?problem_id=3" class="problem-row">
+                                <div class="status-circle solved"></div>
+                                <div style="display:flex; gap:16px; align-items:center;">
+                                    <span style="font-weight:600;">C</span>
+                                    <span>Corner Meeting</span>
+                                </div>
+                                <div>1500</div>
+                                <div style="color:var(--text-muted);">79 / 82</div>
+                            </a>
+                            <a href="#" class="problem-row">
+                                <div class="status-circle"></div>
+                                <div style="display:flex; gap:16px; align-items:center;">
+                                    <span style="font-weight:600;">D</span>
+                                    <span>Distant Transfers</span>
+                                </div>
+                                <div>2000</div>
+                                <div style="color:var(--text-muted);">57 / 63</div>
+                            </a>
+                            <a href="#" class="problem-row">
+                                <div class="status-circle"></div>
+                                <div style="display:flex; gap:16px; align-items:center;">
+                                    <span style="font-weight:600;">E</span>
+                                    <span>Synchronized Inversions</span>
+                                </div>
+                                <div>2500</div>
+                                <div style="color:var(--text-muted);">28 / 33</div>
+                            </a>
+                            <a href="#" class="problem-row">
+                                <div class="status-circle"></div>
+                                <div style="display:flex; gap:16px; align-items:center;">
+                                    <span style="font-weight:600;">F</span>
+                                    <span>Magnetic Path</span>
+                                </div>
+                                <div>3000</div>
+                                <div style="color:var(--text-muted);">30 / 32</div>
+                            </a>
+                            <a href="#" class="problem-row">
+                                <div class="status-circle"></div>
+                                <div style="display:flex; gap:16px; align-items:center;">
+                                    <span style="font-weight:600;">G</span>
+                                    <span>Complementary Path</span>
+                                </div>
+                                <div>3500</div>
+                                <div style="color:var(--text-muted);">8 / 11</div>
+                            </a>
+                        </div>
                     </div>
-                    <!-- Stub data for UI mockup -->
-                    <a href="problem.html?problem_id=1" style="display:flex; padding: 12px; text-decoration:none; color:inherit; border-bottom: 1px solid var(--card-border);">
-                        <div style="width: 50px; font-weight:700;">A</div>
-                        <div style="flex: 1; color: var(--primary-accent);">Graph BFS Traversal</div>
-                        <div style="width: 100px; color:var(--text-muted);">100</div>
-                    </a>
+
+                    <!-- Bottom Row: Commentary & My Submissions -->
+                    <div class="arena-bottom-grid">
+                        
+                        <!-- Commentary Panel -->
+                        <div class="arena-panel">
+                            <div class="arena-panel-header" style="justify-content: space-between;">
+                                <span>COMMENTARY</span>
+                                <span style="color:var(--text-primary); text-transform:none;">View all</span>
+                            </div>
+                            <div class="arena-panel-scroll">
+                                <div class="commentary-row">
+                                    <div><span style="font-weight:600;">Pratik Mistry</span> got <span style="color:#10b981;">Accepted</span> on B</div>
+                                    <div style="color:var(--text-muted);">3m ago</div>
+                                </div>
+                                <div class="commentary-row">
+                                    <div><span style="font-weight:600;">Pratik Mistry</span> got <span style="color:#ef4444;">Wrong Answer</span> on B</div>
+                                    <div style="color:var(--text-muted);">4m ago</div>
+                                </div>
+                                <div class="commentary-row">
+                                    <div><span style="font-weight:600;">Pratik Mistry</span> got <span style="color:#10b981;">Accepted</span> on A</div>
+                                    <div style="color:var(--text-muted);">11m ago</div>
+                                </div>
+                                <div class="commentary-row">
+                                    <div><span style="font-weight:600;">seroze kim</span> got <span style="color:#10b981;">Accepted</span> on B</div>
+                                    <div style="color:var(--text-muted);">1h ago</div>
+                                </div>
+                                <div class="commentary-row">
+                                    <div><span style="font-weight:600;">Hello</span> got <span style="color:#10b981;">Accepted</span> on A</div>
+                                    <div style="color:var(--text-muted);">1h ago</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- My Submissions Panel -->
+                        <div class="arena-panel">
+                            <div class="arena-panel-header" style="justify-content: space-between;">
+                                <span>MY SUBMISSIONS</span>
+                                <span style="color:var(--text-primary); text-transform:none;">View all</span>
+                            </div>
+                            <div class="arena-panel-scroll">
+                                <div class="commentary-row" style="align-items:center;">
+                                    <div style="font-weight:600; font-size:14px; width:40px;">C</div>
+                                    <div style="color:#10b981; flex:1;">Accepted</div>
+                                    <div style="color:var(--text-muted);">14h ago</div>
+                                </div>
+                                <div class="commentary-row" style="align-items:center;">
+                                    <div style="font-weight:600; font-size:14px; width:40px;">B</div>
+                                    <div style="color:#10b981; flex:1;">Accepted</div>
+                                    <div style="color:var(--text-muted);">14h ago</div>
+                                </div>
+                                <div class="commentary-row" style="align-items:center;">
+                                    <div style="font-weight:600; font-size:14px; width:40px;">A</div>
+                                    <div style="color:#10b981; flex:1;">Accepted</div>
+                                    <div style="color:var(--text-muted);">15h ago</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Right Column: Ranking (Leaderboard) -->
+                <div class="arena-panel">
+                    <div class="arena-panel-header" style="justify-content: space-between;">
+                        <span>RANKING</span>
+                        <span style="color:var(--text-primary); text-transform:none;">View all</span>
+                    </div>
+                    <div class="arena-panel-scroll">
+                        
+                        <div class="ranking-row">
+                            <div style="color:var(--text-muted);">1</div>
+                            <div style="color:#f59e0b; font-weight:600;">tkdgkb</div>
+                            <div style="text-align:right;">12,594</div>
+                        </div>
+                        <div class="ranking-row">
+                            <div style="color:var(--text-muted);">2</div>
+                            <div style="color:#00f0ff; font-weight:600;">Alex Wice</div>
+                            <div style="text-align:right;">12,334</div>
+                        </div>
+                        <div class="ranking-row">
+                            <div style="color:var(--text-muted);">3</div>
+                            <div style="color:#f59e0b; font-weight:600;">Amirali Asgari</div>
+                            <div style="text-align:right;">12,146</div>
+                        </div>
+                        <div class="ranking-row">
+                            <div style="color:var(--text-muted);">4</div>
+                            <div style="color:#10b981; font-weight:600;">maspy</div>
+                            <div style="text-align:right;">12,114</div>
+                        </div>
+                        <div class="ranking-row">
+                            <div style="color:var(--text-muted);">5</div>
+                            <div style="color:#f97316; font-weight:600;">baluteshih</div>
+                            <div style="text-align:right;">12,104</div>
+                        </div>
+                        <div class="ranking-row">
+                            <div style="color:var(--text-muted);">6</div>
+                            <div style="color:#ef4444; font-weight:600;">Denisov</div>
+                            <div style="text-align:right;">11,986</div>
+                        </div>
+                        <div class="ranking-row">
+                            <div style="color:var(--text-muted);">7</div>
+                            <div style="color:#f97316; font-weight:600;">abc864197532</div>
+                            <div style="text-align:right;">11,843</div>
+                        </div>
+                        <div class="ranking-row">
+                            <div style="color:var(--text-muted);">8</div>
+                            <div style="color:#10b981; font-weight:600;">amirhosein farkhondehfar</div>
+                            <div style="text-align:right;">11,442</div>
+                        </div>
+                        <div class="ranking-row">
+                            <div style="color:var(--text-muted);">9</div>
+                            <div style="color:var(--text-primary); font-weight:600;">Avazxonov Jahongir</div>
+                            <div style="text-align:right;">9,356</div>
+                        </div>
+                        <div class="ranking-row">
+                            <div style="color:var(--text-muted);">10</div>
+                            <div style="color:var(--text-primary); font-weight:600;">Surya Pratap singh</div>
+                            <div style="text-align:right;">9,151</div>
+                        </div>
+                        <div class="ranking-row">
+                            <div style="color:var(--text-muted);">11</div>
+                            <div style="color:var(--text-primary); font-weight:600;">Dezhonger Zhang</div>
+                            <div style="text-align:right;">9,115</div>
+                        </div>
+                        <div class="ranking-row">
+                            <div style="color:var(--text-muted);">12</div>
+                            <div style="color:var(--text-primary); font-weight:600;">Ulug'bek Rahmatullayev</div>
+                            <div style="text-align:right;">9,065</div>
+                        </div>
+                        <div class="ranking-row">
+                            <div style="color:var(--text-muted);">13</div>
+                            <div style="color:var(--text-primary); font-weight:600;">Jim_X</div>
+                            <div style="text-align:right;">8,957</div>
+                        </div>
+                        <div class="ranking-row">
+                            <div style="color:var(--text-muted);">14</div>
+                            <div style="color:var(--text-primary); font-weight:600;">Mohammad Sajjad Akhavan Bah...</div>
+                            <div style="text-align:right;">8,808</div>
+                        </div>
+                        <div class="ranking-row">
+                            <div style="color:var(--text-muted);">15</div>
+                            <div style="color:var(--text-primary); font-weight:600;">Mousa Aboubaker Hamed</div>
+                            <div style="text-align:right;">8,736</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
+    <!-- Script to fetch contest details -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const contestId = urlParams.get('id');
+            const titleEl = document.getElementById('contestName');
+            
+            if (contestId) {
+                try {
+                    // Try to fetch contest name from backend (if endpoint supports it)
+                    // Otherwise this falls back to generic text
+                    const response = await fetch('http://localhost:8080/api/contests');
+                    if (response.ok) {
+                        const data = await response.json();
+                        const contests = data.contests || data || [];
+                        const contest = contests.find(c => c.id == contestId);
+                        if (contest) {
+                            titleEl.textContent = contest.title;
+                        } else {
+                            titleEl.textContent = "Starter Round 4";
+                        }
+                    }
+                } catch (e) {
+                    titleEl.textContent = "Starter Round 4";
+                }
+            } else {
+                titleEl.textContent = "Contest Preview";
+            }
+        });
+    </script>
 </body>
 </html>

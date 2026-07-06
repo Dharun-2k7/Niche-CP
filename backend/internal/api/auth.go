@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -63,7 +64,8 @@ func GoogleCallback(c *gin.Context) {
 	}
 
 	// Fetch user info from Google
-	response, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
+	client := &http.Client{Timeout: 5 * time.Second}
+	response, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed getting user info"})
 		return
@@ -114,8 +116,12 @@ func GoogleCallback(c *gin.Context) {
 
 	// For a simple SPA, we can set the JWT in an HTTP-only cookie, 
 	// or redirect back to the frontend with the token in the URL fragment (hash).
-	// We will redirect back to the frontend's home page (on port 3000) and pass the token securely.
-	c.Redirect(http.StatusTemporaryRedirect, "http://localhost:3000/index.html?token="+jwtToken)
+	// We will redirect back to the frontend's home page and pass the token securely.
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:3000"
+	}
+	c.Redirect(http.StatusTemporaryRedirect, frontendURL+"/index.html?token="+jwtToken)
 }
 
 // --- Standard Authentication ---

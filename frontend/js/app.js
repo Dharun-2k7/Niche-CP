@@ -135,6 +135,10 @@ document.addEventListener('DOMContentLoaded', () => {
             terminalOutput.value = '';
 
             try {
+                // Auto switch to Test Result tab
+                const resTab = document.querySelector('.tc-tab[data-target="pane-results"]');
+                if (resTab) resTab.click();
+
                 for (let i = 0; i < runs.length; i++) {
                     terminalOutput.value += `=== Test ${i+1} ===\n`;
                     const response = await fetch('http://localhost:8080/api/run', {

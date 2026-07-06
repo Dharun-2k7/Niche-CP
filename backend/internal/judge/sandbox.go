@@ -74,6 +74,10 @@ func RunSecurely(code, language, input string) (*SandboxResult, error) {
 		"--network", "none",
 		"--memory", "256m",
 		"--cpus", "1.0",
+		"--pids-limit", "50",
+		"--security-opt", "no-new-privileges",
+		"--read-only",
+		"--tmpfs", "/tmp",
 		"-v", fmt.Sprintf("%s:/workspace", tempDir),
 		"-i", // Keep STDIN open even if not attached
 		image,

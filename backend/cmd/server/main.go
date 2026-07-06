@@ -27,7 +27,11 @@ func main() {
 
 	// Basic CORS middleware
 	r.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		allowedOrigin := os.Getenv("FRONTEND_URL")
+		if allowedOrigin == "" {
+			allowedOrigin = "http://localhost:3000"
+		}
+		c.Writer.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		if c.Request.Method == "OPTIONS" {
@@ -42,7 +46,6 @@ func main() {
 
 	// Public Routes
 	r.GET("/health", api.HealthCheck)
-	r.GET("/api/submissions/:id", api.GetSubmissionStatus)
 	r.POST("/api/run", api.RunCode) // Allow unauthenticated manual runs
 
 	// Auth Routes
@@ -68,6 +71,7 @@ func main() {
 	protected.Use(middleware.RequireAuth())
 	{
 		protected.POST("/submit", api.SubmitCode)
+		protected.GET("/submissions/:id", api.GetSubmissionStatus)
 		protected.GET("/profile", api.GetProfile)
 		protected.GET("/profile/solved", api.GetSolvedProblems)
 		protected.PUT("/profile", api.UpdateProfile)

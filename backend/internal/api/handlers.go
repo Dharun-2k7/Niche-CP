@@ -127,14 +127,22 @@ func RunCode(c *gin.Context) {
 // GetSubmissionStatus handles polling for submission results
 func GetSubmissionStatus(c *gin.Context) {
 	id := c.Param("id")
+	userID := c.GetInt("user_id") // From auth middleware
+
 	var status string
 	var executionTimeMs *int
+	var subUserID int
 
-	query := `SELECT status, execution_time_ms FROM submissions WHERE id = $1`
-	err := db.DB.QueryRow(query, id).Scan(&status, &executionTimeMs)
+	query := `SELECT status, execution_time_ms, user_id FROM submissions WHERE id = $1`
+	err := db.DB.QueryRow(query, id).Scan(&status, &executionTimeMs, &subUserID)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Submission not found"})
+		return
+	}
+
+	if subUserID != userID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
 		return
 	}
 

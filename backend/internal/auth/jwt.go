@@ -2,18 +2,33 @@ package auth
 
 import (
 	"errors"
+	"log"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var getJWTSecret = func() []byte {
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		return []byte("super_secret_fallback_key_for_dev") // Fallback for local development
-	}
-	return []byte(secret)
+var (
+	jwtSecret []byte
+	jwtOnce   sync.Once
+)
+
+func getJWTSecret() []byte {
+	jwtOnce.Do(func() {
+		secret := os.Getenv("JWT_SECRET")
+		if secret == "" {
+			// In production, missing JWT_SECRET should be a hard crash
+			if os.Getenv("ENV") == "production" || os.Getenv("ENV") == "prod" {
+				log.Fatal("FATAL: JWT_SECRET environment variable is missing in production!")
+			}
+			jwtSecret = []byte("super_secret_fallback_key_for_dev") // Fallback for local development
+		} else {
+			jwtSecret = []byte(secret)
+		}
+	})
+	return jwtSecret
 }
 
 // GenerateToken creates a JWT for a given user ID
@@ -42,9 +57,14 @@ func ValidateToken(tokenString string) (int, string, error) {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userID := int(claims["user_id"].(float64)) // JSON numbers are float64
-		email := claims["email"].(string)
-		return userID, email, nil
+		userIDF, okID := claims["user_id"].(float64) // JSON numbers are float64
+		email, okEmail := claims["email"].(string)
+
+		if !okID || !okEmail {
+			return 0, "", errors.New("invalid or missing token claims")
+		}
+
+		return int(userIDF), email, nil
 	}
 
 	return 0, "", errors.New("invalid token")

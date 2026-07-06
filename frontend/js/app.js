@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Auth Check Logic
     const urlParams = new URLSearchParams(window.location.search);
-    const tokenFromUrl = urlParams.get('token');
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const tokenFromUrl = hashParams.get('token') || urlParams.get('token');
     if (tokenFromUrl) {
         localStorage.setItem('jwt_token', tokenFromUrl);
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -235,7 +236,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
 
                         try {
-                            const statusRes = await fetch(`http://localhost:8080/api/submissions/${data.submission_id}`);
+                            const statusRes = await fetch(`http://localhost:8080/api/submissions/${data.submission_id}`, {
+                                headers: {
+                                    'Authorization': `Bearer ${token}`
+                                }
+                            });
                             if (statusRes.ok) {
                                 const statusData = await statusRes.json();
                                 if (statusData.status !== 'PENDING') {

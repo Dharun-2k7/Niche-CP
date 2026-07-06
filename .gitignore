@@ -31,3 +31,7 @@ go.work.sum
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Generated binaries and uploads
+backend/main
+backend/uploads/

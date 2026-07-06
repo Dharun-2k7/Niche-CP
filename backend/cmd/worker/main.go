@@ -39,78 +39,100 @@ func main() {
 
 		// result[0] is the queue name, result[1] is the JSON payload
 		payload := result[1]
-		var job map[string]interface{}
-		if err := json.Unmarshal([]byte(payload), &job); err != nil {
-			log.Printf("Failed to unmarshal job payload: %v", err)
-			continue
-		}
+		
+		// Run job in an anonymous func to safely recover from panics per-job
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					log.Printf("Worker recovered from panic processing job: %v\nPayload: %s", r, payload)
+				}
+			}()
 
-		submissionID := int(job["submission_id"].(float64))
-		code := job["code"].(string)
-		language := job["language"].(string)
-		problemID := int(job["problem_id"].(float64))
+			var job map[string]interface{}
+			if err := json.Unmarshal([]byte(payload), &job); err != nil {
+				log.Printf("Failed to unmarshal job payload: %v", err)
+				return
+			}
 
-		log.Printf("Processing Submission %d (%s) for Problem %d...", submissionID, language, problemID)
+			// Defensive type assertions
+			subIDRaw, okSub := job["submission_id"].(float64)
+			code, okCode := job["code"].(string)
+			language, okLang := job["language"].(string)
+			probIDRaw, okProb := job["problem_id"].(float64)
 
-		// Fetch hidden test cases from Postgres using problemID
-		var testCasesJSON string
-		err = db.DB.QueryRow("SELECT hidden_testcases FROM problems WHERE id = $1", problemID).Scan(&testCasesJSON)
-		if err != nil {
-			log.Printf("Failed to fetch test cases for Problem %d: %v", problemID, err)
-			_, _ = db.DB.Exec("UPDATE submissions SET status = $1 WHERE id = $2", "INTERNAL_ERROR", submissionID)
-			continue
-		}
+			if !okSub || !okCode || !okLang || !okProb {
+				log.Printf("Malformed job payload missing required fields: %s", payload)
+				if okSub {
+					_, _ = db.DB.Exec("UPDATE submissions SET status = $1 WHERE id = $2", "INTERNAL_ERROR", int(subIDRaw))
+				}
+				return
+			}
 
-		var testCases []TestCase
-		if err := json.Unmarshal([]byte(testCasesJSON), &testCases); err != nil {
-			log.Printf("Failed to unmarshal test cases for Problem %d: %v", problemID, err)
-			_, _ = db.DB.Exec("UPDATE submissions SET status = $1 WHERE id = $2", "INTERNAL_ERROR", submissionID)
-			continue
-		}
+			submissionID := int(subIDRaw)
+			problemID := int(probIDRaw)
 
-		status := "ACCEPTED"
-		for i, tc := range testCases {
-			res, err := judge.RunSecurely(code, language, tc.Input)
+			log.Printf("Processing Submission %d (%s) for Problem %d...", submissionID, language, problemID)
 
+			// Fetch hidden test cases from Postgres using problemID
+			var testCasesJSON string
+			err = db.DB.QueryRow("SELECT hidden_testcases FROM problems WHERE id = $1", problemID).Scan(&testCasesJSON)
 			if err != nil {
-				status = "RUNTIME_ERROR"
-				log.Printf("Docker execution failed for Sub %d: %v", submissionID, err)
-				break
-			} else if res.TimeExceeded {
-				status = "TIME_LIMIT_EXCEEDED"
-				break
-			} else if res.Stderr != "" {
-				status = "RUNTIME_ERROR"
-				break
+				log.Printf("Failed to fetch test cases for Problem %d: %v", problemID, err)
+				_, _ = db.DB.Exec("UPDATE submissions SET status = $1 WHERE id = $2", "INTERNAL_ERROR", submissionID)
+				return
 			}
 
-			actualOutput := strings.TrimSpace(res.Stdout)
-			expectedOutput := strings.TrimSpace(tc.ExpectedOutput)
-
-			if actualOutput != expectedOutput {
-				status = "WRONG_ANSWER"
-				log.Printf("Submission %d failed on test case %d", submissionID, i+1)
-				break
+			var testCases []TestCase
+			if err := json.Unmarshal([]byte(testCasesJSON), &testCases); err != nil {
+				log.Printf("Failed to unmarshal test cases for Problem %d: %v", problemID, err)
+				_, _ = db.DB.Exec("UPDATE submissions SET status = $1 WHERE id = $2", "INTERNAL_ERROR", submissionID)
+				return
 			}
-		}
 
-		// Update Database with the verdict
-		_, err = db.DB.Exec("UPDATE submissions SET status = $1 WHERE id = $2", status, submissionID)
-		if err != nil {
-			log.Printf("Failed to update database for Sub %d: %v", submissionID, err)
-		} else {
-			log.Printf("Submission %d completed with status: %s", submissionID, status)
-			if status == "ACCEPTED" {
-				var userID int
-				err = db.DB.QueryRow("SELECT user_id FROM submissions WHERE id = $1", submissionID).Scan(&userID)
-				if err == nil {
-					db.DB.Exec(`
-						INSERT INTO user_problem_status (user_id, problem_id, status)
-						VALUES ($1, $2, $3)
-						ON CONFLICT (user_id, problem_id) DO UPDATE SET status = EXCLUDED.status
-					`, userID, problemID, status)
+			status := "ACCEPTED"
+			for i, tc := range testCases {
+				res, err := judge.RunSecurely(code, language, tc.Input)
+
+				if err != nil {
+					status = "RUNTIME_ERROR"
+					log.Printf("Docker execution failed for Sub %d: %v", submissionID, err)
+					break
+				} else if res.TimeExceeded {
+					status = "TIME_LIMIT_EXCEEDED"
+					break
+				} else if res.Stderr != "" {
+					status = "RUNTIME_ERROR"
+					break
+				}
+
+				actualOutput := strings.TrimSpace(res.Stdout)
+				expectedOutput := strings.TrimSpace(tc.ExpectedOutput)
+
+				if actualOutput != expectedOutput {
+					status = "WRONG_ANSWER"
+					log.Printf("Submission %d failed on test case %d", submissionID, i+1)
+					break
 				}
 			}
-		}
+
+			// Update Database with the verdict
+			_, err = db.DB.Exec("UPDATE submissions SET status = $1 WHERE id = $2", status, submissionID)
+			if err != nil {
+				log.Printf("Failed to update database for Sub %d: %v", submissionID, err)
+			} else {
+				log.Printf("Submission %d completed with status: %s", submissionID, status)
+				if status == "ACCEPTED" {
+					var userID int
+					err = db.DB.QueryRow("SELECT user_id FROM submissions WHERE id = $1", submissionID).Scan(&userID)
+					if err == nil {
+						db.DB.Exec(`
+							INSERT INTO user_problem_status (user_id, problem_id, status)
+							VALUES ($1, $2, $3)
+							ON CONFLICT (user_id, problem_id) DO UPDATE SET status = EXCLUDED.status
+						`, userID, problemID, status)
+					}
+				}
+			}
+		}()
 	}
 }

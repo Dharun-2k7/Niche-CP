@@ -388,16 +388,43 @@ func VerifyEmailUpdate(c *gin.Context) {
 func UploadProfilePicture(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 
+	// Enforce 2MB size limit
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, 2<<20)
+
 	// Parse the multipart form
 	file, header, err := c.Request.FormFile("profile_picture")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No file uploaded or file is too large"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "File is too large (max 2MB) or missing"})
 		return
 	}
 	defer file.Close()
 
+	// Check extension
+	ext := strings.ToLower(filepath.Ext(header.Filename))
+	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Only JPG, PNG, and WebP images are allowed"})
+		return
+	}
+
+	// Sniff MIME type securely
+	buff := make([]byte, 512)
+	if _, err := file.Read(buff); err != nil && err != io.EOF {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file for validation"})
+		return
+	}
+	fileType := http.DetectContentType(buff)
+	if !strings.HasPrefix(fileType, "image/") || strings.Contains(fileType, "svg") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid image file format"})
+		return
+	}
+
+	// Reset file pointer after read
+	if _, err := file.Seek(0, io.SeekStart); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process file upload"})
+		return
+	}
+
 	// Create unique filename
-	ext := filepath.Ext(header.Filename)
 	filename := fmt.Sprintf("dp_%d_%d%s", userID, time.Now().Unix(), ext)
 	uploadPath := filepath.Join("uploads", filename)
 

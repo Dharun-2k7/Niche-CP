@@ -15,6 +15,7 @@ import (
 	"github.com/Dharun-2k7/online-coding-platform/internal/auth"
 	"github.com/Dharun-2k7/online-coding-platform/internal/db"
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -121,7 +122,7 @@ func GoogleCallback(c *gin.Context) {
 	if frontendURL == "" {
 		frontendURL = "http://localhost:3000"
 	}
-	c.Redirect(http.StatusTemporaryRedirect, frontendURL+"/index.html?token="+jwtToken)
+	c.Redirect(http.StatusTemporaryRedirect, frontendURL+"/index.html#token="+jwtToken)
 }
 
 // --- Standard Authentication ---
@@ -170,7 +171,11 @@ func RegisterUser(c *gin.Context) {
 	`, req.Name, req.Email, string(hashedPassword), req.RollNo, req.Batch).Scan(&userID)
 
 	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Email already exists"})
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			c.JSON(http.StatusConflict, gin.H{"error": "Email already exists"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
+		}
 		return
 	}
 

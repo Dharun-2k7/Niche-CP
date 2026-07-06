@@ -10,6 +10,10 @@ CREATE TABLE IF NOT EXISTS users (
     is_college_verified BOOLEAN DEFAULT FALSE,
     pending_email VARCHAR(255),
     email_verified BOOLEAN DEFAULT FALSE,
+    cf_handle VARCHAR(255),
+    cf_verify_string VARCHAR(255),
+    is_cf_verified BOOLEAN DEFAULT FALSE,
+    profile_picture_url VARCHAR(255),
     permissions JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

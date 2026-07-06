@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"net/http"
+	"time"
 	"github.com/Dharun-2k7/online-coding-platform/internal/db"
 	"github.com/gin-gonic/gin"
 )
@@ -86,4 +87,51 @@ func GetAllContests(c *gin.Context) {
 		}
 	}
 	c.JSON(http.StatusOK, contests)
+}
+
+type RegisterContestRequest struct {
+	ContestID int `json:"contest_id" binding:"required"`
+}
+
+func RegisterForContest(c *gin.Context) {
+	var req RegisterContestRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID, _ := c.Get("user_id")
+
+	var startTime, regOpenTime time.Time
+	err := db.DB.QueryRow(`SELECT start_time, registration_open_time FROM contests WHERE id = $1`, req.ContestID).Scan(&startTime, &regOpenTime)
+	
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Contest not found"})
+		return
+	}
+
+	now := time.Now()
+	if now.Before(regOpenTime) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Registration has not opened yet"})
+		return
+	}
+	if now.After(startTime) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Registration is closed (contest has started)"})
+		return
+	}
+
+	// Assuming a contest_registrations table. Let's create it if missing or just mock the logic.
+	// We'll create contest_registrations in schema.sql next.
+	_, err = db.DB.Exec(`
+		INSERT INTO contest_registrations (user_id, contest_id)
+		VALUES ($1, $2)
+		ON CONFLICT (user_id, contest_id) DO NOTHING
+	`, userID, req.ContestID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully registered for contest"})
 }

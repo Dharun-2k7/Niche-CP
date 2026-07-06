@@ -1,7 +1,9 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
+	"time"
 	"github.com/Dharun-2k7/online-coding-platform/internal/db"
 	"github.com/gin-gonic/gin"
 )
@@ -94,6 +96,7 @@ type CreateContestRequest struct {
 	Type            string `json:"type" binding:"required"`
 	StartTime       string `json:"start_time" binding:"required"`
 	DurationMinutes int    `json:"duration_minutes" binding:"required"`
+	RegistrationOpenTime string `json:"registration_open_time"`
 }
 
 func CreateContest(c *gin.Context) {
@@ -103,12 +106,19 @@ func CreateContest(c *gin.Context) {
 		return
 	}
 
+	// Calculate registration_open_time if not provided
+	importTime, _ := time.Parse(time.RFC3339, req.StartTime)
+	regOpenTime := req.RegistrationOpenTime
+	if regOpenTime == "" {
+		regOpenTime = importTime.Add(-48 * time.Hour).Format(time.RFC3339)
+	}
+
 	var contestID int
 	err := db.DB.QueryRow(`
-		INSERT INTO contests (title, type, start_time, duration_minutes)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO contests (title, type, start_time, duration_minutes, registration_open_time)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id
-	`, req.Title, req.Type, req.StartTime, req.DurationMinutes).Scan(&contestID)
+	`, req.Title, req.Type, req.StartTime, req.DurationMinutes, regOpenTime).Scan(&contestID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create contest"})
@@ -117,3 +127,96 @@ func CreateContest(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Contest created successfully!", "contest_id": contestID})
 }
+
+type UpdateContestRequest struct {
+	Title                string `json:"title" binding:"required"`
+	Type                 string `json:"type" binding:"required"`
+	StartTime            string `json:"start_time" binding:"required"`
+	DurationMinutes      int    `json:"duration_minutes" binding:"required"`
+	RegistrationOpenTime string `json:"registration_open_time"`
+}
+
+func UpdateContest(c *gin.Context) {
+	contestID := c.Param("id")
+	var req UpdateContestRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	importTime, _ := time.Parse(time.RFC3339, req.StartTime)
+	regOpenTime := req.RegistrationOpenTime
+	if regOpenTime == "" {
+		regOpenTime = importTime.Add(-48 * time.Hour).Format(time.RFC3339)
+	}
+
+	res, err := db.DB.Exec(`
+		UPDATE contests 
+		SET title = $1, type = $2, start_time = $3, duration_minutes = $4, registration_open_time = $5
+		WHERE id = $6
+	`, req.Title, req.Type, req.StartTime, req.DurationMinutes, regOpenTime, contestID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update contest"})
+		return
+	}
+
+	rowsAffected, _ := res.RowsAffected()
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Contest not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Contest updated successfully"})
+}
+
+type UpdatePermissionsRequest struct {
+	Email       string   `json:"email" binding:"required,email"`
+	Permissions []string `json:"permissions" binding:"required"`
+}
+
+func UpdateUserPermissions(c *gin.Context) {
+	var req UpdatePermissionsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if req.Email == "dharunkaarthick07@gmail.com" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot modify permissions of the super admin."})
+		return
+	}
+
+	// Validate permissions
+	validPermissions := map[string]bool{
+		"create_problem": true,
+		"create_contest": true,
+		"manage_users":   true,
+		"manage_admins":  true,
+	}
+
+	for _, p := range req.Permissions {
+		if !validPermissions[p] {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid permission: " + p})
+			return
+		}
+	}
+
+	// Convert to JSON
+	permJSON, _ := json.Marshal(req.Permissions)
+
+	res, err := db.DB.Exec(`UPDATE users SET permissions = $1::jsonb WHERE email = $2`, string(permJSON), req.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update permissions"})
+		return
+	}
+
+	rowsAffected, _ := res.RowsAffected()
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Permissions updated successfully"})
+}
+

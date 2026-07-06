@@ -29,8 +29,15 @@
 
     <main class="app-container repovive-layout" style="margin-top: 40px; grid-template-columns: 1fr;">
         <div class="module-card">
-            <h2>Create New Contest</h2>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Initialize a contest container</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h2>Manage Contests</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 0;">Create a new contest or edit an existing one</p>
+                </div>
+                <select id="contestSelect" class="cyber-select" style="max-width: 300px; padding: 8px;">
+                    <option value="new">-- Create New Contest --</option>
+                </select>
+            </div>
             
             <div class="form-group">
                 <label>Contest Title</label>
@@ -58,7 +65,7 @@
             </div>
 
             <div style="margin-top: 24px; display: flex; align-items: center; gap: 16px;">
-                <button id="createContestBtn" class="btn-primary" style="padding: 10px 24px; font-size: 14px; border-radius: 6px;">Create Contest</button>
+                <button id="saveContestBtn" class="btn-primary" style="padding: 10px 24px; font-size: 14px; border-radius: 6px;">Create Contest</button>
                 <span id="cMsg" style="font-size: 13px; display: none;"></span>
             </div>
             
@@ -73,8 +80,62 @@
         const token = localStorage.getItem('jwt_token');
         if (!token) window.location.href = 'login.html';
 
-        document.getElementById('createContestBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('createContestBtn');
+        let currentContests = [];
+        let selectedContestId = null;
+
+        async function loadContests() {
+            try {
+                const res = await fetch('http://localhost:8080/api/contests');
+                if (res.ok) {
+                    currentContests = await res.json();
+                    const select = document.getElementById('contestSelect');
+                    if(currentContests && currentContests.length > 0) {
+                        currentContests.forEach(c => {
+                            const opt = document.createElement('option');
+                            opt.value = c.id;
+                            opt.textContent = `[ID: ${c.id}] ${c.title}`;
+                            select.appendChild(opt);
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to load contests", e);
+            }
+        }
+        
+        loadContests();
+
+        document.getElementById('contestSelect').addEventListener('change', (e) => {
+            const val = e.target.value;
+            const btn = document.getElementById('saveContestBtn');
+            const msg = document.getElementById('cMsg');
+            msg.style.display = 'none';
+
+            if (val === 'new') {
+                selectedContestId = null;
+                btn.textContent = 'Create Contest';
+                document.querySelectorAll('.form-input').forEach(el => el.value = '');
+            } else {
+                selectedContestId = val;
+                btn.textContent = 'Update Contest';
+                const c = currentContests.find(x => x.id == val);
+                if (c) {
+                    document.getElementById('cTitle').value = c.title;
+                    document.getElementById('cType').value = c.type;
+                    document.getElementById('cDuration').value = c.duration_minutes;
+                    
+                    if (c.start_time) {
+                        const dateObj = new Date(c.start_time);
+                        const offset = dateObj.getTimezoneOffset() * 60000;
+                        const localISOTime = (new Date(dateObj - offset)).toISOString().slice(0, 16);
+                        document.getElementById('cStartTime').value = localISOTime;
+                    }
+                }
+            }
+        });
+
+        document.getElementById('saveContestBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('saveContestBtn');
             const msg = document.getElementById('cMsg');
             
             const title = document.getElementById('cTitle').value;
@@ -89,15 +150,20 @@
                 return;
             }
 
-            // Convert to RFC3339 for Postgres TIMESTAMP
             const startTime = new Date(startTimeStr).toISOString();
 
-            btn.textContent = 'Creating...';
+            btn.textContent = selectedContestId ? 'Updating...' : 'Creating...';
             btn.disabled = true;
 
+            const url = selectedContestId 
+                ? `http://localhost:8080/api/admin/contests/${selectedContestId}`
+                : `http://localhost:8080/api/admin/contests`;
+            
+            const method = selectedContestId ? 'PUT' : 'POST';
+
             try {
-                const res = await fetch('http://localhost:8080/api/admin/contests', {
-                    method: 'POST',
+                const res = await fetch(url, {
+                    method: method,
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
@@ -113,10 +179,14 @@
                 const data = await res.json();
                 if (res.ok) {
                     msg.style.color = '#10b981';
-                    msg.textContent = `${data.message} (Contest ID: ${data.contest_id})`;
+                    msg.textContent = selectedContestId ? data.message : `${data.message} (Contest ID: ${data.contest_id})`;
                     msg.style.display = 'inline-block';
                     
-                    document.querySelectorAll('.form-input').forEach(el => el.value = '');
+                    if (!selectedContestId) {
+                        document.querySelectorAll('.form-input').forEach(el => el.value = '');
+                        document.getElementById('contestSelect').innerHTML = '<option value="new">-- Create New Contest --</option>';
+                        loadContests();
+                    }
                 } else {
                     msg.style.color = '#ff4d4d';
                     msg.textContent = data.error;
@@ -127,7 +197,7 @@
                 msg.textContent = 'Network error';
                 msg.style.display = 'inline-block';
             } finally {
-                btn.textContent = 'Create Contest';
+                btn.textContent = selectedContestId ? 'Update Contest' : 'Create Contest';
                 btn.disabled = false;
             }
         });

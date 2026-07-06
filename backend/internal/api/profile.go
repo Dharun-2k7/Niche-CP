@@ -74,10 +74,33 @@ func GetProfile(c *gin.Context) {
 		profile.ProfilePictureURL = *profilePic
 	}
 
-	// Mock total solved for now
-	profile.TotalSolved = 15
+	// Fetch total solved
+	var totalSolved int
+	db.DB.QueryRow(`SELECT COUNT(*) FROM user_problem_status WHERE user_id = $1 AND status = 'ACCEPTED'`, userID).Scan(&totalSolved)
+	profile.TotalSolved = totalSolved
 
 	c.JSON(http.StatusOK, profile)
+}
+
+func GetSolvedProblems(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+
+	rows, err := db.DB.Query(`SELECT problem_id FROM user_problem_status WHERE user_id = $1 AND status = 'ACCEPTED'`, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch solved problems"})
+		return
+	}
+	defer rows.Close()
+
+	var solved []int
+	for rows.Next() {
+		var pid int
+		if err := rows.Scan(&pid); err == nil {
+			solved = append(solved, pid)
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"solved_problems": solved})
 }
 
 type VerifyCollegeEmailRequest struct {
@@ -236,6 +259,18 @@ func VerifyCF(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Codeforces account successfully verified!"})
+}
+
+func DisconnectCF(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+
+	_, err := db.DB.Exec(`UPDATE users SET cf_handle = NULL, cf_verify_string = NULL, is_cf_verified = false WHERE id = $1`, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to disconnect Codeforces account"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Codeforces account disconnected successfully!"})
 }
 
 // -- Profile Edit Logic --

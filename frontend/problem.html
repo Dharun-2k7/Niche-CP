@@ -44,6 +44,10 @@
             <span class="id" id="problemIdDisplay">Loading...</span>
             <span class="title" id="problemTitleDisplay">Please wait</span>
             <span class="diff" id="problemDiffDisplay">--</span>
+            <span id="problemSolvedDisplay" style="margin-left: 12px; display: none; align-items: center; gap: 4px; color: #10b981; font-weight: 600; font-size: 14px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10.08 10.08 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                Solved
+            </span>
         </div>
         <div class="right">
             <span id="problemRoundDisplay">Practice Mode</span>
@@ -92,8 +96,19 @@
                 <textarea id="customInput" style="width:100%; height:50px; background:rgba(0,0,0,0.2); border:1px solid var(--card-border); border-radius:4px; color:#e0e0e0; padding:8px; font-family:monospace; resize:vertical;" placeholder="Enter custom input to run against..."></textarea>
                 
                 <div style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">>_ OUTPUT</div>
-                <textarea id="terminalOutput" readonly style="width:100%; flex: 1; min-height:80px; background:transparent; border:none; color:#e0e0e0; outline:none; font-family:inherit; resize:none;" placeholder="- run your code to see output -"></textarea>
             </div>
+            
+            <div id="verdictPanel" style="display: none; padding: 16px; border-radius: 8px; margin-top: 12px; align-items: center; justify-content: space-between; border: 1px solid var(--card-border); background: var(--card-bg);">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div id="verdictIcon"></div>
+                    <div>
+                        <div id="verdictText" style="font-size: 18px; font-weight: 700; margin-bottom: 4px;"></div>
+                        <div id="verdictSubtext" style="font-size: 13px; color: var(--text-muted);"></div>
+                    </div>
+                </div>
+                <button class="btn-ghost btn-sm" onclick="document.getElementById('verdictPanel').style.display='none'">Close</button>
+            </div>
+            
             <div id="statusMessage" class="status-banner"></div>
         </div>
     </main>
@@ -113,6 +128,21 @@
                         document.getElementById('problemIdDisplay').textContent = `NCP-${problem.id}`;
                         document.getElementById('problemTitleDisplay').textContent = problem.title;
                         document.getElementById('problemDiffDisplay').textContent = problem.difficulty || 'Medium';
+                        
+                        const token = localStorage.getItem('jwt_token');
+                        if (token) {
+                            try {
+                                const solvedRes = await fetch('http://localhost:8080/api/profile/solved', {
+                                    headers: { 'Authorization': `Bearer ${token}` }
+                                });
+                                if (solvedRes.ok) {
+                                    const solvedData = await solvedRes.json();
+                                    if (solvedData.solved_problems && solvedData.solved_problems.includes(parseInt(pid))) {
+                                        document.getElementById('problemSolvedDisplay').style.display = 'inline-flex';
+                                    }
+                                }
+                            } catch(e){}
+                        }
                         
                         let tagsHtml = '';
                         try {

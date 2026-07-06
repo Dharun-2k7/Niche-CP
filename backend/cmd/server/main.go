@@ -69,6 +69,7 @@ func main() {
 	{
 		protected.POST("/submit", api.SubmitCode)
 		protected.GET("/profile", api.GetProfile)
+		protected.GET("/profile/solved", api.GetSolvedProblems)
 		protected.PUT("/profile", api.UpdateProfile)
 		protected.POST("/profile/upload-dp", api.UploadProfilePicture)
 		protected.POST("/profile/verify-college-email", api.VerifyCollegeEmail)
@@ -76,6 +77,8 @@ func main() {
 		protected.POST("/profile/verify-email-update", api.VerifyEmailUpdate)
 		protected.POST("/profile/cf/init", api.InitCFVerification)
 		protected.POST("/profile/cf/verify", api.VerifyCF)
+		protected.POST("/profile/cf/disconnect", api.DisconnectCF)
+		protected.POST("/contests/register", api.RegisterForContest)
 	}
 
 	// Admin Routes
@@ -83,8 +86,10 @@ func main() {
 	admin.Use(middleware.RequireAdmin())
 	{
 		admin.GET("/users", api.GetAllUsers)
+		admin.POST("/users/permissions", api.UpdateUserPermissions)
 		admin.POST("/problems", api.CreateProblem)
 		admin.POST("/contests", api.CreateContest)
+		admin.PUT("/contests/:id", api.UpdateContest)
 	}
 
 	// Start Server

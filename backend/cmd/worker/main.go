@@ -100,6 +100,17 @@ func main() {
 			log.Printf("Failed to update database for Sub %d: %v", submissionID, err)
 		} else {
 			log.Printf("Submission %d completed with status: %s", submissionID, status)
+			if status == "ACCEPTED" {
+				var userID int
+				err = db.DB.QueryRow("SELECT user_id FROM submissions WHERE id = $1", submissionID).Scan(&userID)
+				if err == nil {
+					db.DB.Exec(`
+						INSERT INTO user_problem_status (user_id, problem_id, status)
+						VALUES ($1, $2, $3)
+						ON CONFLICT (user_id, problem_id) DO UPDATE SET status = EXCLUDED.status
+					`, userID, problemID, status)
+				}
+			}
 		}
 	}
 }

@@ -102,6 +102,22 @@
                 const list = document.getElementById('problemList');
                 list.innerHTML = '';
                 
+                let solvedProblems = new Set();
+                const token = localStorage.getItem('jwt_token');
+                if (token) {
+                    try {
+                        const solvedRes = await fetch('http://localhost:8080/api/profile/solved', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (solvedRes.ok) {
+                            const solvedData = await solvedRes.json();
+                            if (solvedData.solved_problems) {
+                                solvedData.solved_problems.forEach(id => solvedProblems.add(id));
+                            }
+                        }
+                    } catch(e){}
+                }
+                
                 if (problems.length === 0) {
                     list.innerHTML = '<div style="text-align:center; color: var(--text-muted); margin-top: 40px;">No problems available.</div>';
                     return;
@@ -119,6 +135,17 @@
                         }
                     } catch(e){}
 
+                    let solveStatusHtml = `
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10.08 10.08 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        Solve
+                    `;
+                    if (solvedProblems.has(p.id)) {
+                        solveStatusHtml = `
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10.08 10.08 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            <span style="color: #10b981; font-weight: 600;">Solved</span>
+                        `;
+                    }
+
                     list.innerHTML += `
                         <a href="problem.html?problem_id=${p.id}" class="problem-row">
                             <div style="display:flex; align-items:center; gap:24px;">
@@ -133,8 +160,7 @@
                             <div style="display:flex; align-items:center; gap:24px;">
                                 <div class="diff-tag ${diffClass}">${diffText}</div>
                                 <div style="color:var(--text-muted); font-size:13px; display:flex; align-items:center; gap:4px;">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10.08 10.08 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                                    Solve
+                                    ${solveStatusHtml}
                                 </div>
                             </div>
                         </a>

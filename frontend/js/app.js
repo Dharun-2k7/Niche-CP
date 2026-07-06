@@ -220,12 +220,33 @@ document.addEventListener('DOMContentLoaded', () => {
                                 if (statusData.status !== 'PENDING') {
                                     clearInterval(pollInterval);
                                     let statusType = 'error';
+                                    let color = '#ef4444';
+                                    let icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+                                    let text = statusData.status.replace(/_/g, ' ');
+
                                     if (statusData.status === 'ACCEPTED') {
                                         statusType = 'success';
+                                        color = '#10b981';
+                                        icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2"><path d="M22 11.08V12a10.08 10.08 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
                                     } else if (statusData.status === 'TIME_LIMIT_EXCEEDED' || statusData.status === 'MEMORY_LIMIT_EXCEEDED') {
                                         statusType = 'warning';
+                                        color = '#f59e0b';
+                                        icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
                                     }
-                                    showStatus(`Submission ${statusData.status}! (Time: ${statusData.execution_time_ms || 0}ms)`, statusType);
+                                    
+                                    // Update styling of the panel
+                                    const verdictPanel = document.getElementById('verdictPanel');
+                                    if (verdictPanel) {
+                                        verdictPanel.style.display = 'flex';
+                                        verdictPanel.style.borderColor = color;
+                                        document.getElementById('verdictIcon').innerHTML = icon;
+                                        const vText = document.getElementById('verdictText');
+                                        vText.textContent = text;
+                                        vText.style.color = color;
+                                        document.getElementById('verdictSubtext').textContent = `Runtime: ${statusData.execution_time_ms || 0}ms | Memory: ~0MB`;
+                                    }
+                                    
+                                    showStatus(`Submission Finished!`, 'success');
                                     submitBtn.disabled = false;
                                     submitBtn.textContent = 'Submit Code';
                                 }

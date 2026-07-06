@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS contests (
     type VARCHAR(50) NOT NULL, -- 'ICPC', 'IOI', 'CUSTOM'
     start_time TIMESTAMP NOT NULL,
     duration_minutes INTEGER NOT NULL,
+    registration_open_time TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -67,4 +68,18 @@ CREATE TABLE IF NOT EXISTS submissions (
     status VARCHAR(50) DEFAULT 'PENDING',
     execution_time_ms INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS user_problem_status (
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    problem_id INTEGER REFERENCES problems(id) ON DELETE CASCADE,
+    status VARCHAR(50) NOT NULL,
+    PRIMARY KEY (user_id, problem_id)
+);
+
+CREATE TABLE IF NOT EXISTS contest_registrations (
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    contest_id INTEGER REFERENCES contests(id) ON DELETE CASCADE,
+    registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, contest_id)
 );

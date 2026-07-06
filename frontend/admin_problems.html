@@ -42,6 +42,66 @@
             font-size: 12px;
             border-radius: 4px;
         }
+
+        /* Tabbed UI Styles */
+        .tc-tabs-container {
+            display: flex;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.2);
+            overflow: hidden;
+            min-height: 300px;
+        }
+        .tc-tabs-sidebar {
+            width: 150px;
+            background: rgba(255,255,255,0.05);
+            border-right: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+        }
+        .tc-tab-btn {
+            padding: 12px;
+            font-size: 13px;
+            text-align: left;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .tc-tab-btn:hover { background: rgba(255,255,255,0.1); }
+        .tc-tab-btn.active {
+            background: var(--primary-accent);
+            color: white;
+            font-weight: 600;
+        }
+        .tc-tab-add {
+            padding: 12px;
+            font-size: 12px;
+            text-align: center;
+            color: var(--primary-accent);
+            cursor: pointer;
+        }
+        .tc-tab-add:hover { background: rgba(255,255,255,0.05); }
+        .tc-content-area {
+            flex: 1;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .tc-content-area textarea {
+            width: 100%;
+            height: 100px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            color: white;
+            padding: 12px;
+            font-family: monospace;
+            resize: vertical;
+        }
+
         /* EasyMDE overrides for dark theme */
         .editor-toolbar { border-color: var(--card-border); background: var(--card-bg); opacity: 0.9; }
         .editor-toolbar > button { color: var(--text-color) !important; }
@@ -149,8 +209,14 @@
                 <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">These test cases will be visible to students in the problem description.</p>
                 
                 <div class="ui-builder" id="sampleBuilderContainer">
-                    <div id="sampleRows"></div>
-                    <button class="btn-ghost btn-sm" onclick="addSampleRow()" style="margin-top: 8px;">+ Add Example</button>
+                    <div class="tc-tabs-container">
+                        <div class="tc-tabs-sidebar" id="sampleTabsList">
+                            <!-- Tabs generated via JS -->
+                        </div>
+                        <div class="tc-content-area" id="sampleTabContent">
+                            <!-- Content generated via JS -->
+                        </div>
+                    </div>
                 </div>
 
                 <div class="advanced-field form-group">
@@ -165,8 +231,14 @@
                 <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">These are strictly used by the execution worker to evaluate correctness.</p>
                 
                 <div class="ui-builder" id="hiddenBuilderContainer">
-                    <div id="hiddenRows"></div>
-                    <button class="btn-ghost btn-sm" onclick="addHiddenRow()" style="margin-top: 8px; border-color: rgba(239, 68, 68, 0.3); color: #ef4444;">+ Add Test Case</button>
+                    <div class="tc-tabs-container">
+                        <div class="tc-tabs-sidebar" id="hiddenTabsList">
+                            <!-- Tabs generated via JS -->
+                        </div>
+                        <div class="tc-content-area" id="hiddenTabContent">
+                            <!-- Content generated via JS -->
+                        </div>
+                    </div>
                 </div>
 
                 <div class="advanced-field form-group">
@@ -181,7 +253,7 @@
                 <div class="form-group">
                     <label>Where should this problem be published?</label>
                     <select id="pDestination" class="cyber-select form-input">
-                        <option value="practice">Practice Bank (Independent)</option>
+                        <option value="practice">Problem Bank (Source of Truth)</option>
                         <option value="contest">Link to a Contest</option>
                     </select>
                 </div>
@@ -214,38 +286,103 @@
             status: false
         });
 
-        // UI Builder Logic
-        function createTcRowHTML(idPrefix, index) {
-            return `
-                <div class="tc-row" id="${idPrefix}_row_${index}">
+        // UI Builder Logic - Tabbed Interface
+        class TestcaseManager {
+            constructor(type, tabsListId, tabContentId) {
+                this.type = type;
+                this.testcases = [{input: '', expected_output: ''}];
+                this.activeIndex = 0;
+                this.tabsListEl = document.getElementById(tabsListId);
+                this.tabContentEl = document.getElementById(tabContentId);
+                this.render();
+            }
+
+            render() {
+                this.tabsListEl.innerHTML = '';
+                this.testcases.forEach((tc, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'tc-tab-btn' + (this.activeIndex === i ? ' active' : '');
+                    btn.textContent = `Testcase ${i+1}`;
+                    btn.onclick = () => {
+                        this.saveCurrent();
+                        this.activeIndex = i;
+                        this.render();
+                    };
+                    this.tabsListEl.appendChild(btn);
+                });
+
+                const addBtn = document.createElement('div');
+                addBtn.className = 'tc-tab-add';
+                addBtn.textContent = '+ Add Testcase';
+                addBtn.onclick = () => {
+                    this.saveCurrent();
+                    this.testcases.push({input: '', expected_output: ''});
+                    this.activeIndex = this.testcases.length - 1;
+                    this.render();
+                };
+                this.tabsListEl.appendChild(addBtn);
+
+                this.renderContent();
+            }
+
+            renderContent() {
+                if (this.testcases.length === 0) {
+                    this.tabContentEl.innerHTML = '<div style="color:var(--text-muted);">No testcases added.</div>';
+                    return;
+                }
+
+                const tc = this.testcases[this.activeIndex];
+                this.tabContentEl.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h4 style="margin:0; font-size: 14px;">Testcase ${this.activeIndex + 1}</h4>
+                        <button class="btn-ghost btn-sm" style="color:#ef4444; border-color:rgba(239,68,68,0.2);" onclick="${this.type}Manager.removeCurrent()">Delete</button>
+                    </div>
                     <div>
                         <label style="font-size:12px; margin-bottom:4px; display:block;">Input</label>
-                        <textarea class="form-input ${idPrefix}-in" placeholder="Enter input text"></textarea>
+                        <textarea id="${this.type}In" placeholder="Enter input data...">${tc.input}</textarea>
                     </div>
                     <div>
                         <label style="font-size:12px; margin-bottom:4px; display:block;">Expected Output</label>
-                        <textarea class="form-input ${idPrefix}-out" placeholder="Enter expected output text"></textarea>
+                        <textarea id="${this.type}Out" placeholder="Enter expected output data...">${tc.expected_output}</textarea>
                     </div>
-                    <div style="padding-top: 24px;">
-                        <button class="btn-ghost btn-sm" onclick="document.getElementById('${idPrefix}_row_${index}').remove()" style="color:#ef4444; border-color:rgba(239, 68, 68, 0.2);">Remove</button>
-                    </div>
-                </div>
-            `;
+                `;
+            }
+
+            saveCurrent() {
+                if (this.testcases.length === 0) return;
+                const inEl = document.getElementById(`${this.type}In`);
+                const outEl = document.getElementById(`${this.type}Out`);
+                if (inEl && outEl) {
+                    this.testcases[this.activeIndex].input = inEl.value;
+                    this.testcases[this.activeIndex].expected_output = outEl.value;
+                }
+            }
+
+            removeCurrent() {
+                if (this.testcases.length <= 1) {
+                    alert('You must have at least one testcase.');
+                    return;
+                }
+                this.testcases.splice(this.activeIndex, 1);
+                this.activeIndex = Math.max(0, this.activeIndex - 1);
+                this.render();
+            }
+
+            getData() {
+                this.saveCurrent();
+                return this.testcases.filter(tc => tc.input.trim() || tc.expected_output.trim());
+            }
+
+            reset() {
+                this.testcases = [{input: '', expected_output: ''}];
+                this.activeIndex = 0;
+                this.render();
+            }
         }
 
-        let sampleCounter = 0;
-        function addSampleRow() {
-            document.getElementById('sampleRows').insertAdjacentHTML('beforeend', createTcRowHTML('sample', sampleCounter++));
-        }
+        const sampleManager = new TestcaseManager('sample', 'sampleTabsList', 'sampleTabContent');
+        const hiddenManager = new TestcaseManager('hidden', 'hiddenTabsList', 'hiddenTabContent');
 
-        let hiddenCounter = 0;
-        function addHiddenRow() {
-            document.getElementById('hiddenRows').insertAdjacentHTML('beforeend', createTcRowHTML('hidden', hiddenCounter++));
-        }
-
-        // Initialize with one row each
-        addSampleRow();
-        addHiddenRow();
 
         // Load Contests for Dropdown
         document.getElementById('pDestination').addEventListener('change', async (e) => {
@@ -299,22 +436,8 @@
                 hiddenCasesJson = document.getElementById('pHiddenTestCases').value || '[]';
             } else {
                 // Construct JSON from UI Builders
-                const samples = [];
-                document.querySelectorAll('.tc-row').forEach(row => {
-                    if (row.id.startsWith('sample_')) {
-                        const inVal = row.querySelector('.sample-in').value;
-                        const outVal = row.querySelector('.sample-out').value;
-                        if (inVal.trim() || outVal.trim()) samples.push({input: inVal, expected_output: outVal});
-                    }
-                });
-                const hiddens = [];
-                document.querySelectorAll('.tc-row').forEach(row => {
-                    if (row.id.startsWith('hidden_')) {
-                        const inVal = row.querySelector('.hidden-in').value;
-                        const outVal = row.querySelector('.hidden-out').value;
-                        if (inVal.trim() || outVal.trim()) hiddens.push({input: inVal, expected_output: outVal});
-                    }
-                });
+                const samples = sampleManager.getData();
+                const hiddens = hiddenManager.getData();
                 
                 sampleCasesJson = JSON.stringify(samples);
                 hiddenCasesJson = JSON.stringify(hiddens);
@@ -376,10 +499,8 @@
                     // Reset UI
                     document.querySelectorAll('.form-input').forEach(el => el.value = '');
                     easyMDE.value('');
-                    document.getElementById('sampleRows').innerHTML = '';
-                    document.getElementById('hiddenRows').innerHTML = '';
-                    addSampleRow();
-                    addHiddenRow();
+                    sampleManager.reset();
+                    hiddenManager.reset();
                 } else {
                     msg.style.color = '#ff4d4d';
                     msg.textContent = data.error;

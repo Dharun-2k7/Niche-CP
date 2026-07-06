@@ -319,7 +319,7 @@
                                 <div style="background: #ef4444; flex: 1;" id="cfBarHard"></div>
                             </div>
                             <div style="text-align: right;">
-                                <button class="btn-ghost" style="padding: 4px 8px; font-size: 11px; color: var(--text-muted);">Disconnect</button>
+                                <button class="btn-ghost" id="cfDisconnectBtn" style="padding: 4px 8px; font-size: 11px; color: var(--text-muted);">Disconnect</button>
                             </div>
                         </div>
                     </div>
@@ -462,6 +462,7 @@
                         rollNumber = userProfileData.email.split('@')[0].toUpperCase();
                     }
                     updateField('nicheRollNumberStat', rollNumber);
+                    updateField('nicheSolvedStat', userProfileData.total_solved || 0);
                     
                     if(userProfileData.profile_picture_url) {
                         document.getElementById('sidebarAvatarImg').src = userProfileData.profile_picture_url;
@@ -717,6 +718,30 @@
                     btn.textContent = 'I have updated my profile. Verify Now';
                 }
             });
+
+            // Disconnect CF Logic
+            const disconnectBtn = document.getElementById('cfDisconnectBtn');
+            if (disconnectBtn) {
+                disconnectBtn.addEventListener('click', async () => {
+                    if (!confirm('Are you sure you want to disconnect your Codeforces account?')) return;
+                    
+                    try {
+                        const res = await fetch('http://localhost:8080/api/profile/cf/disconnect', {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            alert(data.message);
+                            window.location.reload();
+                        } else {
+                            alert(data.error || 'Failed to disconnect');
+                        }
+                    } catch (err) {
+                        alert('Network Error');
+                    }
+                });
+            }
         });
 
         // Fetch CF Data directly from browser

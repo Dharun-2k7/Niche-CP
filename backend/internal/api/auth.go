@@ -89,12 +89,16 @@ func GoogleCallback(c *gin.Context) {
 
 	// Find or Create user in DB
 	var userID int
+	isVerified := rollNo != ""
 	err = db.DB.QueryRow(`
-		INSERT INTO users (name, email, roll_no) 
-		VALUES ($1, $2, $3) 
-		ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, roll_no = COALESCE(users.roll_no, EXCLUDED.roll_no)
+		INSERT INTO users (name, email, roll_no, is_college_verified) 
+		VALUES ($1, $2, $3, $4) 
+		ON CONFLICT (email) DO UPDATE SET 
+			name = EXCLUDED.name, 
+			roll_no = COALESCE(users.roll_no, EXCLUDED.roll_no),
+			is_college_verified = EXCLUDED.is_college_verified
 		RETURNING id
-	`, googleUser.Name, googleUser.Email, rollNo).Scan(&userID)
+	`, googleUser.Name, googleUser.Email, rollNo, isVerified).Scan(&userID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to sync user to database"})

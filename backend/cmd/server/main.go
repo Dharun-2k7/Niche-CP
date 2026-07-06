@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/Dharun-2k7/online-coding-platform/internal/api"
 	"github.com/Dharun-2k7/online-coding-platform/internal/auth"
@@ -53,14 +54,14 @@ func main() {
 	r.GET("/api/auth/google/callback", api.GoogleCallback)
 	r.POST("/api/auth/register", api.RegisterUser)
 	r.POST("/api/auth/login", api.LoginUser)
-	
+
 	// New Auth Flows
 	r.POST("/api/auth/otp/send", api.SendOTP)
 	r.POST("/api/auth/otp/verify", api.VerifyOTP)
 	r.POST("/api/auth/register-otp/send", api.SendRegisterOTP)
 	r.POST("/api/auth/password/forgot", api.ForgotPassword)
 	r.POST("/api/auth/password/reset", api.ResetPassword)
-	
+
 	// Problems Route
 	r.GET("/api/problems", api.GetAllProblems)
 	r.GET("/api/problems/:id", api.GetProblem)

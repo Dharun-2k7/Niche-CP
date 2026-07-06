@@ -73,70 +73,7 @@
                             </div>
                         </div>
                         <div class="arena-panel-scroll" id="problemsList">
-                            <!-- Stub Problems -->
-                            <a href="problem.html?problem_id=1" class="problem-row">
-                                <div class="status-circle solved"></div>
-                                <div style="display:flex; gap:16px; align-items:center;">
-                                    <span style="font-weight:600;">A</span>
-                                    <span>Different Parity</span>
-                                </div>
-                                <div>500</div>
-                                <div style="color:var(--text-muted);">96 / 98</div>
-                            </a>
-                            <a href="problem.html?problem_id=2" class="problem-row">
-                                <div class="status-circle solved"></div>
-                                <div style="display:flex; gap:16px; align-items:center;">
-                                    <span style="font-weight:600;">B</span>
-                                    <span>Balanced Trio</span>
-                                </div>
-                                <div>1000</div>
-                                <div style="color:var(--text-muted);">83 / 91</div>
-                            </a>
-                            <a href="problem.html?problem_id=3" class="problem-row">
-                                <div class="status-circle solved"></div>
-                                <div style="display:flex; gap:16px; align-items:center;">
-                                    <span style="font-weight:600;">C</span>
-                                    <span>Corner Meeting</span>
-                                </div>
-                                <div>1500</div>
-                                <div style="color:var(--text-muted);">79 / 82</div>
-                            </a>
-                            <a href="#" class="problem-row">
-                                <div class="status-circle"></div>
-                                <div style="display:flex; gap:16px; align-items:center;">
-                                    <span style="font-weight:600;">D</span>
-                                    <span>Distant Transfers</span>
-                                </div>
-                                <div>2000</div>
-                                <div style="color:var(--text-muted);">57 / 63</div>
-                            </a>
-                            <a href="#" class="problem-row">
-                                <div class="status-circle"></div>
-                                <div style="display:flex; gap:16px; align-items:center;">
-                                    <span style="font-weight:600;">E</span>
-                                    <span>Synchronized Inversions</span>
-                                </div>
-                                <div>2500</div>
-                                <div style="color:var(--text-muted);">28 / 33</div>
-                            </a>
-                            <a href="#" class="problem-row">
-                                <div class="status-circle"></div>
-                                <div style="display:flex; gap:16px; align-items:center;">
-                                    <span style="font-weight:600;">F</span>
-                                    <span>Magnetic Path</span>
-                                </div>
-                                <div>3000</div>
-                                <div style="color:var(--text-muted);">30 / 32</div>
-                            </a>
-                            <a href="#" class="problem-row">
-                                <div class="status-circle"></div>
-                                <div style="display:flex; gap:16px; align-items:center;">
-                                    <span style="font-weight:600;">G</span>
-                                    <span>Complementary Path</span>
-                                </div>
-                                <div>3500</div>
-                                <div style="color:var(--text-muted);">8 / 11</div>
-                            </a>
+                            <div style="text-align:center; color: var(--text-muted); margin-top: 40px; font-size: 14px;">Fetching contest problems...</div>
                         </div>
                     </div>
 
@@ -299,8 +236,6 @@
             
             if (contestId) {
                 try {
-                    // Try to fetch contest name from backend (if endpoint supports it)
-                    // Otherwise this falls back to generic text
                     const response = await fetch('http://localhost:8080/api/contests');
                     if (response.ok) {
                         const data = await response.json();
@@ -309,16 +244,52 @@
                         if (contest) {
                             titleEl.textContent = contest.title;
                         } else {
-                            titleEl.textContent = "Starter Round 4";
+                            titleEl.textContent = "NicheCP Contest";
                         }
                     }
                 } catch (e) {
-                    titleEl.textContent = "Starter Round 4";
+                    titleEl.textContent = "NicheCP Contest";
+                }
+
+                try {
+                    const probRes = await fetch('http://localhost:8080/api/problems');
+                    if (probRes.ok) {
+                        const problems = await probRes.json();
+                        const probList = document.getElementById('problemsList');
+                        probList.innerHTML = '';
+                        
+                        // Pick first 5 as a mock for the contest
+                        const contestProbs = problems.slice(0, 5);
+                        
+                        if (contestProbs.length === 0) {
+                            probList.innerHTML = '<div style="text-align:center; color: var(--text-muted); margin-top: 40px; font-size:14px;">No problems available in this contest.</div>';
+                        } else {
+                            const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+                            contestProbs.forEach((p, index) => {
+                                const points = (index + 1) * 500;
+                                probList.innerHTML += `
+                                    <a href="problem.html?problem_id=${p.id}" class="problem-row" style="text-decoration:none; color:inherit; display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
+                                        <div class="status-circle" style="width:12px; height:12px; border-radius:50%; border:2px solid rgba(255,255,255,0.2);"></div>
+                                        <div style="display:flex; gap:16px; align-items:center; flex:1; margin-left:16px;">
+                                            <span style="font-weight:600; color:var(--primary-accent); font-size:15px;">${letters[index] || '?'}</span>
+                                            <span style="font-size:14px;">${p.title}</span>
+                                        </div>
+                                        <div style="font-size:13px; color:var(--text-secondary); width:60px; text-align:right;">${points}</div>
+                                        <div style="color:var(--text-muted); font-size:12px; width:60px; text-align:right;">0 / 0</div>
+                                    </a>
+                                `;
+                            });
+                        }
+                    }
+                } catch (e) {
+                    document.getElementById('problemsList').innerHTML = '<div style="text-align:center; color: #ef4444; margin-top: 40px;">Failed to load problems.</div>';
                 }
             } else {
                 titleEl.textContent = "Contest Preview";
+                document.getElementById('problemsList').innerHTML = '<div style="text-align:center; color: var(--text-muted); margin-top: 40px; font-size:14px;">No contest selected.</div>';
             }
         });
     </script>
+<script src="js/components.js"></script>
 </body>
 </html>

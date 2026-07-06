@@ -10,22 +10,8 @@
 <body data-theme="quantum">
     <div class="noise-bg" style="opacity: 0.4;"></div>
 
-    <nav class="navbar">
-        <a href="index.html" style="text-decoration: none; color: inherit;" class="nav-brand">
-            <div>NicheCP <span style="color:var(--primary-accent); font-size:12px; margin-left:8px;">ADMIN</span></div>
-        </a>
-        
-        <div class="nav-links">
-            <a href="index.html" class="nav-link">Home</a>
-            <a href="admin.html" class="nav-link">Admin</a>
-            <a href="admin_problems.html" class="nav-link">Problems</a>
-            <a href="admin_contests.html" class="nav-link active">Contests</a>
-        </div>
-
-        <div class="nav-controls">
-            <div id="authNavContainer"></div>
-        </div>
-    </nav>
+    <!-- Floating Glass Navigation (Injected via JS) -->
+    <div id="global-nav-container"></div>
 
     <main class="app-container repovive-layout" style="margin-top: 40px; grid-template-columns: 1fr;">
         <div class="module-card">
@@ -202,5 +188,6 @@
             }
         });
     </script>
+<script src="js/components.js"></script>
 </body>
 </html>

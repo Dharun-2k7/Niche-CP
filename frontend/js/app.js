@@ -10,26 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const token = localStorage.getItem('jwt_token');
 
-    // Update Navbar if logged in
-    const authContainer = document.getElementById('authNavContainer');
-    if (token && authContainer) {
-        if (window.location.pathname.includes('profile.html')) {
-            authContainer.innerHTML = `<button class="btn-ghost" onclick="logout()" style="padding: 8px 16px; font-size: 13px; border-radius: 6px;">Sign Out</button>`;
-        } else {
-            authContainer.innerHTML = `<a href="profile.html" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; border-radius: 6px; text-decoration: none;">Profile</a>`;
-        }
-
-        // Check if admin
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            if (payload.email === 'dharunkaarthick07@gmail.com') {
-                const navLinks = document.querySelector('.nav-links');
-                if (navLinks && !document.querySelector('a[href="admin.html"]')) {
-                    navLinks.innerHTML += `<a href="admin.html" class="nav-link" style="color:var(--primary-accent);">Admin</a>`;
-                }
-            }
-        } catch(e) {}
-    }
+    // Render Global Glassmorphic Navigation
+    renderGlobalNav(token);
 
     // Theme Switcher Logic
     const themeBtns = document.querySelectorAll('.theme-dot');
@@ -313,3 +295,75 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+// ==========================================
+// Global Navigation Renderer
+// ==========================================
+async function renderGlobalNav(token) {
+    const container = document.getElementById('global-nav-container');
+    if (!container) return;
+
+    let role = 'student';
+    let avatarUrl = '';
+    
+    if (token) {
+        try {
+            // Hardcoding backend URL for MVP since we are rendering from static HTML
+            const res = await fetch('http://localhost:8080/api/profile', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                role = data.role;
+                avatarUrl = data.profile_picture_url || '';
+            }
+        } catch (e) {
+            console.error("Failed to fetch profile for nav:", e);
+        }
+    }
+
+    const navItems = [
+        { label: 'Home', path: 'index.html' },
+        { label: 'Roadmaps', path: '#' },
+        { label: 'Contests', path: 'contests.html' },
+        { label: 'Problems', path: 'problem.html' },
+        { label: 'Arena', path: 'arena.html' }
+    ];
+
+    if (role === 'admin' || role === 'superadmin') {
+        navItems.push({ label: 'Admin', path: 'admin.html' });
+    }
+
+    let currentPath = window.location.pathname.split('/').pop() || 'index.html';
+    if (currentPath === '') currentPath = 'index.html';
+
+    const navLinksHTML = navItems.map(item => {
+        const isActive = (currentPath === item.path) ? 'active' : '';
+        return `<a href="${item.path}" class="glass-nav-item ${isActive}">${item.label}</a>`;
+    }).join('');
+
+    const rightSideHTML = token 
+        ? `
+            <div class="glass-nav-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <div class="notification-badge">0</div>
+            </div>
+            <img src="${avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=fallback'}" class="nav-avatar" onclick="window.location.href='profile.html'" alt="Profile" title="Go to Profile">
+          `
+        : `<a href="login.html" class="glass-nav-item" style="background:var(--primary-accent); color:#000; padding: 6px 16px;">Sign In</a>`;
+
+    container.innerHTML = `
+        <div class="glass-nav">
+            <a href="index.html" class="nav-brand">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px; color:var(--primary-accent);"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line><polyline points="22 8.5 12 15.5 2 8.5"></polyline><polyline points="2 15.5 12 8.5 22 15.5"></polyline><line x1="12" y1="2" x2="12" y2="8.5"></line></svg>
+                NicheCP
+            </a>
+            <div class="glass-nav-center">
+                ${navLinksHTML}
+            </div>
+            <div class="glass-nav-right">
+                ${rightSideHTML}
+            </div>
+        </div>
+    `;
+}

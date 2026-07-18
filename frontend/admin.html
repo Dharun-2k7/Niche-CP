@@ -7,23 +7,6 @@
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        .admin-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        .admin-table th, .admin-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--card-border);
-        }
-        .admin-table th {
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-        .admin-table td {
-            font-size: 14px;
-        }
     </style>
 </head>
 <body data-theme="quantum">
@@ -38,7 +21,7 @@
             <h2>User Management</h2>
             <p style="color: var(--text-muted); margin-bottom: 20px;">Manage users and permissions</p>
             
-            <table class="admin-table">
+            <table class="admin-data-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -57,18 +40,37 @@
     </main>
 
     <!-- Permissions Modal -->
-    <div id="permissionsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
-        <div class="module-card" style="width: 400px; position: relative;">
-            <button onclick="closePermissionsModal()" style="position:absolute; top:10px; right:10px; background:none; border:none; color:var(--text-muted); cursor:pointer;">✕</button>
-            <h3>Edit Permissions</h3>
-            <p id="permUserEmail" style="color:var(--text-muted); font-size:13px; margin-bottom: 15px;"></p>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <label><input type="checkbox" id="perm_create_problem" value="create_problem"> Create Problem</label>
-                <label><input type="checkbox" id="perm_create_contest" value="create_contest"> Create Contest</label>
-                <label><input type="checkbox" id="perm_manage_users" value="manage_users"> Manage Users</label>
-                <label><input type="checkbox" id="perm_manage_admins" value="manage_admins"> Manage Admins</label>
+    <div id="permissionsModal" class="premium-modal-overlay">
+        <div class="premium-modal">
+            <button onclick="closePermissionsModal()" style="position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); cursor:pointer; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:background 0.2s;">✕</button>
+            
+            <h3 style="font-size: 20px; margin-bottom: 8px; font-weight: 600;">Edit Permissions</h3>
+            <p id="permUserEmail" style="color:var(--text-muted); font-size:14px; margin-bottom: 24px;"></p>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <label class="custom-toggle">
+                    <span style="font-size: 14px; font-weight: 500;">Create Problem</span>
+                    <input type="checkbox" id="perm_create_problem" value="create_problem">
+                    <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
+                <label class="custom-toggle">
+                    <span style="font-size: 14px; font-weight: 500;">Create Contest</span>
+                    <input type="checkbox" id="perm_create_contest" value="create_contest">
+                    <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
+                <label class="custom-toggle">
+                    <span style="font-size: 14px; font-weight: 500;">Manage Users</span>
+                    <input type="checkbox" id="perm_manage_users" value="manage_users">
+                    <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
+                <label class="custom-toggle">
+                    <span style="font-size: 14px; font-weight: 500;">Manage Admins</span>
+                    <input type="checkbox" id="perm_manage_admins" value="manage_admins">
+                    <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
             </div>
-            <button class="btn-primary" style="width:100%; margin-top:20px;" onclick="savePermissions()">Save Permissions</button>
+            
+            <button class="btn-magnetic" style="width:100%; margin-top:32px; padding: 14px; font-size: 15px; border-radius: 12px; border: none; cursor: pointer;" onclick="savePermissions()">Save Permissions</button>
         </div>
     </div>
 
@@ -132,11 +134,11 @@
             document.querySelectorAll('#permissionsModal input[type="checkbox"]').forEach(cb => cb.checked = false);
             // We don't have the user's current permissions in the API response yet, but the user requested an editor.
             // In a full implementation we would fetch them first.
-            document.getElementById('permissionsModal').style.display = 'flex';
+            document.getElementById('permissionsModal').classList.add('active');
         }
 
         function closePermissionsModal() {
-            document.getElementById('permissionsModal').style.display = 'none';
+            document.getElementById('permissionsModal').classList.remove('active');
         }
 
         async function savePermissions() {

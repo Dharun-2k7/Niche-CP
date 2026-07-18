@@ -1846,10 +1846,117 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.05);
 }
 
-.glow-hover {
-    transition: box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s;
-}
 .glow-hover:hover {
     box-shadow: 0 0 25px var(--primary-accent), inset 0 0 10px rgba(0, 0, 0, 0.5);
     border-color: var(--primary-accent);
+}
+
+/* Phase 6: Admin Data Table */
+.admin-data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 24px;
+}
+.admin-data-table th {
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    padding: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    text-align: left;
+}
+.admin-data-table td {
+    padding: 16px;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+    color: var(--text-secondary);
+    transition: background 0.2s;
+}
+.admin-data-table tbody tr:hover td {
+    background: rgba(255,255,255,0.02);
+}
+.admin-data-table td:first-child, .admin-data-table th:first-child {
+    padding-left: 24px;
+}
+.admin-data-table td:last-child, .admin-data-table th:last-child {
+    padding-right: 24px;
+}
+
+/* Premium Glassmorphic Modal */
+.premium-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.premium-modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+.premium-modal {
+    background: rgba(15, 15, 20, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    border-radius: 16px;
+    padding: 32px;
+    width: 440px;
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+}
+.premium-modal-overlay.active .premium-modal {
+    transform: scale(1) translateY(0);
+}
+
+/* Custom Animated Toggle Switch */
+.custom-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.custom-toggle:hover {
+    background: rgba(255,255,255,0.04);
+}
+.custom-toggle input {
+    display: none;
+}
+.toggle-track {
+    width: 44px;
+    height: 24px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 24px;
+    position: relative;
+    transition: background 0.3s;
+}
+.toggle-thumb {
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.custom-toggle input:checked + .toggle-track {
+    background: var(--primary-accent);
+}
+.custom-toggle input:checked + .toggle-track .toggle-thumb {
+    transform: translateX(20px);
 }

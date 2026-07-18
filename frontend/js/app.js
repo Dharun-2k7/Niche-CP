@@ -13,32 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render Global Glassmorphic Navigation
     renderGlobalNav(token);
 
-    // Theme Switcher Logic
-    const themeBtns = document.querySelectorAll('.theme-dot');
-    if (themeBtns.length > 0) {
-        themeBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const theme = btn.getAttribute('data-set');
-                document.body.setAttribute('data-theme', theme);
-                themeBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                localStorage.setItem('nichecp_theme', theme);
-            });
-        });
-
-        // Load saved theme
-        const savedTheme = localStorage.getItem('nichecp_theme');
-        if (savedTheme) {
-            document.body.setAttribute('data-theme', savedTheme);
-            const activeBtn = document.querySelector(`.theme-dot[data-set="${savedTheme}"]`);
-            if (activeBtn) {
-                themeBtns.forEach(b => b.classList.remove('active'));
-                activeBtn.classList.add('active');
-            }
-        }
-    }
-
-    // We only enforce login on the arena page. If we are on index.html, we don't redirect.
+    // Theme switcher logic removed (NicheCP uses a strict premium dark theme).    // We only enforce login on the arena page. If we are on index.html, we don't redirect.
     // (Disabled for now so you can view the arena UI locally without logging in)
     /*
     if (!token && window.location.pathname.includes('arena.html')) {
@@ -297,6 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
+// ==========================================
 // Global Navigation Renderer
 // ==========================================
 async function renderGlobalNav(token) {
@@ -308,7 +284,6 @@ async function renderGlobalNav(token) {
     
     if (token) {
         try {
-            // Hardcoding backend URL for MVP since we are rendering from static HTML
             const res = await fetch('http://localhost:8080/api/profile', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -322,40 +297,65 @@ async function renderGlobalNav(token) {
         }
     }
 
-    const navItems = [
-        { label: 'Home', path: 'index.html' },
-        { label: 'Roadmaps', path: '#' },
-        { label: 'Contests', path: 'contests.html' },
-        { label: 'Problems', path: 'problem.html' },
-        { label: 'Arena', path: 'arena.html' }
-    ];
-
-    if (role === 'admin' || role === 'superadmin') {
-        navItems.push({ label: 'Admin', path: 'admin.html' });
-    }
-
     let currentPath = window.location.pathname.split('/').pop() || 'index.html';
     if (currentPath === '') currentPath = 'index.html';
 
-    const navLinksHTML = navItems.map(item => {
-        const isActive = (currentPath === item.path) ? 'active' : '';
-        return `<a href="${item.path}" class="glass-nav-item ${isActive}">${item.label}</a>`;
-    }).join('');
+    let navLinksHTML = '';
+    let rightSideHTML = '';
 
-    const rightSideHTML = token 
-        ? `
-            <div class="glass-nav-icon">
+    if (token) {
+        // Authenticated Navbar
+        const authNavItems = [
+            { label: 'Problems', path: 'problems.html' },
+            { label: 'Contests', path: 'contests.html' },
+            { label: 'Practice', path: 'practice.html' },
+            { label: 'Learn', path: 'learn.html' },
+            { label: 'Rankings', path: 'rankings.html' },
+            { label: 'Blogs', path: 'blogs.html' }
+        ];
+
+        navLinksHTML = authNavItems.map(item => {
+            const isActive = (currentPath === item.path) ? 'active' : '';
+            return `<a href="${item.path}" class="glass-nav-item ${isActive}">${item.label}</a>`;
+        }).join('');
+
+        rightSideHTML = `
+            <div class="glass-nav-icon" style="margin-right: 16px; position: relative;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                <div class="notification-badge">0</div>
+                <div class="notification-dot" style="position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: var(--primary-accent); border-radius: 50%;"></div>
             </div>
-            <img src="${avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=fallback'}" class="nav-avatar" onclick="window.location.href='profile.html'" alt="Profile" title="Go to Profile">
-          `
-        : `<a href="login.html" class="glass-nav-item" style="background:var(--primary-accent); color:#000; padding: 6px 16px;">Sign In</a>`;
+            <div class="glass-nav-icon" style="margin-right: 16px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+            <img src="${avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=fallback'}" class="nav-avatar" onclick="window.location.href='profile.html'" alt="Profile">
+        `;
+    } else {
+        // Unauthenticated Navbar (Landing Page)
+        const unauthNavItems = [
+            { label: 'Home', path: 'index.html' },
+            { label: 'Problems', path: 'problems.html' },
+            { label: 'Contests', path: 'contests.html' },
+            { label: 'Learn', path: 'learn.html' },
+            { label: 'Rankings', path: 'rankings.html' },
+            { label: 'Blogs', path: 'blogs.html' },
+            { label: 'About', path: 'about.html' }
+        ];
+
+        navLinksHTML = unauthNavItems.map(item => {
+            const isActive = (currentPath === item.path) ? 'active' : '';
+            return `<a href="${item.path}" class="glass-nav-item ${isActive}">${item.label}</a>`;
+        }).join('');
+
+        rightSideHTML = `
+            <a href="login.html" class="glass-nav-item" style="margin-right: 8px;">Login</a>
+            <a href="register.html" class="btn-primary" style="padding: 8px 20px; font-size: 14px; border-radius: 20px;">Sign Up</a>
+        `;
+    }
 
     container.innerHTML = `
-        <div class="glass-nav">
+        <div class="glass-nav fade-in-down" style="backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); background: rgba(6, 6, 6, 0.6); padding: 12px 24px;">
             <a href="index.html" class="nav-brand">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px; color:var(--primary-accent);"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line><polyline points="22 8.5 12 15.5 2 8.5"></polyline><polyline points="2 15.5 12 8.5 22 15.5"></polyline><line x1="12" y1="2" x2="12" y2="8.5"></line></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-accent)" stroke-width="2" style="margin-right:8px;"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line><polyline points="22 8.5 12 15.5 2 8.5"></polyline><polyline points="2 15.5 12 8.5 22 15.5"></polyline><line x1="12" y1="2" x2="12" y2="8.5"></line></svg>
                 NicheCP
             </a>
             <div class="glass-nav-center">

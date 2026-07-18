@@ -13,51 +13,57 @@
     <!-- Floating Glass Navigation (Injected via JS) -->
     <div id="global-nav-container"></div>
 
-    <main class="app-container repovive-layout" style="margin-top: 40px; grid-template-columns: 1fr;">
-        <div class="module-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px;">
+    <main class="app-container repovive-layout fade-in-up" style="margin-top: 40px; grid-template-columns: 1fr;">
+        <div class="module-card glow-hover" style="border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(10, 10, 15, 0.5); backdrop-filter: blur(20px); border-radius: 16px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;" class="fade-in-up stagger-1">
                 <div>
-                    <h2>Manage Contests</h2>
-                    <p style="color: var(--text-muted); margin-bottom: 0;">Create a new contest or edit an existing one</p>
+                    <h2 class="title-massive" style="font-size: 36px; background: linear-gradient(90deg, #fff, #a1a1aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Manage Contests</h2>
+                    <p style="color: var(--text-muted); font-size: 15px; margin-top: 8px;">Create a new contest or edit an existing one with advanced configurations.</p>
                 </div>
-                <select id="contestSelect" class="cyber-select" style="max-width: 300px; padding: 8px;">
-                    <option value="new">-- Create New Contest --</option>
-                </select>
+                <div style="background: rgba(255,255,255,0.03); padding: 6px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                    <select id="contestSelect" class="cyber-select" style="max-width: 300px; padding: 10px 16px; background: transparent; border: none; outline: none; color: #fff; font-size: 14px; cursor: pointer;">
+                        <option value="new">✦ Create New Contest ✦</option>
+                    </select>
+                </div>
             </div>
             
-            <div class="form-group">
-                <label>Contest Title</label>
-                <input type="text" id="cTitle" class="form-input" placeholder="e.g. NicheCP Starter Round 6">
+            <div class="form-group fade-in-up stagger-2" style="position: relative; margin-bottom: 24px;">
+                <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--primary-accent); margin-bottom: 8px; display: block;">Contest Title</label>
+                <input type="text" id="cTitle" class="form-input" placeholder="e.g. NicheCP Starter Round 6" style="width: 100%; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 16px; transition: border-color 0.3s, box-shadow 0.3s;">
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;" class="fade-in-up stagger-3">
                 <div class="form-group">
-                    <label>Start Time</label>
-                    <input type="datetime-local" id="cStartTime" class="form-input">
+                    <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; display: block;">Start Time</label>
+                    <input type="datetime-local" id="cStartTime" class="form-input" style="width: 100%; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px;">
                 </div>
                 <div class="form-group">
-                    <label>Duration (Minutes)</label>
-                    <input type="number" id="cDuration" class="form-input" placeholder="120">
+                    <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; display: block;">Duration (Minutes)</label>
+                    <input type="number" id="cDuration" class="form-input" placeholder="120" style="width: 100%; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px;">
                 </div>
             </div>
 
-            <div class="form-group" style="margin-top: 16px;">
-                <label>Penalty Type</label>
-                <select id="cType" class="cyber-select form-input">
+            <div class="form-group fade-in-up stagger-4" style="margin-bottom: 32px;">
+                <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; display: block;">Penalty Type</label>
+                <select id="cType" class="cyber-select form-input" style="width: 100%; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px;">
                     <option value="ICPC">ICPC (Time + 20m penalty)</option>
                     <option value="IOI">IOI (Partial Scoring)</option>
                     <option value="CUSTOM">Custom (Base Scoring)</option>
                 </select>
             </div>
 
-            <div style="margin-top: 24px; display: flex; align-items: center; gap: 16px;">
-                <button id="saveContestBtn" class="btn-primary" style="padding: 10px 24px; font-size: 14px; border-radius: 6px;">Create Contest</button>
-                <span id="cMsg" style="font-size: 13px; display: none;"></span>
+            <div class="fade-in-up stagger-5" style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 24px;">
+                <p style="font-size: 13px; color: var(--text-muted); max-width: 400px; line-height: 1.5;">
+                    <span style="color: var(--primary-accent); font-weight: 600;">Note:</span> After creating the contest, note the Contest ID and use the "Problems" tab to link existing or new problems to it.
+                </p>
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <span id="cMsg" style="font-size: 14px; display: none; font-weight: 500;"></span>
+                    <button id="saveContestBtn" class="btn-magnetic" style="padding: 12px 32px; font-size: 15px; border-radius: 30px; display: flex; align-items: center; gap: 8px; border: none; cursor: pointer;">
+                        <span>Create Contest</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </button>
+                </div>
             </div>
-            
-            <p style="font-size: 12px; color: var(--text-muted); margin-top: 16px;">
-                After creating the contest, note the Contest ID and use the "Problems" tab to link existing or new problems to it.
-            </p>
         </div>
     </main>
 

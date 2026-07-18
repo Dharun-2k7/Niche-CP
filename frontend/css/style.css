@@ -3,41 +3,28 @@
    ========================================================================= */
 
 
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 :root {
-    /* DEFAULT THEME: Quantum Neon (Premium) */
-    --bg-base: #050505;
-    --card-bg: rgba(255, 255, 255, 0.03);
-    --card-border: rgba(0, 240, 255, 0.15);
-    --card-border-hover: rgba(0, 240, 255, 0.6);
-    --primary-accent: #00e5ff;
-    --secondary-accent: #b026ff;
-    --text-primary: #ffffff;
-    --text-muted: #a1a1aa;
-    --btn-text: #000000;
-}
-
-[data-theme="aurora"] {
-    --bg-base: #02040a;
-    --card-bg: rgba(255, 255, 255, 0.03);
-    --card-border: rgba(16, 185, 129, 0.15);
-    --card-border-hover: rgba(16, 185, 129, 0.6);
-    --primary-accent: #10b981;
-    --secondary-accent: #0284c7;
-    --text-primary: #f8fafc;
-    --text-muted: #94a3b8;
-    --btn-text: #020617;
-}
-
-[data-theme="solar"] {
-    --bg-base: #0f0a05;
-    --card-bg: rgba(255, 255, 255, 0.03);
-    --card-border: rgba(249, 115, 22, 0.15);
-    --card-border-hover: rgba(249, 115, 22, 0.6);
-    --primary-accent: #f97316;
-    --secondary-accent: #eab308;
-    --text-primary: #fafafa;
-    --text-muted: #a3a3a3;
-    --btn-text: #000000;
+    /* NicheCP Premium Design System */
+    --bg-base: #060606;
+    --card-bg: #101010;
+    --card-hover: #171717;
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-border-hover: #3B82F6;
+    --primary-accent: #3B82F6;
+    --text-primary: #FAFAFA;
+    --text-muted: #A3A3A3;
+    --btn-text: #FAFAFA;
+    
+    /* Design Tokens */
+    --radius-sm: 12px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    
+    --transition-fast: 150ms;
+    --transition-normal: 220ms;
+    --transition-slow: 350ms;
 }
 
 /* ================== GLOBAL STYLES & RESET ================== */
@@ -119,8 +106,13 @@ body::before {
 ::-webkit-scrollbar-thumb:hover { background: var(--primary-accent); }
 
 /* Typography */
-h1, h2, h3, h4, h5, h6, .display-font {
-    font-family: 'Space Grotesk', sans-serif;
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+}
+.display-font {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400; /* Instrument Serif looks best at 400 */
     color: var(--text-primary);
 }
 
@@ -177,12 +169,12 @@ h1, h2, h3, h4, h5, h6, .display-font {
 }
 
 .glass-nav .nav-brand {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    font-weight: 400;
     color: var(--text-primary);
     text-decoration: none;
-    letter-spacing: -0.5px;
+    letter-spacing: 0;
     display: flex;
     align-items: center;
     padding-left: 12px;
@@ -300,7 +292,7 @@ h1, h2, h3, h4, h5, h6, .display-font {
 }
 
 .nav-brand {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 20px;
     font-weight: 700;
     letter-spacing: -0.5px;
@@ -564,7 +556,7 @@ h1, h2, h3, h4, h5, h6, .display-font {
     border-color: var(--primary-accent);
 }
 .stat-number {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 64px;
     font-weight: 800;
     color: var(--primary-accent);
@@ -621,7 +613,7 @@ h1, h2, h3, h4, h5, h6, .display-font {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 24px;
     font-weight: bold;
     color: var(--primary-accent);
@@ -669,7 +661,7 @@ h1, h2, h3, h4, h5, h6, .display-font {
 }
 .transform-card .slide-year,
 .slide-year {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 16px;
     color: var(--primary-accent);
     margin-bottom: 12px;
@@ -705,7 +697,7 @@ h1, h2, h3, h4, h5, h6, .display-font {
     transition: width 0.4s ease;
 }
 .evolution-label {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
     color: var(--text-muted);
     letter-spacing: 1px;
@@ -724,7 +716,7 @@ h1, h2, h3, h4, h5, h6, .display-font {
     border: 1px solid var(--card-border);
 }
 .path-node {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 24px;
     color: var(--text-muted);
     transition: color 0.3s;
@@ -745,7 +737,7 @@ h1, h2, h3, h4, h5, h6, .display-font {
     text-align: center;
 }
 .cinematic-text {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: clamp(32px, 5vw, 64px);
     font-weight: 800;
     line-height: 1.4;
@@ -861,7 +853,7 @@ h1, h2, h3, h4, h5, h6, .display-font {
 }
 
 .code-val {
-    font-family: 'Space Grotesk', 'Courier New', Courier, monospace;
+    font-family: 'JetBrains Mono', monospace;
     color: var(--secondary-accent);
     font-weight: bold;
 }
@@ -931,7 +923,7 @@ h1, h2, h3, h4, h5, h6, .display-font {
     border: 1px solid var(--card-border);
     border-radius: 8px;
     padding: 15px;
-    font-family: 'Space Grotesk', 'Courier New', Courier, monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 15px;
     resize: vertical;
     outline: none;
@@ -965,7 +957,7 @@ h1, h2, h3, h4, h5, h6, .display-font {
     z-index: 1000;
     padding: 15px 40px;
     border-radius: 50px;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-weight: bold;
     font-size: 16px;
     color: white;
@@ -1778,4 +1770,58 @@ h1, h2, h3, h4, h5, h6, .display-font {
     font-size: 13px;
     display: flex;
     justify-content: space-between;
+}
+
+/* ==========================================
+   MODERN UI/UX ANIMATIONS & UTILITIES (21st.dev inspired)
+   ========================================== */
+.fade-in-down {
+    animation: fadeInDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.fade-in {
+    animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Staggered Animations */
+.stagger-1 { animation-delay: 0.1s; opacity: 0; }
+.stagger-2 { animation-delay: 0.2s; opacity: 0; }
+.stagger-3 { animation-delay: 0.3s; opacity: 0; }
+.stagger-4 { animation-delay: 0.4s; opacity: 0; }
+.stagger-5 { animation-delay: 0.5s; opacity: 0; }
+
+/* Micro-interactions */
+.hover-lift {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-lift:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.05);
+}
+
+.glow-hover {
+    transition: box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s;
+}
+.glow-hover:hover {
+    box-shadow: 0 0 25px var(--primary-accent), inset 0 0 10px rgba(0, 0, 0, 0.5);
+    border-color: var(--primary-accent);
 }

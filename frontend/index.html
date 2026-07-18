@@ -12,6 +12,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
+    <!-- Three.js for Particle Swarm -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+
 </head>
 <body data-theme="quantum">
 
@@ -22,44 +25,77 @@
     <!-- Floating Glass Navigation (Injected via JS) -->
     <div id="global-nav-container"></div>
 
+    <!-- Three.js Background Container -->
+    <div id="three-canvas-container" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;"></div>
+
     <!-- 1. Hero Section -->
-    <header style="padding: 80px 40px 60px; text-align: center; max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; align-items: center;">
-        <h1 class="display-font" style="font-size: clamp(48px, 8vw, 96px); font-weight: 800; letter-spacing: -2px; margin-bottom: 16px; line-height: 1;">
-            NicheCP
-        </h1>
-        <h2 style="font-size: 24px; color: var(--text-muted); font-weight: 400; letter-spacing: -0.5px; margin-bottom: 40px;">
-            Competitive Programming Platform
-        </h2>
+    <header class="hero" style="position: relative; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; max-width: 900px; margin: 0 auto; padding: 0 20px;">
         
-        <div style="display: flex; gap: 16px; margin-bottom: 40px;">
-            <a href="arena.html" class="btn-magnetic" style="font-size: 15px; border-radius: 6px; padding: 12px 28px;">Enter Platform</a>
-            <a href="#contests" class="btn-ghost" style="font-size: 15px; border-radius: 6px; padding: 12px 28px; text-decoration: none;">View Contests</a>
+        <!-- Eyebrow -->
+        <div style="font-size: 13px; font-weight: 600; letter-spacing: 1.5px; color: var(--primary-accent); margin-bottom: 24px; text-transform: uppercase;">
+            OPEN SOURCE • COMPETITIVE PROGRAMMING • BUILT WITH GO
         </div>
 
-        <p style="font-size: 13px; color: var(--text-muted); letter-spacing: 0.5px;">
-            Built and maintained by the Amrita Nagercoil ICPC Club.
+        <!-- Main Heading -->
+        <h1 style="font-size: clamp(42px, 6vw, 96px); font-weight: 700; letter-spacing: -2px; margin-bottom: 24px; line-height: 1.1; color: var(--text-primary);">
+            The Competitive Programming Platform Built for the <span class="display-font" style="font-size: clamp(52px, 7vw, 110px); color: var(--text-primary); display: inline-block; line-height: 1;">Next Generation</span> of Engineers.
+        </h1>
+
+        <!-- Supporting Paragraph -->
+        <p style="font-size: 18px; color: var(--text-muted); font-weight: 400; line-height: 1.6; max-width: 65ch; margin: 0 auto 40px;">
+            Practice algorithms, compete in contests, improve your rating, and build real competitive programming skills on a platform engineered for speed, fairness, and scalability.
         </p>
+        
+        <!-- CTAs -->
+        <div style="display: flex; gap: 16px; margin-bottom: 48px; align-items: center; justify-content: center; flex-wrap: wrap;">
+            <a href="problems.html" class="btn-magnetic" style="font-size: 16px; border-radius: 16px; padding: 14px 32px;">Explore Problems</a>
+            <a href="#contests" class="btn-ghost" style="font-size: 16px; border-radius: 16px; padding: 14px 32px; text-decoration: none;">Host Contest</a>
+            <a href="https://github.com" target="_blank" class="btn-ghost" style="font-size: 16px; border-radius: 16px; padding: 14px 32px; text-decoration: none; border-color: rgba(255,255,255,0.2);">GitHub</a>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator" style="position: absolute; bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <div style="width: 24px; height: 40px; border: 2px solid rgba(255,255,255,0.2); border-radius: 12px; position: relative;">
+                <div class="scroll-wheel" style="width: 4px; height: 8px; background: var(--primary-accent); border-radius: 2px; position: absolute; top: 8px; left: 50%; transform: translateX(-50%);"></div>
+            </div>
+        </div>
     </header>
 
-    <!-- 2. Platform Overview -->
-    <section class="section-container" style="padding: 40px;">
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
-            <div class="module-card">
-                <h3 style="font-size: 16px; margin-bottom: 8px; font-weight: 600;">Host</h3>
-                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0;">Automated contest management and evaluation.</p>
+    <!-- 2. Platform Overview (Bento Box) -->
+    <section class="section-container" style="padding: 40px; max-width: 1200px; margin: 0 auto; z-index: 10; position: relative;">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, minmax(180px, auto)); gap: 20px;">
+            
+            <!-- Bento Item 1: Large Feature -->
+            <div class="module-card" style="grid-column: span 2; grid-row: span 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 32px; background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(59,130,246,0.05) 100%);">
+                <svg class="outline-icon" viewBox="0 0 24 24" style="margin-bottom: 24px; width: 48px; height: 48px;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                <h3 style="font-size: 24px; margin-bottom: 12px; font-weight: 600; color: var(--text-primary);">High-Performance Sandbox</h3>
+                <p style="font-size: 15px; color: var(--text-muted); line-height: 1.6; margin: 0;">Automated, secure code execution environment built on isolated Docker containers, supporting C++, Go, Python, and Java with millisecond precision.</p>
             </div>
-            <div class="module-card">
-                <h3 style="font-size: 16px; margin-bottom: 8px; font-weight: 600;">Participate</h3>
-                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0;">Compete in algorithms, reverse coding, and team events.</p>
+
+            <!-- Bento Item 2 -->
+            <div class="module-card" style="grid-column: span 2; display: flex; flex-direction: column; justify-content: center; padding: 24px;">
+                <h3 style="font-size: 18px; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">Real-time Contests</h3>
+                <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5; margin: 0;">Compete against others globally with live leaderboards, penalty tracking, and instant verdicts.</p>
             </div>
-            <div class="module-card">
-                <h3 style="font-size: 16px; margin-bottom: 8px; font-weight: 600;">Practice</h3>
-                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0;">Solve archived problems across distinct learning tracks.</p>
+
+            <!-- Bento Item 3 -->
+            <div class="module-card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 24px;">
+                <svg class="outline-icon" viewBox="0 0 24 24" style="width: 32px; height: 32px; margin-bottom: 16px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <div>
+                    <h3 style="font-size: 16px; margin-bottom: 4px; font-weight: 600;">Speed</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Sub-10ms evaluation.</p>
+                </div>
             </div>
-            <div class="module-card">
-                <h3 style="font-size: 16px; margin-bottom: 8px; font-weight: 600;">Track</h3>
-                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0;">Monitor your ELO rating progression over time.</p>
+
+            <!-- Bento Item 4 -->
+            <div class="module-card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 24px;">
+                <svg class="outline-icon" viewBox="0 0 24 24" style="width: 32px; height: 32px; margin-bottom: 16px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <div>
+                    <h3 style="font-size: 16px; margin-bottom: 4px; font-weight: 600;">Security</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Strict isolated runtime.</p>
+                </div>
             </div>
+
         </div>
     </section>
 
@@ -392,6 +428,7 @@
     <!-- Scripts -->
     <script src="js/interactions.js"></script>
     <script src="js/animations.js"></script>
+    <script src="js/three-hero.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Handle OAuth token in URL

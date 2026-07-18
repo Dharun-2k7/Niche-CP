@@ -165,13 +165,19 @@ func VerifyCollegeEmailOTP(c *gin.Context) {
 
 	// Extract roll number from email (e.g., nc.sc.u4cse24012@...)
 	rollNo := ""
-	emailParts := strings.Split(req.Email, "@")
-	if len(emailParts) > 0 {
-		rollNo = strings.ToUpper(emailParts[0])
+	if strings.HasSuffix(req.Email, "amrita.edu") {
+		emailParts := strings.Split(req.Email, "@")
+		if len(emailParts) > 0 {
+			rollNo = strings.ToUpper(emailParts[0])
+		}
 	}
 
 	// Update DB
-	_, err = db.DB.Exec(`UPDATE users SET college_email = $1, is_college_verified = true, roll_no = $2 WHERE id = $3`, req.Email, rollNo, userID)
+	if rollNo != "" {
+		_, err = db.DB.Exec(`UPDATE users SET college_email = $1, is_college_verified = true, roll_no = $2 WHERE id = $3`, req.Email, rollNo, userID)
+	} else {
+		_, err = db.DB.Exec(`UPDATE users SET college_email = $1, is_college_verified = true WHERE id = $2`, req.Email, userID)
+	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update college email"})
 		return

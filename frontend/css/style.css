@@ -1400,9 +1400,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .repovive-arena-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    height: calc(100vh - 190px); /* Adjusted to prevent scrolling with new margin-top */
+    display: flex;
+    height: calc(100vh - 190px);
     overflow: hidden;
 }
 .repovive-arena-left, .repovive-arena-right {
@@ -1411,8 +1410,26 @@ h1, h2, h3, h4, h5, h6 {
     overflow: hidden;
 }
 .repovive-arena-left {
+    flex: 1;
+    min-width: 200px;
     border-right: 1px solid rgba(255,255,255,0.05);
     background: rgba(20, 20, 22, 0.5);
+}
+.repovive-arena-right {
+    flex: 1;
+    min-width: 300px;
+}
+.drag-divider {
+    width: 6px;
+    background: transparent;
+    cursor: col-resize;
+    position: relative;
+    z-index: 50;
+    transition: background 0.2s;
+    margin: 0 -3px; /* overlap to make it easier to grab without adding width */
+}
+.drag-divider:hover, .drag-divider.dragging {
+    background: var(--primary-accent);
 }
 .repovive-arena-tabs {
     display: flex;

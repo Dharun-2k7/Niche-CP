@@ -10,25 +10,28 @@
         .problem-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 16px;
             margin-top: 24px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            background: rgba(10, 10, 12, 0.4);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
         }
         .problem-row {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 16px 24px;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.15s ease;
             text-decoration: none;
             color: inherit;
         }
+        .problem-row:last-child {
+            border-bottom: none;
+        }
         .problem-row:hover {
-            border-color: rgba(255,255,255,0.2);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            background: rgba(255,255,255,0.03);
         }
         .diff-tag {
             padding: 4px 10px;
@@ -128,18 +131,18 @@
 
                     list.innerHTML += `
                         <a href="problem.html?problem_id=${p.id}" class="problem-row">
-                            <div style="display:flex; align-items:center; gap:24px;">
-                                <div style="font-family:monospace; color:var(--text-muted); font-size:14px; width:60px;">NCP-${p.id}</div>
-                                <div>
-                                    <div style="font-size:16px; font-weight:600; margin-bottom:6px;">${p.title}</div>
+                            <div style="display:flex; align-items:center; gap:16px;">
+                                <div style="font-family:var(--font-mono); color:var(--text-muted); font-size:13px; width:50px;">NCP-${p.id}</div>
+                                <div style="display:flex; align-items:center; gap: 12px;">
+                                    <div style="font-size:15px; font-weight:500;">${p.title}</div>
                                     <div style="display:flex; align-items:center;">
                                         ${tagsHtml}
                                     </div>
                                 </div>
                             </div>
-                            <div style="display:flex; align-items:center; gap:24px;">
-                                <div class="diff-tag ${diffClass}">${diffText}</div>
-                                <div style="color:var(--text-muted); font-size:13px; display:flex; align-items:center; gap:4px;">
+                            <div style="display:flex; align-items:center; gap:20px;">
+                                <div class="diff-tag ${diffClass}" style="width: 70px; text-align: center;">${diffText}</div>
+                                <div style="color:var(--text-muted); font-size:13px; display:flex; align-items:center; gap:4px; width: 80px; justify-content: flex-end;">
                                     ${solveStatusHtml}
                                 </div>
                             </div>

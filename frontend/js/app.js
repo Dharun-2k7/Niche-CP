@@ -48,10 +48,31 @@ document.addEventListener('DOMContentLoaded', () => {
     if (editorContainer && window.require) {
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
         require(['vs/editor/editor.main'], function() {
+            monaco.editor.defineTheme('nichecp-dark', {
+                base: 'vs-dark',
+                inherit: true,
+                rules: [
+                    { background: '060606' },
+                    { token: 'keyword', foreground: '3B82F6' },
+                    { token: 'string', foreground: '10B981' },
+                    { token: 'comment', foreground: '6B7280', fontStyle: 'italic' },
+                    { token: 'number', foreground: 'F59E0B' }
+                ],
+                colors: {
+                    'editor.background': '#060606',
+                    'editor.foreground': '#F3F4F6',
+                    'editor.lineHighlightBackground': '#111115',
+                    'editorLineNumber.foreground': '#4B5563',
+                    'editorIndentGuide.background': '#1F2937',
+                    'editorSuggestWidget.background': '#0D0D12',
+                    'editorSuggestWidget.border': '#1F2937'
+                }
+            });
+
             monacoEditor = monaco.editor.create(editorContainer, {
                 value: 'def solve(n):\n    # Write your logic here\n    pass',
                 language: 'python',
-                theme: 'vs-dark',
+                theme: 'nichecp-dark',
                 automaticLayout: true,
                 minimap: { enabled: false },
                 fontSize: 14,

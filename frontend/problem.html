@@ -33,7 +33,7 @@
     </div>
 
     <main class="repovive-arena-layout">
-        <div class="repovive-arena-left">
+        <div class="repovive-arena-left" id="arenaLeft">
             <div class="repovive-arena-tabs">
                 <div class="tab active">Statement</div>
             </div>
@@ -42,7 +42,9 @@
             </div>
         </div>
         
-        <div class="repovive-arena-right" style="position: relative; display: flex; flex-direction: column;">
+        <div class="drag-divider" id="dragDivider"></div>
+        
+        <div class="repovive-arena-right" id="arenaRight" style="position: relative; display: flex; flex-direction: column;">
             <div class="editor-top" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px 16px; background: var(--card-bg);">
                 <div style="display: flex; gap: 16px; align-items: center;">
                     <select id="language" class="cyber-select" style="padding: 4px 12px; font-size: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: white;">
@@ -215,6 +217,50 @@
                     document.querySelectorAll('.tc-pane').forEach(p => p.style.display = 'none');
                     document.getElementById(target.dataset.target).style.display = 'flex';
                 });
+            });
+
+            // Resizable panels logic
+            const divider = document.getElementById('dragDivider');
+            const leftPane = document.getElementById('arenaLeft');
+            const rightPane = document.getElementById('arenaRight');
+            let isDragging = false;
+
+            divider.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                divider.classList.add('dragging');
+                document.body.style.cursor = 'col-resize';
+                // Prevent text selection while dragging
+                e.preventDefault(); 
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                // Calculate percentage
+                const containerWidth = document.querySelector('.repovive-arena-layout').offsetWidth;
+                const newLeftWidth = e.clientX; // Assuming layout touches left edge. Actually let's use bounding client rect
+                const layoutRect = document.querySelector('.repovive-arena-layout').getBoundingClientRect();
+                let percentage = ((e.clientX - layoutRect.left) / containerWidth) * 100;
+                
+                // Boundaries
+                if (percentage < 20) percentage = 20;
+                if (percentage > 80) percentage = 80;
+                
+                leftPane.style.flex = `0 0 ${percentage}%`;
+                rightPane.style.flex = `1 1 0%`;
+
+                // If Monaco editor exists, tell it to resize
+                if (window.monacoEditor) {
+                    window.monacoEditor.layout();
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    divider.classList.remove('dragging');
+                    document.body.style.cursor = 'default';
+                }
             });
         });
     </script>

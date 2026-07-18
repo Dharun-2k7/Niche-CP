@@ -1002,11 +1002,18 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Simple Campus Dashboard Classes */
 .campus-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
+    background: rgba(20, 20, 22, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     padding: 24px;
     margin-bottom: 24px;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.campus-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .campus-title {

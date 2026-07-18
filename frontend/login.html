@@ -8,36 +8,80 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #0d0d12;
             margin: 0;
-            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            overflow: hidden;
         }
 
-        .login-container {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 40px;
-            border-radius: 16px;
-            backdrop-filter: blur(10px);
-            text-align: center;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            max-width: 400px;
+        .split-layout {
+            display: flex;
+            min-height: 100vh;
             width: 100%;
         }
 
+        .split-left {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .split-right {
+            flex: 1;
+            display: none;
+            position: relative;
+            background: radial-gradient(circle at center, rgba(59,130,246,0.05) 0%, var(--bg-color) 100%);
+            border-left: 1px solid rgba(255,255,255,0.05);
+            overflow: hidden;
+        }
+
+        @media (min-width: 900px) {
+            .split-right {
+                display: flex;
+            }
+        }
+
+        /* Ambient Grid for Right Pane */
+        .ambient-grid {
+            position: absolute;
+            inset: -100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            transform: perspective(500px) rotateX(45deg);
+            animation: gridMove 20s linear infinite;
+            mask-image: radial-gradient(circle at center, black 20%, transparent 70%);
+            -webkit-mask-image: radial-gradient(circle at center, black 20%, transparent 70%);
+        }
+
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(60px); }
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 380px;
+        }
+
         .login-title {
-            color: white;
-            font-size: 2rem;
-            margin-bottom: 10px;
+            font-family: var(--font-display);
+            font-size: 36px;
+            margin-bottom: 8px;
+            font-weight: 400;
         }
 
         .login-subtitle {
-            color: #a0a0a0;
-            margin-bottom: 30px;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            font-size: 15px;
         }
 
         .google-btn {
@@ -128,9 +172,14 @@
         }
     </style>
 </head>
-<body>
-
-    <div class="login-container">
+    <div class="split-layout">
+        <!-- Left: Form -->
+        <div class="split-left">
+            <div class="login-container">
+                <!-- Simple Logo/Brand -->
+                <a href="index.html" style="display: inline-block; color: white; text-decoration: none; font-weight: 700; font-size: 20px; letter-spacing: -0.5px; margin-bottom: 40px;">
+                    <span style="color: var(--primary-accent);">Niche</span>CP
+                </a>
         <h1 class="login-title">Welcome Back</h1>
         <p class="login-subtitle">Sign in to access the ICPC Arena</p>
 
@@ -179,6 +228,15 @@
         </a>
 
         <a href="register.html" class="auth-link">Don't have an account? Register</a>
+        </div>
+        </div>
+
+        <!-- Right: Visual -->
+        <div class="split-right">
+            <div class="ambient-grid"></div>
+            <!-- Floating Elements / Orbs could go here -->
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%); border-radius: 50%; filter: blur(40px);"></div>
+        </div>
     </div>
 
     <script>

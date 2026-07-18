@@ -1583,12 +1583,16 @@ h1, h2, h3, h4, h5, h6 {
     grid-template-columns: 2fr 1fr 1.5fr;
     padding: 24px;
     align-items: center;
+    border: 1px solid transparent;
     border-bottom: 1px solid rgba(255,255,255,0.02);
-    transition: background 0.2s;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    border-radius: 8px;
 }
 
 .contest-row:hover {
-    background: rgba(255,255,255,0.01);
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(255,255,255,0.08);
+    transform: translateY(-1px);
 }
 
 .contest-title {

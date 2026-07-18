@@ -24,6 +24,31 @@
             background: rgba(255,255,255,0.1);
             border-radius: 4px;
         }
+        
+        .live-indicator {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #ef4444;
+            border-radius: 50%;
+            margin-left: 4px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        
+        .row-enter-active {
+            animation: slideIn 0.4s ease-out forwards;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body data-theme="quantum">
@@ -84,9 +109,9 @@
                         <div class="arena-panel">
                             <div class="arena-panel-header" style="justify-content: space-between;">
                                 <span>COMMENTARY</span>
-                                <span style="color:var(--text-primary); text-transform:none;">View all</span>
+                                <span style="color:var(--text-primary); text-transform:none;">Live <span class="live-indicator"></span></span>
                             </div>
-                            <div class="arena-panel-scroll">
+                            <div class="arena-panel-scroll" id="commentaryList">
                                 <div class="commentary-row">
                                     <div><span style="font-weight:600;">Pratik Mistry</span> got <span style="color:#10b981;">Accepted</span> on B</div>
                                     <div style="color:var(--text-muted);">3m ago</div>
@@ -142,9 +167,9 @@
                 <div class="arena-panel">
                     <div class="arena-panel-header" style="justify-content: space-between;">
                         <span>RANKING</span>
-                        <span style="color:var(--text-primary); text-transform:none;">View all</span>
+                        <span style="color:var(--text-primary); text-transform:none;">Live <span class="live-indicator"></span></span>
                     </div>
-                    <div class="arena-panel-scroll">
+                    <div class="arena-panel-scroll" id="rankingList">
                         
                         <div class="ranking-row">
                             <div style="color:var(--text-muted);">1</div>
@@ -288,6 +313,47 @@
                 titleEl.textContent = "Contest Preview";
                 document.getElementById('problemsList').innerHTML = '<div style="text-align:center; color: var(--text-muted); margin-top: 40px; font-size:14px;">No contest selected.</div>';
             }
+
+            // Phase 5: Mock WebSocket Integration for Live Commentary and Rankings
+            const commentaryList = document.getElementById('commentaryList');
+            const rankingList = document.getElementById('rankingList');
+
+            const users = ['Pratik Mistry', 'seroze kim', 'Hello', 'Alex Wice', 'maspy', 'tourist', 'Benq'];
+            const problems = ['A', 'B', 'C', 'D', 'E'];
+            const verdicts = [
+                { text: 'Accepted', color: '#10b981' },
+                { text: 'Wrong Answer', color: '#ef4444' },
+                { text: 'Time Limit Exceeded', color: '#f59e0b' }
+            ];
+
+            function addMockCommentary() {
+                const user = users[Math.floor(Math.random() * users.length)];
+                const prob = problems[Math.floor(Math.random() * problems.length)];
+                // Weight Accepted higher
+                const verdict = Math.random() > 0.4 ? verdicts[0] : verdicts[Math.floor(Math.random() * verdicts.length)];
+                
+                const div = document.createElement('div');
+                div.className = 'commentary-row row-enter-active';
+                div.innerHTML = `
+                    <div><span style="font-weight:600;">${user}</span> got <span style="color:${verdict.color};">${verdict.text}</span> on ${prob}</div>
+                    <div style="color:var(--text-muted);">Just now</div>
+                `;
+                
+                commentaryList.insertBefore(div, commentaryList.firstChild);
+                
+                // Keep list small
+                if (commentaryList.children.length > 20) {
+                    commentaryList.removeChild(commentaryList.lastChild);
+                }
+            }
+
+            // Simulate incoming events
+            setInterval(() => {
+                if(Math.random() > 0.3) {
+                    addMockCommentary();
+                }
+            }, 3500);
+
         });
     </script>
 <script src="js/components.js"></script>

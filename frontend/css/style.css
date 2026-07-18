@@ -1960,3 +1960,11 @@ h1, h2, h3, h4, h5, h6 {
 .custom-toggle input:checked + .toggle-track .toggle-thumb {
     transform: translateX(20px);
 }
+
+@media screen and (max-width: 768px) {
+    .admin-data-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}

@@ -1,3 +1,35 @@
+// =========================================================================
+// Global Fetch Override for Network Errors
+// =========================================================================
+const originalFetch = window.fetch;
+window.fetch = async function(...args) {
+    try {
+        const response = await originalFetch(...args);
+        return response;
+    } catch (error) {
+        showConnectionErrorUI();
+        throw new Error('NicheCP_Network_Error');
+    }
+};
+
+function showConnectionErrorUI() {
+    if (document.getElementById('nichecp-connection-error')) return;
+    const errorHTML = `
+        <div id="nichecp-connection-error" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+            <div class="module-card" style="text-align: center; max-width: 400px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="width: 48px; height: 48px; margin-bottom: 16px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">Unable to connect to the server.</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">The backend service appears to be offline or unreachable.</p>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button class="btn-magnetic" style="padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; color: #fff;" onclick="window.location.reload()">Retry</button>
+                    <button class="btn-ghost" style="padding: 10px 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: transparent; color: var(--text-primary); cursor: pointer;" onclick="document.getElementById('nichecp-connection-error').remove()">Check Backend Status</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', errorHTML);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Auth Check Logic
     const urlParams = new URLSearchParams(window.location.search);
@@ -327,12 +359,13 @@ async function renderGlobalNav(token) {
     if (token) {
         // Authenticated Navbar
         const authNavItems = [
-            { label: 'Problems', path: 'problems.html' },
+            { label: 'Dashboard', path: 'index.html' },
+            { label: 'Problems', path: 'arena.html' },
             { label: 'Contests', path: 'contests.html' },
-            { label: 'Practice', path: 'practice.html' },
-            { label: 'Learn', path: 'learn.html' },
-            { label: 'Rankings', path: 'rankings.html' },
-            { label: 'Blogs', path: 'blogs.html' }
+            { label: 'Practice', path: 'coming-soon.html' },
+            { label: 'Learn', path: 'coming-soon.html' },
+            { label: 'Rankings', path: 'coming-soon.html' },
+            { label: 'Blogs', path: 'coming-soon.html' }
         ];
 
         navLinksHTML = authNavItems.map(item => {
@@ -354,12 +387,12 @@ async function renderGlobalNav(token) {
         // Unauthenticated Navbar (Landing Page)
         const unauthNavItems = [
             { label: 'Home', path: 'index.html' },
-            { label: 'Problems', path: 'problems.html' },
+            { label: 'Problems', path: 'arena.html' },
             { label: 'Contests', path: 'contests.html' },
-            { label: 'Learn', path: 'learn.html' },
-            { label: 'Rankings', path: 'rankings.html' },
-            { label: 'Blogs', path: 'blogs.html' },
-            { label: 'About', path: 'about.html' }
+            { label: 'Learn', path: 'coming-soon.html' },
+            { label: 'Rankings', path: 'coming-soon.html' },
+            { label: 'Blogs', path: 'coming-soon.html' },
+            { label: 'About', path: 'coming-soon.html' }
         ];
 
         navLinksHTML = unauthNavItems.map(item => {

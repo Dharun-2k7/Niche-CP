@@ -25,20 +25,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const tl = gsap.timeline();
-    tl.from(".hero-subtitle", {
-        opacity: 0,
-        y: 15,
-        duration: 0.5,
-        ease: "power2.out"
-    }, "-=0.4")
-    .from(".hero-cta .btn-magnetic", {
-        opacity: 0,
-        y: 10,
-        stagger: 0.1,
-        duration: 0.4,
-        ease: "power2.out"
-    }, "-=0.3");
+    if (document.querySelector('.hero-subtitle')) {
+        const tl = gsap.timeline();
+        tl.from(".hero-subtitle", {
+            opacity: 0,
+            y: 15,
+            duration: 0.5,
+            ease: "power2.out"
+        }, "-=0.4")
+        .from(".hero-cta .btn-magnetic", {
+            opacity: 0,
+            y: 10,
+            stagger: 0.1,
+            duration: 0.4,
+            ease: "power2.out"
+        }, "-=0.3");
+    }
 
     // =========================================================================
     // 2. VIEWPORT FADE-INS (Cards & Sections)

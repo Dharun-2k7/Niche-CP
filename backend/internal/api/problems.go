@@ -48,7 +48,7 @@ func GetAllProblems(c *gin.Context) {
 	}
 	defer rows.Close()
 
-	var problems []map[string]interface{}
+	problems := make([]map[string]interface{}, 0)
 	for rows.Next() {
 		var id int
 		var title, difficulty, tags string
@@ -72,7 +72,7 @@ func GetAllContests(c *gin.Context) {
 	}
 	defer rows.Close()
 
-	var contests []map[string]interface{}
+	contests := make([]map[string]interface{}, 0)
 	for rows.Next() {
 		var id, duration int
 		var title, typeStr string

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -40,6 +41,12 @@ func generateStateOauthCookie(c *gin.Context) string {
 // GoogleLogin redirects the user to the Google OAuth consent screen
 func GoogleLogin(c *gin.Context) {
 	oauthState := generateStateOauthCookie(c)
+	
+	referer := c.Request.Referer()
+	if referer != "" {
+		c.SetCookie("oauth_referer", referer, int(20*time.Minute.Seconds()), "/", "", false, true)
+	}
+
 	url := auth.GoogleOAuthConfig.AuthCodeURL(oauthState)
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
@@ -119,6 +126,11 @@ func GoogleCallback(c *gin.Context) {
 	// or redirect back to the frontend with the token in the URL fragment (hash).
 	// We will redirect back to the frontend's home page and pass the token securely.
 	frontendURL := os.Getenv("FRONTEND_URL")
+	if ref, err := c.Cookie("oauth_referer"); err == nil && ref != "" {
+		if parsed, err := url.Parse(ref); err == nil {
+			frontendURL = parsed.Scheme + "://" + parsed.Host
+		}
+	}
 	if frontendURL == "" {
 		frontendURL = "http://localhost:3000"
 	}

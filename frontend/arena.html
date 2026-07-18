@@ -101,7 +101,7 @@
                     } catch(e){}
                 }
                 
-                if (problems.length === 0) {
+                if (!problems || !Array.isArray(problems) || problems.length === 0) {
                     list.innerHTML = '<div style="text-align:center; color: var(--text-muted); margin-top: 40px;">No problems available.</div>';
                     return;
                 }

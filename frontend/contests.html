@@ -41,7 +41,12 @@
                 const past = [];
                 
                 // If it's returning a map/array wrapper
-                const contestList = data.contests || data || [];
+                const contestList = (data && (data.contests || data)) || [];
+                
+                if (!Array.isArray(contestList)) {
+                    container.innerHTML = '<div style="text-align:center; color: var(--text-muted); margin-top: 40px;">No contests available.</div>';
+                    return;
+                }
 
                 contestList.forEach(c => {
                     // strict UTC parsing

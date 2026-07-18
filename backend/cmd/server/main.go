@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"github.com/Dharun-2k7/online-coding-platform/internal/api"
 	"github.com/Dharun-2k7/online-coding-platform/internal/auth"
@@ -28,11 +27,7 @@ func main() {
 
 	// Basic CORS middleware
 	r.Use(func(c *gin.Context) {
-		allowedOrigin := os.Getenv("FRONTEND_URL")
-		if allowedOrigin == "" {
-			allowedOrigin = "http://localhost:3000"
-		}
-		c.Writer.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		if c.Request.Method == "OPTIONS" {

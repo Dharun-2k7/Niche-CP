@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Dharun-2k7/online-coding-platform/internal/auth"
+	"github.com/Dharun-2k7/online-coding-platform/internal/db"
 	"github.com/gin-gonic/gin"
 )
 
@@ -65,10 +66,18 @@ func RequireAdmin() gin.HandlerFunc {
 			return
 		}
 
-		// Hardcoded super admin
-		if email != "dharunkaarthick07@gmail.com" {
-			// Check if they have admin permissions in DB?
-			// For now, only allow the hardcoded email
+		var role string
+		db.DB.QueryRow(`SELECT role FROM users WHERE id = $1`, userID).Scan(&role)
+
+		isAdmin := false
+		if role == "admin" || role == "superadmin" {
+			isAdmin = true
+		}
+		if email == "dharunkaarthick07@gmail.com" {
+			isAdmin = true
+		}
+
+		if !isAdmin {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Admin access required"})
 			c.Abort()
 			return

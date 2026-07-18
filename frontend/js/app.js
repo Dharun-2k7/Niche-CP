@@ -362,11 +362,15 @@ async function renderGlobalNav(token) {
             { label: 'Dashboard', path: 'index.html' },
             { label: 'Problems', path: 'arena.html' },
             { label: 'Contests', path: 'contests.html' },
-            { label: 'Practice', path: 'coming-soon.html' },
-            { label: 'Learn', path: 'coming-soon.html' },
-            { label: 'Rankings', path: 'coming-soon.html' },
-            { label: 'Blogs', path: 'coming-soon.html' }
+            { label: 'Practice', path: 'practice.html' },
+            { label: 'Learn', path: 'learn.html' },
+            { label: 'Rankings', path: 'rankings.html' },
+            { label: 'Blogs', path: 'blogs.html' }
         ];
+
+        if (role === 'admin' || role === 'superadmin') {
+            authNavItems.push({ label: 'Admin', path: 'admin.html' });
+        }
 
         navLinksHTML = authNavItems.map(item => {
             const isActive = (currentPath === item.path) ? 'active' : '';
@@ -389,10 +393,10 @@ async function renderGlobalNav(token) {
             { label: 'Home', path: 'index.html' },
             { label: 'Problems', path: 'arena.html' },
             { label: 'Contests', path: 'contests.html' },
-            { label: 'Learn', path: 'coming-soon.html' },
-            { label: 'Rankings', path: 'coming-soon.html' },
-            { label: 'Blogs', path: 'coming-soon.html' },
-            { label: 'About', path: 'coming-soon.html' }
+            { label: 'Learn', path: 'learn.html' },
+            { label: 'Rankings', path: 'rankings.html' },
+            { label: 'Blogs', path: 'blogs.html' },
+            { label: 'About', path: 'about.html' }
         ];
 
         navLinksHTML = unauthNavItems.map(item => {

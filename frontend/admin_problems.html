@@ -375,12 +375,15 @@
                 group.style.display = 'block';
                 try {
                     const res = await fetch('http://localhost:8080/api/contests');
-                    const contests = await res.json();
+                    const data = await res.json();
+                    const contests = Array.isArray(data) ? data : (data.contests || []);
                     const select = document.getElementById('pContestId');
                     select.innerHTML = '<option value="">Select a contest...</option>';
-                    contests.forEach(c => {
-                        select.innerHTML += `<option value="${c.id}">${c.title} (ID: ${c.id})</option>`;
-                    });
+                    if (contests && Array.isArray(contests)) {
+                        contests.forEach(c => {
+                            select.innerHTML += `<option value="${c.id}">${c.title} (ID: ${c.id})</option>`;
+                        });
+                    }
                 } catch (e) {
                     document.getElementById('pContestId').innerHTML = '<option value="">Failed to load contests</option>';
                 }

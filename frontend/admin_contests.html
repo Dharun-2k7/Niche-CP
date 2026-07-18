@@ -79,7 +79,8 @@
             try {
                 const res = await fetch('http://localhost:8080/api/contests');
                 if (res.ok) {
-                    currentContests = await res.json();
+                    const data = await res.json();
+                    currentContests = Array.isArray(data) ? data : (data.contests || []);
                     const select = document.getElementById('contestSelect');
                     if(currentContests && currentContests.length > 0) {
                         currentContests.forEach(c => {

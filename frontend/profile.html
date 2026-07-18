@@ -317,18 +317,20 @@
                 <div>
                     <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Recent contests (last 10)</h3>
                     <div id="cfSubmissionsLoading" style="font-size: 13px; color: var(--text-muted);">Connect Codeforces to see contest history...</div>
-                    <table class="submissions-table" id="cfSubmissionsTable" style="width: 100%; border-collapse: collapse; display: none;">
-                        <thead>
-                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
-                                <th style="padding: 12px 0; text-align: left;">Contest</th>
-                                <th style="padding: 12px 0; text-align: right;">Rating</th>
-                                <th style="padding: 12px 0; text-align: right;">Delta</th>
-                                <th style="padding: 12px 0; text-align: right;">Rank</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cfSubmissionsBody">
-                        </tbody>
-                    </table>
+                    <div style="overflow-x: auto;">
+                        <table class="submissions-table" id="cfSubmissionsTable" style="width: 100%; border-collapse: collapse; display: none;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                                    <th style="padding: 12px 0; text-align: left;">Contest</th>
+                                    <th style="padding: 12px 0; text-align: right;">Rating</th>
+                                    <th style="padding: 12px 0; text-align: right;">Delta</th>
+                                    <th style="padding: 12px 0; text-align: right;">Rank</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cfSubmissionsBody">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -434,10 +436,12 @@
                     updateField('sidebarSubtitle', "Student @ Amrita Vishwa Vidyapeetham");
                     updateField('nicheBatchStat', userProfileData.batch || 'No Batch');
 
-                    // Extract Roll Number from Email
-                    let rollNumber = '--';
-                    if (userProfileData.email && userProfileData.email.includes('@')) {
-                        rollNumber = userProfileData.email.split('@')[0].toUpperCase();
+                    // Render Roll Number based on verified college email
+                    let rollNumber = 'Not Verified';
+                    if (userProfileData.is_college_verified && userProfileData.roll_no) {
+                        rollNumber = userProfileData.roll_no;
+                    } else if (userProfileData.is_college_verified && userProfileData.college_email) {
+                        rollNumber = userProfileData.college_email.split('@')[0].toUpperCase();
                     }
                     updateField('nicheRollNumberStat', rollNumber);
                     updateField('nicheSolvedStat', userProfileData.total_solved || 0);

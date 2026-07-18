@@ -143,8 +143,6 @@ type RegisterRequest struct {
 	Name     string `json:"name" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
-	RollNo   string `json:"roll_no" binding:"required"`
-	Batch    string `json:"batch" binding:"required"`
 	OTP      string `json:"otp" binding:"required,len=6"`
 }
 
@@ -172,15 +170,13 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
-	if req.RollNo == "" {
-		req.RollNo = extractRollNumber(req.Email)
-	}
+	rollNo := extractRollNumber(req.Email)
 
 	var userID int
 	err = db.DB.QueryRow(`
-		INSERT INTO users (name, email, password_hash, roll_no, batch) 
-		VALUES ($1, $2, $3, $4, $5) RETURNING id
-	`, req.Name, req.Email, string(hashedPassword), req.RollNo, req.Batch).Scan(&userID)
+		INSERT INTO users (name, email, password_hash, roll_no) 
+		VALUES ($1, $2, $3, $4) RETURNING id
+	`, req.Name, req.Email, string(hashedPassword), rollNo).Scan(&userID)
 
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {

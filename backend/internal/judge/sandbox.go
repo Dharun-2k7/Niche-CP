@@ -3,13 +3,45 @@ package judge
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
+
+	lru "github.com/hashicorp/golang-lru/v2"
+	"golang.org/x/sync/singleflight"
 )
+
+var (
+	cacheDir     = "/dev/shm/nichecp-cache"
+	binaryCache  *lru.Cache[string, string]
+	compileGroup singleflight.Group
+)
+
+func init() {
+	// 1. Clean up any orphaned binaries from previous crashes
+	_ = os.RemoveAll(cacheDir)
+
+	// 2. Ensure cache directory exists in RAM disk
+	if err := os.MkdirAll(cacheDir, 0777); err != nil {
+		log.Fatalf("Failed to initialize tmpfs cache: %v", err)
+	}
+
+	// 3. Initialize LRU Cache (Capacity: 500)
+	var err error
+	binaryCache, err = lru.NewWithEvict(500, func(key string, artifactDir string) {
+		// Eviction callback: Physically delete from tmpfs to free memory
+		log.Printf("[LRU] Evicting cached artifact from RAM: %s", artifactDir)
+		_ = os.RemoveAll(artifactDir)
+	})
+	if err != nil {
+		log.Fatalf("Failed to create LRU cache: %v", err)
+	}
+}
 
 // SandboxResult contains the output of a secure execution
 type SandboxResult struct {
@@ -18,57 +50,161 @@ type SandboxResult struct {
 	TimeExceeded bool
 }
 
-// RunSecurely takes raw code and input, runs it in an isolated Docker container, and returns the result
-func RunSecurely(code, language, input string) (*SandboxResult, error) {
-	// 1. Create a secure temporary directory
-	tempDir, err := os.MkdirTemp("", "judge_*")
-	if err != nil {
-		return nil, fmt.Errorf("failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tempDir) // Ensure cleanup happens
+type CompilationResult struct {
+	ArtifactDir string
+	Error       string // Compilation error message, empty if success
+}
 
-	// 2. Setup file extensions and execution commands based on language
+func getHash(code, language, compilerVersion, flags string) string {
+	h := sha256.New()
+	h.Write([]byte(code + language + compilerVersion + flags))
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+// CompileCode prepares or compiles the code and returns the path to the artifact directory.
+// Uses singleflight to prevent Thundering Herd, and LRU cache for memory safety.
+func CompileCode(code, language string) (*CompilationResult, error) {
+	var image string
+	var compileCmd []string
+	var isCompiled bool
+	var flags string
 	var filename string
+
+	switch language {
+	case "python":
+		filename = "main.py"
+		image = "python:3.9-alpine"
+		isCompiled = false
+	case "go":
+		filename = "main.go"
+		image = "golang:1.20"
+		// CGO_ENABLED=0 creates a statically linked binary
+		compileCmd = []string{"sh", "-c", "CGO_ENABLED=0 go build -a -installsuffix cgo -o /workspace/main /workspace/main.go"}
+		flags = "CGO_ENABLED=0 -a -installsuffix cgo"
+		isCompiled = true
+	case "cpp":
+		filename = "main.cpp"
+		image = "gcc:12"
+		// -static creates a statically linked binary compatible with Alpine
+		compileCmd = []string{"g++", "-static", "-O2", "/workspace/main.cpp", "-o", "/workspace/main"}
+		flags = "-static -O2"
+		isCompiled = true
+	case "c":
+		filename = "main.c"
+		image = "gcc:12"
+		compileCmd = []string{"gcc", "-static", "-O2", "/workspace/main.c", "-o", "/workspace/main"}
+		flags = "-static -O2"
+		isCompiled = true
+	case "java":
+		filename = "Main.java"
+		image = "openjdk:17-alpine"
+		compileCmd = []string{"javac", "/workspace/Main.java"}
+		flags = ""
+		isCompiled = true
+	default:
+		return nil, fmt.Errorf("unsupported language: %s", language)
+	}
+
+	hashStr := getHash(code, language, image, flags)
+
+	// Fast path: Check LRU cache
+	if path, ok := binaryCache.Get(hashStr); ok {
+		return &CompilationResult{ArtifactDir: path}, nil
+	}
+
+	// Slow path: Singleflight to coalesce concurrent identical compiles
+	res, err, _ := compileGroup.Do(hashStr, func() (interface{}, error) {
+		// Double-check cache in case another goroutine just finished it
+		if path, ok := binaryCache.Get(hashStr); ok {
+			return &CompilationResult{ArtifactDir: path}, nil
+		}
+
+		artifactDir := filepath.Join(cacheDir, hashStr)
+		if err := os.MkdirAll(artifactDir, 0777); err != nil {
+			return nil, fmt.Errorf("failed to create artifact dir: %v", err)
+		}
+
+		// Write source code
+		codePath := filepath.Join(artifactDir, filename)
+		if err := os.WriteFile(codePath, []byte(code), 0777); err != nil {
+			return nil, fmt.Errorf("failed to write code file: %v", err)
+		}
+
+		if !isCompiled {
+			// Interpreted languages don't need a Docker compile phase.
+			binaryCache.Add(hashStr, artifactDir)
+			return &CompilationResult{ArtifactDir: artifactDir}, nil
+		}
+
+		// Compilation Phase in Docker
+		dockerArgs := []string{
+			"run", "--rm",
+			"--network", "none",
+			"--memory", "512m", // Generous memory for compiler
+			"--cpus", "2.0",
+			"-v", fmt.Sprintf("%s:/workspace", artifactDir),
+			image,
+		}
+		dockerArgs = append(dockerArgs, compileCmd...)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second) // 10s compile timeout
+		defer cancel()
+
+		cmd := exec.CommandContext(ctx, "docker", dockerArgs...)
+		var stderr bytes.Buffer
+		cmd.Stderr = &stderr
+		cmd.Stdout = &stderr // Capture stdout just in case the compiler uses it for errors
+
+		err := cmd.Run()
+		if err != nil {
+			// Clean up failed compilation directory so it doesn't pollute tmpfs
+			_ = os.RemoveAll(artifactDir)
+
+			if ctx.Err() == context.DeadlineExceeded {
+				return &CompilationResult{Error: "Compilation Time Limit Exceeded"}, nil
+			}
+			return &CompilationResult{Error: stderr.String()}, nil
+		}
+
+		// Cache successful compilation in LRU
+		binaryCache.Add(hashStr, artifactDir)
+		return &CompilationResult{ArtifactDir: artifactDir}, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res.(*CompilationResult), nil
+}
+
+// RunArtifact executes a pre-compiled artifact or source file for the given language.
+// Uses ultra-lightweight alpine containers for statically compiled languages.
+func RunArtifact(artifactDir, language, input string) (*SandboxResult, error) {
 	var image string
 	var runCmd []string
 
 	switch language {
 	case "python":
-		filename = "main.py"
-		image = "python:3.9-slim"
+		image = "python:3.9-alpine"
 		runCmd = []string{"python3", "/workspace/main.py"}
 	case "go":
-		filename = "main.go"
-		image = "golang:1.20"
-		// 'go run' inside docker is slow, but fine for MVP
-		runCmd = []string{"go", "run", "/workspace/main.go"}
+		image = "alpine:latest" // Static binary
+		runCmd = []string{"/workspace/main"}
 	case "cpp":
-		filename = "main.cpp"
-		image = "gcc:12"
-		// Needs compile step first, then run
-		runCmd = []string{"sh", "-c", "g++ /workspace/main.cpp -o /workspace/main && /workspace/main"}
+		image = "alpine:latest" // Static binary
+		runCmd = []string{"/workspace/main"}
 	case "c":
-		filename = "main.c"
-		image = "gcc:12"
-		runCmd = []string{"sh", "-c", "gcc /workspace/main.c -o /workspace/main && /workspace/main"}
+		image = "alpine:latest" // Static binary
+		runCmd = []string{"/workspace/main"}
 	case "java":
-		filename = "Main.java"
-		image = "openjdk:17-jdk-slim"
-		runCmd = []string{"sh", "-c", "javac /workspace/Main.java && java -cp /workspace Main"}
+		image = "openjdk:17-alpine"
+		runCmd = []string{"java", "-cp", "/workspace", "Main"}
 	default:
 		return nil, fmt.Errorf("unsupported language: %s", language)
 	}
 
-	codePath := filepath.Join(tempDir, filename)
-	if err := os.WriteFile(codePath, []byte(code), 0644); err != nil {
-		return nil, fmt.Errorf("failed to write code file: %v", err)
-	}
-
-	// 3. Construct Docker command with security boundaries
-	// --rm: remove container after exit
-	// --network none: Disable internet access
-	// --memory="256m": Prevent memory bombs
-	// --cpus="1.0": Prevent CPU exhaustion
+	// Execution Phase boundaries
 	dockerArgs := []string{
 		"run", "--rm",
 		"--network", "none",
@@ -78,14 +214,14 @@ func RunSecurely(code, language, input string) (*SandboxResult, error) {
 		"--security-opt", "no-new-privileges",
 		"--read-only",
 		"--tmpfs", "/tmp",
-		"-v", fmt.Sprintf("%s:/workspace", tempDir),
-		"-i", // Keep STDIN open even if not attached
+		// Mount artifact dir as read-only to prevent state leakage between tests
+		"-v", fmt.Sprintf("%s:/workspace:ro", artifactDir),
+		"-i",
 		image,
 	}
 	dockerArgs = append(dockerArgs, runCmd...)
 
-	// 4. Setup Execution with Timeout (5.0 seconds)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // 5s execution timeout
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, "docker", dockerArgs...)
@@ -94,15 +230,12 @@ func RunSecurely(code, language, input string) (*SandboxResult, error) {
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	// Pass custom input to STDIN of the docker container
 	if input != "" {
 		cmd.Stdin = strings.NewReader(input)
 	}
 
-	// 5. Run the container
-	err = cmd.Run()
+	_ = cmd.Run()
 
-	// Check if it was killed by our Context Timeout
 	if ctx.Err() == context.DeadlineExceeded {
 		return &SandboxResult{
 			Stdout:       stdout.String(),

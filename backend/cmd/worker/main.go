@@ -89,9 +89,22 @@ func main() {
 				return
 			}
 
+			// Compile code once before iterating test cases
+			compRes, err := judge.CompileCode(code, language)
+			if err != nil {
+				log.Printf("Compilation environment error for Sub %d: %v", submissionID, err)
+				_, _ = db.DB.Exec("UPDATE submissions SET status = $1 WHERE id = $2", "INTERNAL_ERROR", submissionID)
+				return
+			}
+			if compRes.Error != "" {
+				log.Printf("Compilation error for Sub %d: %s", submissionID, compRes.Error)
+				_, _ = db.DB.Exec("UPDATE submissions SET status = $1 WHERE id = $2", "COMPILATION_ERROR", submissionID)
+				return
+			}
+
 			status := "ACCEPTED"
 			for i, tc := range testCases {
-				res, err := judge.RunSecurely(code, language, tc.Input)
+				res, err := judge.RunArtifact(compRes.ArtifactDir, language, tc.Input)
 
 				if err != nil {
 					status = "RUNTIME_ERROR"

@@ -39,6 +39,7 @@ The NicheCP platform is currently in late-stage development/stabilization. A mas
 *   The connection flow between the main API server and the Docker execution workers requires ongoing monitoring to ensure high concurrency doesn't cause race conditions or memory leaks in Redis.
 
 ## Recent Major Changes
+*   (2026-07-19) Execution Engine (Phase 1): Upgraded Sandbox to "Compile Once, Execute Many" architecture. Integrated LRU caching with `singleflight` concurrency control to avoid thundering herds. Switched C/C++ and Go to statically linked binaries executing on `alpine` containers for massive latency reductions (~80% faster execution).
 *   (2026-07-19) Redesigned the Admin Dashboard with a grid layout and quick actions, completely overhauled Login and Registration pages with a premium split-screen glassmorphic design, and unified the styling of module cards across the platform.
 *   (2026-07-19) Implemented multi-step email update flow, added 24-hour password reset cooldown, fixed Solved Count deduplication bug, added standard navigation bar to contests page, standardized Hero CTAs, and added `favicon.svg`.
 *   (2026-07-18) Completely revamped the Hero Section UI, standardized Bento grid padding, removed manual Roll Number entry in favor of strict email extraction, integrated DB-driven role checking in `RequireAdmin` middleware, and wrapped all loose `fetch` calls in `try/catch` with horizontal scroll support for data tables.

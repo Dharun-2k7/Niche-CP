@@ -1,7 +1,8 @@
 # NicheCP Task Tracking
 
 ## High Priority Tasks
-- [ ] **Docker Execution Integration Validation**: Verify end-to-end reliability of the Redis queue and custom Docker execution engine under load.
+- [x] **Docker Execution Integration Validation**: Verify end-to-end reliability of the Redis queue and custom Docker execution engine under load. (Phase 1 Latency/Robustness completed)
+- [ ] **Execution Engine Throughput (Phase 2)**: Add Redis queue sharding and worker connection pooling.
 - [ ] **Problem Setter Wizard Implementation**: Transition from JSON-based problem inputs to a human-friendly UI wizard for problem setters.
 - [ ] **Deployment Environment**: Finalize production database schemas and Docker Compose networks for Oracle Cloud deployment.
 

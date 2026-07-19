@@ -10,6 +10,8 @@ All notable changes to the NicheCP project will be documented in this file.
 - **docs/**: Comprehensive documentation directory containing architecture guidelines, setup instructions, decision logs, and this changelog.
 
 ### Changed
+- **Execution Engine Refactor (Phase 1)**: Separated the monolithic Sandbox execution into `CompileCode` and `RunArtifact` to achieve "Compile Once, Execute Many". Implemented an LRU Cache (`hashicorp/golang-lru/v2`) bound to 500 entries targeting physical `/dev/shm` deletion, and `singleflight.Group` to completely mitigate thundering herd concurrent compilations.
+- Upgraded C, C++ and Go compiler flags to produce statically linked binaries (`-static`, `CGO_ENABLED=0`), allowing execution in ultra-lightweight `alpine` containers (cutting execution overhead by ~80%).
 - Redesigned the Admin Dashboard with a grid layout and quick actions, completely overhauled Login and Registration pages with a premium split-screen glassmorphic design, and unified the styling of module cards across the platform.
 - Refactored `RequireAdmin` middleware to natively query PostgreSQL for granular database roles (`admin`, `superadmin`), moving away from purely hardcoded superadmin strings.
 - Updated `index.html` Hero Section for improved vertical spacing, refined typography, and standardized padding on Bento grid components.

@@ -76,7 +76,7 @@ func GetProfile(c *gin.Context) {
 
 	// Fetch total solved
 	var totalSolved int
-	db.DB.QueryRow(`SELECT COUNT(*) FROM user_problem_status WHERE user_id = $1 AND status = 'ACCEPTED'`, userID).Scan(&totalSolved)
+	db.DB.QueryRow(`SELECT COUNT(DISTINCT problem_id) FROM user_problem_status WHERE user_id = $1 AND status = 'ACCEPTED'`, userID).Scan(&totalSolved)
 	profile.TotalSolved = totalSolved
 
 	c.JSON(http.StatusOK, profile)
@@ -85,7 +85,7 @@ func GetProfile(c *gin.Context) {
 func GetSolvedProblems(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 
-	rows, err := db.DB.Query(`SELECT problem_id FROM user_problem_status WHERE user_id = $1 AND status = 'ACCEPTED'`, userID)
+	rows, err := db.DB.Query(`SELECT DISTINCT problem_id FROM user_problem_status WHERE user_id = $1 AND status = 'ACCEPTED'`, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch solved problems"})
 		return
@@ -312,10 +312,11 @@ func UpdateProfile(c *gin.Context) {
 	}
 
 	if req.Email != currentEmail {
-		// Start Email OTP Flow
+		// Start Email OTP Flow - Step 1: Send OTP to EXISTING email
 		otp := generateOTP()
-		key := fmt.Sprintf("email_update_otp:%d", userID)
+		key := fmt.Sprintf("email_update_old_otp:%d", userID)
 		
+		// Store the new email along with the OTP
 		err := db.RedisClient.Set(context.Background(), key, req.Email+":"+otp, 10*time.Minute).Err()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate OTP"})
@@ -329,11 +330,11 @@ func UpdateProfile(c *gin.Context) {
 			return
 		}
 
-		// Send Email
-		body := fmt.Sprintf("Hello %s,\n\nYou requested to change your email address. Your OTP is: %s\n\nThis code expires in 10 minutes.", req.Name, otp)
-		go mailer.SendEmail(req.Email, "NicheCP Email Update Verification", body)
+		// Send Email to CURRENT email
+		body := fmt.Sprintf("Hello %s,\n\nYou requested to change your email address. To proceed, please use this OTP: %s\n\nThis code expires in 10 minutes.", req.Name, otp)
+		go mailer.SendEmail(currentEmail, "NicheCP Email Update Verification", body)
 
-		c.JSON(http.StatusOK, gin.H{"message": "Profile name updated. OTP sent to your new email for verification.", "require_otp": true})
+		c.JSON(http.StatusOK, gin.H{"message": "Profile name updated. OTP sent to your current email for verification.", "require_otp": true, "step": "verify_existing"})
 		return
 	}
 
@@ -344,7 +345,7 @@ type VerifyEmailUpdateRequest struct {
 	OTP string `json:"otp" binding:"required"`
 }
 
-func VerifyEmailUpdate(c *gin.Context) {
+func VerifyExistingEmailOTP(c *gin.Context) {
 	var req VerifyEmailUpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -352,7 +353,7 @@ func VerifyEmailUpdate(c *gin.Context) {
 	}
 
 	userID, _ := c.Get("user_id")
-	key := fmt.Sprintf("email_update_otp:%d", userID)
+	key := fmt.Sprintf("email_update_old_otp:%d", userID)
 
 	// Fetch from Redis
 	storedVal, err := db.RedisClient.Get(context.Background(), key).Result()
@@ -361,7 +362,6 @@ func VerifyEmailUpdate(c *gin.Context) {
 		return
 	}
 
-	// Stored val is "email:otp"
 	parts := strings.Split(storedVal, ":")
 	if len(parts) != 2 || parts[1] != req.OTP {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid OTP"})
@@ -378,15 +378,69 @@ func VerifyEmailUpdate(c *gin.Context) {
 		return
 	}
 
-	// Update DB
-	_, err = db.DB.Exec(`UPDATE users SET email = $1, pending_email = NULL WHERE id = $2`, newEmail, userID)
+	// Clean up old OTP
+	db.RedisClient.Del(context.Background(), key)
+
+	// Step 2: Generate and send OTP to the NEW email
+	newOtp := generateOTP()
+	newKey := fmt.Sprintf("email_update_new_otp:%d", userID)
+
+	err = db.RedisClient.Set(context.Background(), newKey, newEmail+":"+newOtp, 10*time.Minute).Err()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate OTP for new email"})
+		return
+	}
+
+	body := fmt.Sprintf("Hello,\n\nPlease verify your new NicheCP email address using this OTP: %s\n\nThis code expires in 10 minutes.", newOtp)
+	go mailer.SendEmail(newEmail, "NicheCP New Email Verification", body)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Existing email verified. OTP sent to your new email.", "step": "verify_new"})
+}
+
+func VerifyNewEmailOTP(c *gin.Context) {
+	var req VerifyEmailUpdateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID, _ := c.Get("user_id")
+	key := fmt.Sprintf("email_update_new_otp:%d", userID)
+
+	storedVal, err := db.RedisClient.Get(context.Background(), key).Result()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "OTP expired or not found"})
+		return
+	}
+
+	parts := strings.Split(storedVal, ":")
+	if len(parts) != 2 || parts[1] != req.OTP {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid OTP"})
+		return
+	}
+
+	newEmail := parts[0]
+
+	var pendingEmail *string
+	err = db.DB.QueryRow(`SELECT pending_email FROM users WHERE id = $1`, userID).Scan(&pendingEmail)
+	if err != nil || pendingEmail == nil || *pendingEmail != newEmail {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Email mismatch or no pending email"})
+		return
+	}
+
+	// Update DB and set last_email_change
+	_, err = db.DB.Exec(`UPDATE users SET email = $1, pending_email = NULL, last_email_change = CURRENT_TIMESTAMP WHERE id = $2`, newEmail, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update email. Email might already be taken."})
 		return
 	}
 
-	// Delete from Redis
+	// Clean up new OTP
 	db.RedisClient.Del(context.Background(), key)
+
+	// Send notification to the new email
+	body := "Your NicheCP email address has been updated successfully."
+	go mailer.SendEmail(newEmail, "NicheCP Email Updated", body)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Email updated successfully!"})
 }

@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS users (
     is_cf_verified BOOLEAN DEFAULT FALSE,
     profile_picture_url VARCHAR(255),
     permissions JSONB DEFAULT '[]'::jsonb,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_email_change TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS problems (

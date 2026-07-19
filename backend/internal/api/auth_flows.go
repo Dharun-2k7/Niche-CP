@@ -151,12 +151,18 @@ func ForgotPassword(c *gin.Context) {
 		return
 	}
 
-	// Ensure user exists
+	// Ensure user exists and check last_email_change
 	var userID int
-	err := db.DB.QueryRow(`SELECT id FROM users WHERE email = $1`, req.Email).Scan(&userID)
+	var lastEmailChange *time.Time
+	err := db.DB.QueryRow(`SELECT id, last_email_change FROM users WHERE email = $1`, req.Email).Scan(&userID, &lastEmailChange)
 	if err != nil {
 		// Return 200 to prevent email enumeration attacks, but we log it internally
 		c.JSON(http.StatusOK, gin.H{"message": "If an account exists, a reset link has been sent."})
+		return
+	}
+
+	if lastEmailChange != nil && time.Since(*lastEmailChange) < 24*time.Hour {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Password resets are disabled for 24 hours after changing your email address for security reasons."})
 		return
 	}
 

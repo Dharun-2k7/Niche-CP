@@ -75,6 +75,8 @@ func main() {
 		protected.POST("/profile/verify-college-email", api.VerifyCollegeEmail)
 		protected.POST("/profile/verify-otp", api.VerifyCollegeEmailOTP)
 		protected.POST("/profile/verify-email-update", api.VerifyEmailUpdate)
+		protected.POST("/profile/email/verify-existing", api.VerifyExistingEmailOTP)
+		protected.POST("/profile/email/verify-new", api.VerifyNewEmailOTP)
 		protected.POST("/profile/cf/init", api.InitCFVerification)
 		protected.POST("/profile/cf/verify", api.VerifyCF)
 		protected.POST("/profile/cf/disconnect", api.DisconnectCF)

@@ -20,3 +20,9 @@ All notable changes to the NicheCP project will be documented in this file.
 - Fixed Google OAuth URL redirection which was previously failing on non-standard development ports. Redirection now utilizes dynamic frontend URL extraction via the `oauth_referer` cookie.
 - Fixed 404 dead links on the global navigation by creating placeholder HTML files (`practice.html`, `learn.html`, `rankings.html`, `blogs.html`) using the existing `coming-soon.html` template.
 - Eliminated JavaScript crashing errors inside GSAP animation logic caused by unexpected `null` payloads from API responses.
+- Fixed Solved Count duplication bug by using `COUNT(DISTINCT problem_id)` in profile metrics queries.
+
+### Security
+- Implemented a secure two-step OTP validation flow for email updates (validates current email first, then new email).
+- Enforced a 24-hour cooldown period on password resets following a successful email address change to prevent account hijacking.
+- Restricted the frontend Admin Panel navigation logic exclusively to the verified superadmin email.

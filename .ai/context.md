@@ -11,6 +11,7 @@ The NicheCP platform is currently in late-stage development/stabilization. A mas
 *   **Contest Management**: Admin interface to create and manage contests, including duration, penalty types, and visibility.
 *   **Code Execution Engine**: Custom Docker-based sandboxing system (utilizing Redis queues) supporting multiple languages.
 *   **Robust Frontend UI**: Comprehensive GSAP animations, responsive grids, and null-safe data fetching. Mobile responsive tables with horizontal scrolling.
+*   **Security Architecture**: Two-step email update validation, 24-hour password reset cooldown post-email-change, and strict admin view restrictions on frontend navigation.
 
 ## Current Architecture
 *   **Frontend**: Vanilla HTML/JS/CSS served statically. Dynamic interactions via `app.js` and `components.js`.
@@ -38,4 +39,5 @@ The NicheCP platform is currently in late-stage development/stabilization. A mas
 *   The connection flow between the main API server and the Docker execution workers requires ongoing monitoring to ensure high concurrency doesn't cause race conditions or memory leaks in Redis.
 
 ## Recent Major Changes
+*   (2026-07-19) Implemented multi-step email update flow, added 24-hour password reset cooldown, fixed Solved Count deduplication bug, added standard navigation bar to contests page, standardized Hero CTAs, and added `favicon.svg`.
 *   (2026-07-18) Completely revamped the Hero Section UI, standardized Bento grid padding, removed manual Roll Number entry in favor of strict email extraction, integrated DB-driven role checking in `RequireAdmin` middleware, and wrapped all loose `fetch` calls in `try/catch` with horizontal scroll support for data tables.

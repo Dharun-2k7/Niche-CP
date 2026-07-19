@@ -10,6 +10,7 @@ All notable changes to the NicheCP project will be documented in this file.
 - **docs/**: Comprehensive documentation directory containing architecture guidelines, setup instructions, decision logs, and this changelog.
 
 ### Changed
+- **Dashboard UI/UX Redesign**: Applied a premium frosted glassmorphism effect (`.premium-glass-panel`) to the Upcoming Contests and Contest Categories containers. This integrates the cards with the animated particle background by using deep blur (`16px`), high saturation, and translucent base colors, mimicking a Spatial UI/Modern Dark aesthetic without affecting dense data tables elsewhere.
 - **Execution Engine Refactor (Phase 1)**: Separated the monolithic Sandbox execution into `CompileCode` and `RunArtifact` to achieve "Compile Once, Execute Many". Implemented an LRU Cache (`hashicorp/golang-lru/v2`) bound to 500 entries targeting physical `/dev/shm` deletion, and `singleflight.Group` to completely mitigate thundering herd concurrent compilations.
 - Upgraded C, C++ and Go compiler flags to produce statically linked binaries (`-static`, `CGO_ENABLED=0`), allowing execution in ultra-lightweight `alpine` containers (cutting execution overhead by ~80%).
 - Redesigned the Admin Dashboard with a grid layout and quick actions, completely overhauled Login and Registration pages with a premium split-screen glassmorphic design, and unified the styling of module cards across the platform.

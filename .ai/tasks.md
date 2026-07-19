@@ -5,6 +5,7 @@
 - [ ] **Execution Engine Throughput (Phase 2)**: Add Redis queue sharding and worker connection pooling.
 - [ ] **Problem Setter Wizard Implementation**: Transition from JSON-based problem inputs to a human-friendly UI wizard for problem setters.
 - [ ] **Deployment Environment**: Finalize production database schemas and Docker Compose networks for Oracle Cloud deployment.
+- [x] **UI/UX Pro Max Dashboard Redesign**: Implement premium frosted glassmorphism on dashboard containers for better integration with the particle background.
 
 ## Medium Priority Tasks
 - [ ] **Profile Customization**: Finalize Codeforces handle integration and parsing metrics on the profile page.

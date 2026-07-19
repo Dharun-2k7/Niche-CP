@@ -10,6 +10,7 @@ All notable changes to the NicheCP project will be documented in this file.
 - **docs/**: Comprehensive documentation directory containing architecture guidelines, setup instructions, decision logs, and this changelog.
 
 ### Changed
+- Redesigned the Admin Dashboard with a grid layout and quick actions, completely overhauled Login and Registration pages with a premium split-screen glassmorphic design, and unified the styling of module cards across the platform.
 - Refactored `RequireAdmin` middleware to natively query PostgreSQL for granular database roles (`admin`, `superadmin`), moving away from purely hardcoded superadmin strings.
 - Updated `index.html` Hero Section for improved vertical spacing, refined typography, and standardized padding on Bento grid components.
 - Modified global `fetch` calls across all dynamic pages (`arena.html`, `contests.html`, `profile.html`, `admin.html`) to enforce strict `try/catch` wrapping and null-safe array checks (`Array.isArray`).

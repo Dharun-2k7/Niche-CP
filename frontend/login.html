@@ -3,239 +3,339 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - ICPC Amrita Nagercoil</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Login | NicheCP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
         body {
             margin: 0;
             min-height: 100vh;
-            background-color: var(--bg-color);
-            font-family: var(--font-body);
-            color: var(--text-primary);
+            background-color: #060606;
+            font-family: 'Inter', sans-serif;
+            color: #FAFAFA;
             overflow: hidden;
+            display: flex;
         }
 
+        /* Split Screen Layout */
         .split-layout {
             display: flex;
-            min-height: 100vh;
             width: 100%;
+            min-height: 100vh;
         }
 
-        .split-left {
+        /* Left Side: Visuals & Branding */
+        .split-brand {
+            flex: 1;
+            display: none;
+            position: relative;
+            background: #060606;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        @media (min-width: 900px) {
+            .split-brand {
+                display: flex;
+            }
+        }
+
+        /* Subtle Animated Background for Brand Side */
+        .brand-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(59, 130, 246, 0.08) 0%, transparent 60%);
+            animation: pulseBg 8s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+
+        @keyframes pulseBg {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .brand-content {
+            position: relative;
+            z-index: 1;
+            padding: 40px;
+            max-width: 480px;
+        }
+
+        /* Right Side: Form */
+        .split-form {
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 40px;
+            background: #060606;
+            position: relative;
+        }
+
+        /* Glassmorphic Form Container */
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+            background: #101010;
+            padding: 48px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             position: relative;
             z-index: 10;
         }
 
-        .split-right {
-            flex: 1;
-            display: none;
-            position: relative;
-            background: radial-gradient(circle at center, rgba(59,130,246,0.05) 0%, var(--bg-color) 100%);
-            border-left: 1px solid rgba(255,255,255,0.05);
-            overflow: hidden;
+        .auth-header {
+            margin-bottom: 32px;
         }
 
-        @media (min-width: 900px) {
-            .split-right {
-                display: flex;
-            }
-        }
-
-        /* Ambient Grid for Right Pane */
-        .ambient-grid {
-            position: absolute;
-            inset: -100%;
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            transform: perspective(500px) rotateX(45deg);
-            animation: gridMove 20s linear infinite;
-            mask-image: radial-gradient(circle at center, black 20%, transparent 70%);
-            -webkit-mask-image: radial-gradient(circle at center, black 20%, transparent 70%);
-        }
-
-        @keyframes gridMove {
-            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
-            100% { transform: perspective(500px) rotateX(60deg) translateY(60px); }
-        }
-
-        .login-container {
-            width: 100%;
-            max-width: 380px;
-        }
-
-        .login-title {
-            font-family: var(--font-display);
-            font-size: 36px;
-            margin-bottom: 8px;
-            font-weight: 400;
-        }
-
-        .login-subtitle {
-            color: var(--text-muted);
-            margin-bottom: 40px;
-            font-size: 15px;
-        }
-
-        .google-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 12px;
-            background-color: white;
-            color: #333;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
+        .auth-title {
+            font-size: 28px;
             font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-decoration: none;
-        }
-
-        .google-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
-        }
-
-        .google-icon {
-            width: 24px;
-            height: 24px;
-            flex-shrink: 0;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-            color: var(--text-dim);
             margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .auth-subtitle {
             font-size: 14px;
+            color: #A3A3A3;
+        }
+
+        /* Modern Floating Label Inputs */
+        .input-group {
+            position: relative;
+            margin-bottom: 24px;
         }
 
         .input-group input {
             width: 100%;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
+            padding: 16px 16px 12px;
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            border-radius: 12px;
             color: #fff;
+            font-size: 15px;
             outline: none;
-            transition: border-color 0.3s;
+            transition: all 0.2s;
         }
 
-        .input-group input:focus {
-            border-color: #ff4081;
+        .input-group label {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #A3A3A3;
+            font-size: 15px;
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+
+        .input-group input:focus,
+        .input-group input:not(:placeholder-shown) {
+            border-color: #3B82F6;
+            background: rgba(255, 255, 255, 0.05);
+            padding-top: 24px;
+            padding-bottom: 8px;
+        }
+
+        .input-group input:focus + label,
+        .input-group input:not(:placeholder-shown) + label {
+            top: 12px;
+            font-size: 11px;
+            color: #3B82F6;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .forgot-link {
+            position: absolute;
+            right: 0;
+            top: -24px;
+            font-size: 12px;
+            color: #3B82F6;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .forgot-link:hover {
+            color: #60A5FA;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            background: #FAFAFA;
+            color: #060606;
+            font-weight: 600;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 16px;
+        }
+
+        .btn-primary:hover {
+            background: #E5E5E5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            background: transparent;
+            color: #FAFAFA;
+            font-weight: 500;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .divider {
             display: flex;
             align-items: center;
-            text-align: center;
-            margin: 25px 0;
+            margin: 24px 0;
             color: #555;
+            font-size: 13px;
         }
+        
         .divider::before, .divider::after {
             content: '';
             flex: 1;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .divider:not(:empty)::before { margin-right: .25em; }
-        .divider:not(:empty)::after { margin-left: .25em; }
+        
+        .divider::before { margin-right: 12px; }
+        .divider::after { margin-left: 12px; }
 
-        .auth-link {
-            color: #ff4081;
-            text-decoration: none;
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px;
+            background: #171717;
+            color: #FAFAFA;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
             font-size: 14px;
-            margin-top: 20px;
-            display: block;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
         }
-        .auth-link:hover { text-decoration: underline; }
+
+        .google-btn:hover {
+            background: #262626;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 32px;
+            font-size: 14px;
+            color: #A3A3A3;
+        }
+
+        .auth-footer a {
+            color: #FAFAFA;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .auth-footer a:hover {
+            color: #3B82F6;
+        }
 
         .error-msg {
-            color: #ff3232;
-            font-size: 14px;
-            margin-bottom: 15px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 24px;
             display: none;
         }
     </style>
 </head>
+<body>
     <div class="split-layout">
-        <!-- Left: Form -->
-        <div class="split-left">
-            <div class="login-container">
-                <!-- Simple Logo/Brand -->
-                <a href="index.html" style="display: inline-block; color: white; text-decoration: none; font-weight: 700; font-size: 20px; letter-spacing: -0.5px; margin-bottom: 40px;">
-                    <span style="color: var(--primary-accent);">Niche</span>CP
+        <!-- Left: Visual & Branding -->
+        <div class="split-brand">
+            <div class="brand-bg"></div>
+            <div class="brand-content">
+                <a href="index.html" style="text-decoration: none; display: inline-block; margin-bottom: 32px;">
+                    <h1 style="font-size: 32px; font-weight: 700; color: #FAFAFA; letter-spacing: -1px;">
+                        <span style="color: #3B82F6;">Niche</span>CP
+                    </h1>
                 </a>
-        <h1 class="login-title">Welcome Back</h1>
-        <p class="login-subtitle">Sign in to access the ICPC Arena</p>
-
-        <div id="errorBox" class="error-msg"></div>
-
-        <form id="loginForm">
-            <div class="input-group">
-                <label>Email</label>
-                <input type="email" id="email" required>
+                <h2 style="font-size: 24px; font-weight: 600; margin-bottom: 16px; line-height: 1.3;">Elevate your algorithmic engineering.</h2>
+                <p style="color: #A3A3A3; font-size: 16px; line-height: 1.6;">Join the next generation of developers building high-performance solutions in our competitive arena.</p>
             </div>
-            <div id="passwordSection">
-                <div class="input-group">
-                    <label style="display: flex; justify-content: space-between;">
-                        Password
-                        <a href="reset.html" style="color: #ff4081; text-decoration: none; font-size: 12px;">Forgot?</a>
-                    </label>
-                    <input type="password" id="password" required>
-                </div>
-            </div>
-
-            <div id="otpSection" style="display: none;">
-                <div class="input-group">
-                    <label>6-Digit OTP</label>
-                    <input type="text" id="otpCode" placeholder="Enter OTP from email" maxlength="6">
-                </div>
-            </div>
-
-            <button type="submit" id="mainSubmitBtn" class="google-btn" style="background: linear-gradient(90deg, #b388ff 0%, #ff4081 100%); color: white; margin-bottom: 10px;">
-                Sign In
-            </button>
-            <button type="button" id="toggleOtpBtn" class="google-btn" style="background: rgba(255,255,255,0.1); color: white;">
-                Login with OTP instead
-            </button>
-        </form>
-
-        <div class="divider">OR</div>
-
-        <a href="http://localhost:8080/api/auth/google/login" class="google-btn">
-            <svg class="google-icon" viewBox="0 0 24 24">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            Continue with Google
-        </a>
-
-        <a href="register.html" class="auth-link">Don't have an account? Register</a>
-        </div>
         </div>
 
-        <!-- Right: Visual -->
-        <div class="split-right">
-            <div class="ambient-grid"></div>
-            <!-- Floating Elements / Orbs could go here -->
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%); border-radius: 50%; filter: blur(40px);"></div>
+        <!-- Right: Form -->
+        <div class="split-form">
+            <div class="form-container">
+                <div class="auth-header">
+                    <h1 class="auth-title">Welcome back</h1>
+                    <p class="auth-subtitle">Sign in to your account to continue</p>
+                </div>
+
+                <div id="errorBox" class="error-msg"></div>
+
+                <form id="loginForm">
+                    <div class="input-group">
+                        <input type="email" id="email" placeholder=" " required>
+                        <label for="email">Email address</label>
+                    </div>
+
+                    <div id="passwordSection" class="input-group">
+                        <a href="reset.html" class="forgot-link">Forgot?</a>
+                        <input type="password" id="password" placeholder=" " required>
+                        <label for="password">Password</label>
+                    </div>
+
+                    <div id="otpSection" class="input-group" style="display: none;">
+                        <input type="text" id="otpCode" placeholder=" " maxlength="6">
+                        <label for="otpCode">6-Digit OTP</label>
+                    </div>
+
+                    <button type="submit" id="mainSubmitBtn" class="btn-primary">Sign In</button>
+                    <button type="button" id="toggleOtpBtn" class="btn-secondary">Use OTP instead</button>
+                </form>
+
+                <div class="divider">or continue with</div>
+
+                <a href="http://localhost:8080/api/auth/google/login" class="google-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Google
+                </a>
+
+                <div class="auth-footer">
+                    Don't have an account? <a href="register.html">Sign up</a>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -252,14 +352,14 @@
             const passInput = document.getElementById('password');
 
             if (isOtpMode) {
-                toggleBtn.textContent = 'Login with Password instead';
+                toggleBtn.textContent = 'Use Password instead';
                 mainBtn.textContent = 'Send OTP';
                 passSec.style.display = 'none';
                 passInput.removeAttribute('required');
                 otpSent = false;
                 otpSec.style.display = 'none';
             } else {
-                toggleBtn.textContent = 'Login with OTP instead';
+                toggleBtn.textContent = 'Use OTP instead';
                 mainBtn.textContent = 'Sign In';
                 passSec.style.display = 'block';
                 passInput.setAttribute('required', 'true');
@@ -275,7 +375,9 @@
             const errorBox = document.getElementById('errorBox');
             
             errorBox.style.display = 'none';
-            errorBox.style.color = '#ff3232';
+            errorBox.style.color = '#EF4444';
+            errorBox.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+            errorBox.style.borderColor = 'rgba(239, 68, 68, 0.2)';
 
             try {
                 if (!isOtpMode) {
@@ -304,7 +406,10 @@
                             otpSent = true;
                             document.getElementById('otpSection').style.display = 'block';
                             document.getElementById('mainSubmitBtn').textContent = 'Verify & Login';
-                            errorBox.style.color = '#00ffcc';
+                            
+                            errorBox.style.color = '#34D399';
+                            errorBox.style.backgroundColor = 'rgba(52, 211, 153, 0.1)';
+                            errorBox.style.borderColor = 'rgba(52, 211, 153, 0.2)';
                             errorBox.textContent = data.message;
                             errorBox.style.display = 'block';
                         } else throw new Error(data.error);
@@ -323,13 +428,13 @@
                     }
                 }
             } catch (err) {
-                errorBox.style.color = '#ff3232';
+                errorBox.style.color = '#EF4444';
+                errorBox.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                errorBox.style.borderColor = 'rgba(239, 68, 68, 0.2)';
                 errorBox.textContent = err.message || 'Server connection failed.';
                 errorBox.style.display = 'block';
             }
         });
     </script>
-<script src="js/app.js"></script>
-<script src="js/components.js"></script>
 </body>
 </html>

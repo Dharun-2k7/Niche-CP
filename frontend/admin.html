@@ -17,26 +17,58 @@
     <div id="global-nav-container"></div>
 
     <main class="app-container repovive-layout" style="margin-top: 40px; grid-template-columns: 1fr;">
-        <div class="module-card">
-            <h2>User Management</h2>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Manage users and permissions</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 40px;">
+            <div class="glass-card stat-card" style="text-align: center;">
+                <h3 style="font-size: 32px; color: var(--primary-accent); margin-bottom: 8px;">24</h3>
+                <p style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Total Users</p>
+            </div>
+            <div class="glass-card stat-card" style="text-align: center;">
+                <h3 style="font-size: 32px; color: var(--primary-accent); margin-bottom: 8px;">156</h3>
+                <p style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Problems</p>
+            </div>
+            <div class="glass-card stat-card" style="text-align: center;">
+                <h3 style="font-size: 32px; color: var(--primary-accent); margin-bottom: 8px;">12</h3>
+                <p style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Contests</p>
+            </div>
+            <div class="glass-card stat-card" style="text-align: center;">
+                <h3 style="font-size: 32px; color: var(--primary-accent); margin-bottom: 8px;">8.4k</h3>
+                <p style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Submissions</p>
+            </div>
+        </div>
+
+        <div class="admin-grid">
+            <aside>
+                <div class="glass-card" style="position: sticky; top: 120px;">
+                    <h3 style="margin-bottom: 20px; font-size: 18px;">Quick Actions</h3>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <a href="admin_problems.html" class="btn-magnetic" style="padding: 12px; text-align: center; text-decoration: none; border-radius: 8px; background: rgba(255,255,255,0.05); color: white; display: block; border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;">Create Problem</a>
+                        <a href="admin_contests.html" class="btn-magnetic" style="padding: 12px; text-align: center; text-decoration: none; border-radius: 8px; background: rgba(255,255,255,0.05); color: white; display: block; border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;">Create Contest</a>
+                        <button onclick="document.querySelector('.admin-data-table').scrollIntoView({behavior: 'smooth'})" class="btn-ghost" style="width: 100%; padding: 12px;">Manage Users</button>
+                    </div>
+                </div>
+            </aside>
             
-            <div style="overflow-x: auto;">
-                <table class="admin-data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Roll No</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usersTableBody">
-                        <tr><td colspan="6" style="text-align:center;">Loading users...</td></tr>
-                    </tbody>
-                </table>
+            <div class="glass-card">
+                <h2 style="margin-bottom: 8px;">User Management</h2>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Manage users and permissions</p>
+                
+                <div style="overflow-x: auto;">
+                    <table class="admin-data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Roll No</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr><td colspan="6" style="text-align:center;">Loading users...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>

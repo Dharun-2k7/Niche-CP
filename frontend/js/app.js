@@ -366,7 +366,7 @@ async function renderGlobalNav(token) {
             { label: 'Contests', path: 'contests.html' },
             { label: 'Practice', path: 'practice.html' },
             { label: 'Learn', path: 'learn.html' },
-            { label: 'Rankings', path: 'rankings.html' },
+
             { label: 'Blogs', path: 'blogs.html' }
         ];
 
@@ -393,7 +393,7 @@ async function renderGlobalNav(token) {
             { label: 'Problems', path: 'arena.html' },
             { label: 'Contests', path: 'contests.html' },
             { label: 'Learn', path: 'learn.html' },
-            { label: 'Rankings', path: 'rankings.html' },
+
             { label: 'Blogs', path: 'blogs.html' },
             { label: 'About', path: 'about.html' }
         ];

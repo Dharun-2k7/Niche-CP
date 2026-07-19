@@ -62,8 +62,8 @@
     </header>
 
     <!-- 2. Platform Overview (Bento Box) -->
-    <section class="section-container" style="padding: 40px; max-width: 1200px; margin: 0 auto; z-index: 10; position: relative;">
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, minmax(180px, auto)); gap: 20px;">
+    <section class="section-container" style="max-width: 1200px; margin: 0 auto; z-index: 10; position: relative;">
+        <div class="bento-overview-grid">
             
             <!-- Bento Item 1: Large Feature -->
             <div class="module-card" style="grid-column: span 2; grid-row: span 2; display: flex; flex-direction: column; justify-content: flex-end; padding: 24px; background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(59,130,246,0.05) 100%);">
@@ -100,14 +100,14 @@
     </section>
 
     <!-- 3. Upcoming Contests (Dashboard) -->
-    <section class="section-container" id="contests" style="padding: 60px 40px;">
+    <section class="section-container" id="contests">
         <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px;">
             <h2 class="display-font" style="font-size: 24px;">Upcoming Contests</h2>
             <a href="coming-soon.html" style="color: var(--text-muted); font-size: 13px; text-decoration: none;">View Archive →</a>
         </div>
 
         <div class="module-card premium-glass-panel" style="padding: 0; overflow: hidden;">
-            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap: 16px; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+            <div class="mobile-table-header" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap: 16px; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
                 <div>Contest Name</div>
                 <div>Format</div>
                 <div>Start Time</div>
@@ -117,7 +117,7 @@
             </div>
             
             <!-- Row 1 -->
-            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap: 16px; padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center;">
+            <div class="mobile-table-card" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap: 16px; padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center;">
                 <div style="font-size: 15px; font-weight: 500;">Weekly Algorithm Sprint #16</div>
                 <div><span class="tag tag-primary">Standard</span></div>
                 <div style="font-size: 13px; font-variant-numeric: tabular-nums;">Tomorrow, 18:00</div>
@@ -127,7 +127,7 @@
             </div>
 
             <!-- Row 2 -->
-            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap: 16px; padding: 20px 24px; align-items: center;">
+            <div class="mobile-table-card" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap: 16px; padding: 20px 24px; align-items: center;">
                 <div style="font-size: 15px; font-weight: 500;">Reverse Coding Challenge #4</div>
                 <div><span class="tag tag-secondary">Special</span></div>
                 <div style="font-size: 13px; font-variant-numeric: tabular-nums;">Aug 12, 14:00</div>
@@ -139,7 +139,7 @@
     </section>
 
     <!-- 4. Contest Categories -->
-    <section class="section-container" style="padding: 60px 40px;">
+    <section class="section-container">
         <h2 class="display-font" style="font-size: 24px; margin-bottom: 24px;">Contest Categories</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
             
@@ -175,7 +175,7 @@
     </section>
 
     <!-- 5. Problem Sets -->
-    <section class="section-container" style="padding: 60px 40px;">
+    <section class="section-container">
         <div style="max-width: 600px; margin-bottom: 40px;">
             <h2 class="display-font" style="font-size: 24px; margin-bottom: 12px;">Problem Sets</h2>
             <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6;">Structured topic-based groupings to master fundamental competitive programming algorithms.</p>
@@ -217,7 +217,7 @@
     </section>
 
     <!-- 6. Resources -->
-    <section class="section-container" style="padding: 60px 40px;">
+    <section class="section-container">
         <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px;">
             <h2 class="display-font" style="font-size: 24px;">Resources</h2>
             <a href="coming-soon.html" style="color: var(--text-muted); font-size: 13px; text-decoration: none;">View All Resources →</a>

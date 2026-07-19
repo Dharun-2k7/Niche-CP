@@ -1995,3 +1995,132 @@ h1, h2, h3, h4, h5, h6 {
         grid-template-columns: 250px 1fr;
     }
 }
+
+/* =========================================================================
+   Responsive Overrides - UI/UX Pro Max Architecture
+   ========================================================================= */
+
+.section-container {
+    padding: clamp(40px, 8vw, 80px) clamp(20px, 5vw, 40px) !important;
+}
+
+/* Bento Overview Grid (Mobile Horizontal Slider) */
+.bento-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+@media screen and (max-width: 1024px) {
+    .bento-overview-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media screen and (max-width: 768px) {
+    .bento-overview-grid {
+        display: flex !important;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 20px;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -20px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    .bento-overview-grid > div {
+        flex: 0 0 85% !important;
+        scroll-snap-align: center;
+    }
+}
+
+/* Mobile Table-to-Card Transformation */
+@media screen and (max-width: 768px) {
+    .mobile-table-header {
+        display: none !important;
+    }
+    .mobile-table-card {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+        padding: 20px !important;
+        position: relative;
+    }
+    .mobile-table-card > div:nth-child(1) { /* Title */
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        padding-bottom: 4px;
+    }
+    .mobile-table-card > div:nth-child(2) { /* Tag */
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+    .mobile-table-card > div:nth-child(3), 
+    .mobile-table-card > div:nth-child(4), 
+    .mobile-table-card > div:nth-child(5) {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .mobile-table-card > div:nth-child(3)::before { content: "Date: "; color: var(--text-muted); font-size: 12px; }
+    .mobile-table-card > div:nth-child(4)::before { content: "Duration: "; color: var(--text-muted); font-size: 12px; }
+    .mobile-table-card > div:nth-child(5)::before { content: "Registered: "; color: var(--text-muted); font-size: 12px; }
+    
+    .mobile-table-card > div:nth-child(6) { /* Button */
+        margin-top: 8px;
+        text-align: center !important;
+    }
+    .mobile-table-card > div:nth-child(6) a {
+        display: block;
+        padding: 12px !important;
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+/* Mobile Drawer Overlay */
+.mobile-nav-drawer {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(6, 6, 6, 0.95);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.mobile-nav-drawer.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.mobile-nav-drawer .glass-nav-item {
+    font-size: 24px;
+    padding: 12px 24px;
+}
+.hamburger-btn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 8px;
+}
+.close-drawer-btn {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 8px;
+}
+@media screen and (max-width: 900px) {
+    .glass-nav-center { display: none !important; }
+    .hamburger-btn { display: block; }
+}

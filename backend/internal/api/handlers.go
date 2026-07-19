@@ -108,7 +108,20 @@ func RunCode(c *gin.Context) {
 	// Use our newly created Docker Sandbox
 	// Note: This blocks the HTTP request until execution finishes (up to 2.0s)
 	// which is perfectly fine for a manual "Run" check.
-	res, err := judge.RunSecurely(req.Code, req.Language, req.Input)
+	compRes, err := judge.CompileCode(req.Code, req.Language)
+	if err != nil || compRes.Error != "" {
+		errMsg := compRes.Error
+		if err != nil {
+			errMsg = fmt.Sprintf("Sandbox Error: %v", err)
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"output": "",
+			"stderr": errMsg,
+		})
+		return
+	}
+
+	res, err := judge.RunArtifact(compRes.ArtifactDir, req.Language, req.Input)
 
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{

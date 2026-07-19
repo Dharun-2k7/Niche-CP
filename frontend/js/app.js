@@ -419,6 +419,22 @@ async function renderGlobalNav(token) {
                 ${navLinksHTML}
             </div>
             <div class="glass-nav-right">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    ${rightSideHTML}
+                </div>
+                <button class="hamburger-btn" onclick="document.getElementById('mobileNavDrawer').classList.add('active')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+            </div>
+        </div>
+        <div class="mobile-nav-drawer" id="mobileNavDrawer">
+            <button class="close-drawer-btn" onclick="document.getElementById('mobileNavDrawer').classList.remove('active')">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%;">
+                ${navLinksHTML}
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; width: 80%;">
                 ${rightSideHTML}
             </div>
         </div>

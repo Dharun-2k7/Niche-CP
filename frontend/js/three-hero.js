@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let PARTICLE_COUNT = 35000;
     if (window.innerWidth < 1024) PARTICLE_COUNT = 18000;
     if (window.innerWidth < 768) PARTICLE_COUNT = 8000;
+    if (window.innerWidth < 480) PARTICLE_COUNT = 3000; // Thermal throttling limit
 
     const scene = new THREE.Scene();
     
@@ -24,7 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set up renderer
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const maxPixelRatio = window.innerWidth < 768 ? 1 : 2; // Cap pixel ratio on mobile
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxPixelRatio));
     container.appendChild(renderer.domElement);
 
     // =========================================================================

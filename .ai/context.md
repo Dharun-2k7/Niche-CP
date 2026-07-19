@@ -40,6 +40,7 @@ The NicheCP platform is currently in late-stage development/stabilization. A mas
 
 ## Recent Major Changes
 *   (2026-07-20) Dashboard UI/UX Redesign: Applied a premium frosted glassmorphism effect to the dashboard containers utilizing deep blur and low-opacity fills to seamlessly integrate with the animated particle background.
+*   (2026-07-20) Responsive Architecture Transformation: Overhauled the platform to be fully responsive. Implemented a mobile hamburger navigation drawer, transformed data tables into vertical cards on mobile, applied CSS scroll snapping (`scroll-snap-type`) for horizontal mobile carousels (Bento overview), and optimized the Three.js particle background for mobile (capped at 3,000 particles and `devicePixelRatio` of 1).
 *   (2026-07-19) Execution Engine (Phase 1): Upgraded Sandbox to "Compile Once, Execute Many" architecture. Integrated LRU caching with `singleflight` concurrency control to avoid thundering herds. Switched C/C++ and Go to statically linked binaries executing on `alpine` containers for massive latency reductions (~80% faster execution).
 *   (2026-07-19) Redesigned the Admin Dashboard with a grid layout and quick actions, completely overhauled Login and Registration pages with a premium split-screen glassmorphic design, and unified the styling of module cards across the platform.
 *   (2026-07-19) Implemented multi-step email update flow, added 24-hour password reset cooldown, fixed Solved Count deduplication bug, added standard navigation bar to contests page, standardized Hero CTAs, and added `favicon.svg`.

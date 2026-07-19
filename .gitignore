@@ -35,3 +35,6 @@ Thumbs.db
 # Generated binaries and uploads
 backend/main
 backend/uploads/
+
+# AI Session Log
+.ai/session.md

@@ -26,6 +26,7 @@ Whether you are a new contributor attempting to understand the Execution Engine,
 * **[10 - Deployment Handbook](./10-deployment-handbook.md)**: Oracle Cloud Free Tier provisioning, Nginx, and Systemd configs.
 * **[11 - Monitoring & Observability](./10-deployment-handbook.md#11---monitoring--observability)**: Future integration with Prometheus and Grafana.
 * **[12 - Engineering Decisions](./10-deployment-handbook.md#12---engineering-decisions)**: The "Why" behind Go, Docker, Redis, and custom Worker Pools.
+* **[15 - Operations Runbook](./15-operations-runbook.md)**: Incident response, updates, database recovery, and secrets rotation.
 
 ### 5. Production Readiness
 * **[13 - Production Readiness Audit](./13-production-readiness-audit.md)**: Health scores, critical blockers, and technical debt.

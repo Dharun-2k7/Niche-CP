@@ -16,7 +16,7 @@
     <!-- Floating Glass Navigation (Injected via JS) -->
     <div id="global-nav-container"></div>
 
-    <main class="app-container repovive-layout" style="margin-top: 40px; grid-template-columns: 1fr;">
+    <main class="app-container niche-layout" style="margin-top: 40px; grid-template-columns: 1fr;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 40px;">
             <div class="glass-card stat-card" style="text-align: center;">
                 <h3 style="font-size: 32px; color: var(--primary-accent); margin-bottom: 8px;">24</h3>
@@ -69,6 +69,16 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+            
+            <div class="glass-card" style="margin-top: 24px;">
+                <h2 style="margin-bottom: 8px;">Super Admin Actions</h2>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Promote users to Administrator</p>
+                <div style="display: flex; gap: 12px; align-items: center; max-width: 400px;">
+                    <input type="email" id="promoteEmail" class="form-input" placeholder="User Email" style="flex: 1;">
+                    <button class="btn-magnetic" onclick="promoteToAdmin()" style="padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer;">Promote</button>
+                </div>
+                <div id="promoteMsg" style="margin-top: 12px; font-size: 13px; display: none;"></div>
             </div>
         </div>
     </main>
@@ -196,6 +206,37 @@
             } catch (e) {
                 console.error(e);
                 alert('An error occurred.');
+            }
+        }
+
+        async function promoteToAdmin() {
+            const email = document.getElementById('promoteEmail').value;
+            const msg = document.getElementById('promoteMsg');
+            if (!email) return;
+
+            try {
+                const res = await fetch('http://localhost:8080/api/admin/promote', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+                const data = await res.json();
+                msg.style.display = 'block';
+                if (res.ok) {
+                    msg.style.color = '#10b981';
+                    msg.textContent = data.message;
+                    document.getElementById('promoteEmail').value = '';
+                } else {
+                    msg.style.color = '#ef4444';
+                    msg.textContent = data.error || 'Failed to promote user.';
+                }
+            } catch (e) {
+                msg.style.display = 'block';
+                msg.style.color = '#ef4444';
+                msg.textContent = 'Network error';
             }
         }
     </script>

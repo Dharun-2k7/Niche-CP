@@ -13,7 +13,7 @@
     <!-- Floating Glass Navigation (Injected via JS) -->
     <div id="global-nav-container"></div>
 
-    <main class="app-container repovive-layout fade-in-up" style="margin-top: 40px; grid-template-columns: 1fr;">
+    <main class="app-container niche-layout fade-in-up" style="margin-top: 40px; grid-template-columns: 1fr;">
         <div class="module-card glow-hover" style="border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(10, 10, 15, 0.5); backdrop-filter: blur(20px); border-radius: 16px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;" class="fade-in-up stagger-1">
                 <div>
@@ -56,8 +56,11 @@
                 <p style="font-size: 13px; color: var(--text-muted); max-width: 400px; line-height: 1.5;">
                     <span style="color: var(--primary-accent); font-weight: 600;">Note:</span> After creating the contest, note the Contest ID and use the "Problems" tab to link existing or new problems to it.
                 </p>
-                <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
                     <span id="cMsg" style="font-size: 14px; display: none; font-weight: 500;"></span>
+                    <button id="deleteContestBtn" class="btn-ghost" style="padding: 10px 20px; font-size: 14px; border-radius: 30px; border: 1px solid #ef4444; color: #ef4444; cursor: pointer; display: none;" onclick="openDeleteModal()">
+                        Delete Contest
+                    </button>
                     <button id="saveContestBtn" class="btn-magnetic" style="padding: 12px 32px; font-size: 15px; border-radius: 30px; display: flex; align-items: center; gap: 8px; border: none; cursor: pointer;">
                         <span>Create Contest</span>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
@@ -66,6 +69,70 @@
             </div>
         </div>
     </main>
+
+    <!-- Delete Contest Confirmation Modal -->
+    <div id="deleteContestModal" class="premium-modal-overlay">
+        <div class="premium-modal" style="max-width: 520px;">
+            <button onclick="closeDeleteModal()" style="position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); cursor:pointer; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:background 0.2s;">✕</button>
+            
+            <h3 style="font-size: 20px; margin-bottom: 4px; font-weight: 600; color: #ef4444;">Delete Contest</h3>
+            <p style="color:var(--text-muted); font-size:13px; margin-bottom: 20px;">This action cannot be undone.</p>
+
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 16px; margin-bottom: 20px;">
+                <div style="font-size: 15px; font-weight: 500; margin-bottom: 8px;" id="deleteContestName">—</div>
+                <div style="display: flex; gap: 16px; font-size: 13px; color: var(--text-muted);">
+                    <span><strong id="deleteProblemCount">0</strong> problems</span>
+                    <span><strong id="deleteSubmissionCount">0</strong> submissions</span>
+                </div>
+            </div>
+
+            <!-- Delete Mode Selection -->
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                <label class="custom-toggle" style="cursor:pointer; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);">
+                    <input type="radio" name="deleteMode" value="contest_only" checked style="margin-right: 10px;">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 500;">Delete Contest Only</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Problems remain available in Practice.</div>
+                    </div>
+                </label>
+                <label class="custom-toggle" style="cursor:pointer; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);">
+                    <input type="radio" name="deleteMode" value="selected_problems" style="margin-right: 10px;">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 500;">Delete Contest + Selected Problems</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Choose which problems to permanently remove.</div>
+                    </div>
+                </label>
+                <label class="custom-toggle" style="cursor:pointer; padding: 12px; border-radius: 8px; border: 1px solid rgba(239,68,68,0.15); background: rgba(239,68,68,0.04);">
+                    <input type="radio" name="deleteMode" value="all_problems" style="margin-right: 10px;">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 500; color: #ef4444;">Delete Contest + All Problems</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">⚠ Permanently removes contest and all attached problems.</div>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Problem Selection (shown only for selected_problems mode) -->
+            <div id="problemSelectionArea" style="display: none; margin-bottom: 20px; max-height: 200px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 8px;">
+                <div id="problemCheckboxes" style="display: flex; flex-direction: column; gap: 4px;"></div>
+            </div>
+
+            <!-- Extra confirmation for all_problems -->
+            <div id="allProblemsWarning" style="display: none; margin-bottom: 20px; padding: 12px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px;">
+                <p style="font-size: 13px; color: #ef4444; margin-bottom: 8px; font-weight: 500;">This will permanently delete all problems and their test cases.</p>
+                <label style="font-size: 13px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="confirmAllDelete">
+                    I understand this action is irreversible.
+                </label>
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="btn-ghost" onclick="closeDeleteModal()" style="padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);">Cancel</button>
+                <button id="confirmDeleteBtn" class="btn-magnetic" onclick="executeDelete()" style="padding: 10px 24px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; background: #ef4444; color: #fff;">Delete</button>
+            </div>
+
+            <div id="deleteMsg" style="margin-top: 12px; font-size: 13px; display: none; text-align: center;"></div>
+        </div>
+    </div>
 
     <script src="js/app.js"></script>
     <script>
@@ -107,10 +174,12 @@
             if (val === 'new') {
                 selectedContestId = null;
                 btn.textContent = 'Create Contest';
+                document.getElementById('deleteContestBtn').style.display = 'none';
                 document.querySelectorAll('.form-input').forEach(el => el.value = '');
             } else {
                 selectedContestId = val;
                 btn.textContent = 'Update Contest';
+                document.getElementById('deleteContestBtn').style.display = 'inline-block';
                 const c = currentContests.find(x => x.id == val);
                 if (c) {
                     document.getElementById('cTitle').value = c.title;
@@ -194,6 +263,130 @@
                 btn.disabled = false;
             }
         });
+
+        // ── Delete Contest Logic ──
+        let deleteContestProblems = [];
+
+        async function openDeleteModal() {
+            if (!selectedContestId) return;
+            const modal = document.getElementById('deleteContestModal');
+            const msg = document.getElementById('deleteMsg');
+            msg.style.display = 'none';
+
+            // Reset state
+            document.querySelector('input[name="deleteMode"][value="contest_only"]').checked = true;
+            document.getElementById('problemSelectionArea').style.display = 'none';
+            document.getElementById('allProblemsWarning').style.display = 'none';
+            document.getElementById('confirmAllDelete').checked = false;
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/admin/contests/${selectedContestId}/details`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('deleteContestName').textContent = data.title;
+                    document.getElementById('deleteProblemCount').textContent = data.problem_count;
+                    document.getElementById('deleteSubmissionCount').textContent = data.submission_count;
+                    deleteContestProblems = data.problems || [];
+
+                    // Populate problem checkboxes
+                    const checkboxArea = document.getElementById('problemCheckboxes');
+                    checkboxArea.innerHTML = '';
+                    deleteContestProblems.forEach(p => {
+                        checkboxArea.innerHTML += `
+                            <label style="display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: background 0.2s;">
+                                <input type="checkbox" class="delete-problem-cb" value="${p.id}">
+                                ${p.title}
+                            </label>
+                        `;
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to load contest details', e);
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteContestModal').classList.remove('active');
+        }
+
+        // Toggle problem selection and warning based on radio
+        document.querySelectorAll('input[name="deleteMode"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                document.getElementById('problemSelectionArea').style.display = e.target.value === 'selected_problems' ? 'block' : 'none';
+                document.getElementById('allProblemsWarning').style.display = e.target.value === 'all_problems' ? 'block' : 'none';
+            });
+        });
+
+        async function executeDelete() {
+            if (!selectedContestId) return;
+            const mode = document.querySelector('input[name="deleteMode"]:checked').value;
+            const msg = document.getElementById('deleteMsg');
+
+            // Extra guard for all_problems
+            if (mode === 'all_problems' && !document.getElementById('confirmAllDelete').checked) {
+                msg.style.display = 'block';
+                msg.style.color = '#ef4444';
+                msg.textContent = 'Please confirm you understand this action is irreversible.';
+                return;
+            }
+
+            const body = { delete_mode: mode };
+            if (mode === 'selected_problems') {
+                const selected = Array.from(document.querySelectorAll('.delete-problem-cb:checked')).map(cb => parseInt(cb.value));
+                if (selected.length === 0) {
+                    msg.style.display = 'block';
+                    msg.style.color = '#ef4444';
+                    msg.textContent = 'Please select at least one problem to delete.';
+                    return;
+                }
+                body.problem_ids = selected;
+            }
+
+            const btn = document.getElementById('confirmDeleteBtn');
+            btn.disabled = true;
+            btn.textContent = 'Deleting...';
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/admin/contests/${selectedContestId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    msg.style.display = 'block';
+                    msg.style.color = '#10b981';
+                    msg.textContent = data.message;
+                    setTimeout(() => {
+                        closeDeleteModal();
+                        selectedContestId = null;
+                        document.getElementById('deleteContestBtn').style.display = 'none';
+                        document.getElementById('contestSelect').innerHTML = '<option value="new">✦ Create New Contest ✦</option>';
+                        document.querySelectorAll('.form-input').forEach(el => el.value = '');
+                        document.getElementById('saveContestBtn').querySelector('span').textContent = 'Create Contest';
+                        loadContests();
+                    }, 1200);
+                } else {
+                    msg.style.display = 'block';
+                    msg.style.color = '#ef4444';
+                    msg.textContent = data.error || 'Failed to delete contest.';
+                }
+            } catch (e) {
+                msg.style.display = 'block';
+                msg.style.color = '#ef4444';
+                msg.textContent = 'Network error.';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Delete';
+            }
+        }
     </script>
 <script src="js/components.js"></script>
 </body>

@@ -49,6 +49,20 @@
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        .arena-empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            padding: 40px 16px;
+            line-height: 1.6;
+        }
+        .arena-empty-state svg {
+            width: 32px;
+            height: 32px;
+            stroke: rgba(255,255,255,0.15);
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body data-theme="quantum">
@@ -56,7 +70,7 @@
     <div class="arena-wrapper">
         <!-- Thin Left Sidebar -->
         <div class="arena-sidebar">
-            <div style="margin-bottom: 20px; font-family: 'Space Grotesk', sans-serif; font-weight: bold; font-size: 18px; color: var(--text-primary);">[R]</div>
+            <div style="margin-bottom: 20px; font-family: 'Space Grotesk', sans-serif; font-weight: bold; font-size: 18px; color: var(--text-primary);">[N]</div>
             
             <svg class="arena-sidebar-icon active" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
             
@@ -98,7 +112,7 @@
                             </div>
                         </div>
                         <div class="arena-panel-scroll" id="problemsList">
-                            <div style="text-align:center; color: var(--text-muted); margin-top: 40px; font-size: 14px;">Fetching contest problems...</div>
+                            <div class="arena-empty-state">Fetching contest problems...</div>
                         </div>
                     </div>
 
@@ -108,29 +122,13 @@
                         <!-- Commentary Panel -->
                         <div class="arena-panel">
                             <div class="arena-panel-header" style="justify-content: space-between;">
-                                <span>COMMENTARY</span>
+                                <span>SUBMISSIONS FEED</span>
                                 <span style="color:var(--text-primary); text-transform:none;">Live <span class="live-indicator"></span></span>
                             </div>
                             <div class="arena-panel-scroll" id="commentaryList">
-                                <div class="commentary-row">
-                                    <div><span style="font-weight:600;">Pratik Mistry</span> got <span style="color:#10b981;">Accepted</span> on B</div>
-                                    <div style="color:var(--text-muted);">3m ago</div>
-                                </div>
-                                <div class="commentary-row">
-                                    <div><span style="font-weight:600;">Pratik Mistry</span> got <span style="color:#ef4444;">Wrong Answer</span> on B</div>
-                                    <div style="color:var(--text-muted);">4m ago</div>
-                                </div>
-                                <div class="commentary-row">
-                                    <div><span style="font-weight:600;">Pratik Mistry</span> got <span style="color:#10b981;">Accepted</span> on A</div>
-                                    <div style="color:var(--text-muted);">11m ago</div>
-                                </div>
-                                <div class="commentary-row">
-                                    <div><span style="font-weight:600;">seroze kim</span> got <span style="color:#10b981;">Accepted</span> on B</div>
-                                    <div style="color:var(--text-muted);">1h ago</div>
-                                </div>
-                                <div class="commentary-row">
-                                    <div><span style="font-weight:600;">Hello</span> got <span style="color:#10b981;">Accepted</span> on A</div>
-                                    <div style="color:var(--text-muted);">1h ago</div>
+                                <div class="arena-empty-state">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                    <div>No submissions yet.</div>
                                 </div>
                             </div>
                         </div>
@@ -139,23 +137,11 @@
                         <div class="arena-panel">
                             <div class="arena-panel-header" style="justify-content: space-between;">
                                 <span>MY SUBMISSIONS</span>
-                                <span style="color:var(--text-primary); text-transform:none;">View all</span>
                             </div>
-                            <div class="arena-panel-scroll">
-                                <div class="commentary-row" style="align-items:center;">
-                                    <div style="font-weight:600; font-size:14px; width:40px;">C</div>
-                                    <div style="color:#10b981; flex:1;">Accepted</div>
-                                    <div style="color:var(--text-muted);">14h ago</div>
-                                </div>
-                                <div class="commentary-row" style="align-items:center;">
-                                    <div style="font-weight:600; font-size:14px; width:40px;">B</div>
-                                    <div style="color:#10b981; flex:1;">Accepted</div>
-                                    <div style="color:var(--text-muted);">14h ago</div>
-                                </div>
-                                <div class="commentary-row" style="align-items:center;">
-                                    <div style="font-weight:600; font-size:14px; width:40px;">A</div>
-                                    <div style="color:#10b981; flex:1;">Accepted</div>
-                                    <div style="color:var(--text-muted);">15h ago</div>
+                            <div class="arena-panel-scroll" id="mySubmissionsList">
+                                <div class="arena-empty-state">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                    <div>Log in to see your submissions.</div>
                                 </div>
                             </div>
                         </div>
@@ -170,81 +156,9 @@
                         <span style="color:var(--text-primary); text-transform:none;">Live <span class="live-indicator"></span></span>
                     </div>
                     <div class="arena-panel-scroll" id="rankingList">
-                        
-                        <div class="ranking-row">
-                            <div style="color:var(--text-muted);">1</div>
-                            <div style="color:#f59e0b; font-weight:600;">tkdgkb</div>
-                            <div style="text-align:right;">12,594</div>
-                        </div>
-                        <div class="ranking-row">
-                            <div style="color:var(--text-muted);">2</div>
-                            <div style="color:#00f0ff; font-weight:600;">Alex Wice</div>
-                            <div style="text-align:right;">12,334</div>
-                        </div>
-                        <div class="ranking-row">
-                            <div style="color:var(--text-muted);">3</div>
-                            <div style="color:#f59e0b; font-weight:600;">Amirali Asgari</div>
-                            <div style="text-align:right;">12,146</div>
-                        </div>
-                        <div class="ranking-row">
-                            <div style="color:var(--text-muted);">4</div>
-                            <div style="color:#10b981; font-weight:600;">maspy</div>
-                            <div style="text-align:right;">12,114</div>
-                        </div>
-                        <div class="ranking-row">
-                            <div style="color:var(--text-muted);">5</div>
-                            <div style="color:#f97316; font-weight:600;">baluteshih</div>
-                            <div style="text-align:right;">12,104</div>
-                        </div>
-                        <div class="ranking-row">
-                            <div style="color:var(--text-muted);">6</div>
-                            <div style="color:#ef4444; font-weight:600;">Denisov</div>
-                            <div style="text-align:right;">11,986</div>
-                        </div>
-                        <div class="ranking-row">
-                            <div style="color:var(--text-muted);">7</div>
-                            <div style="color:#f97316; font-weight:600;">abc864197532</div>
-                            <div style="text-align:right;">11,843</div>
-                        </div>
-                        <div class="ranking-row">
-                            <div style="color:var(--text-muted);">8</div>
-                            <div style="color:#10b981; font-weight:600;">amirhosein farkhondehfar</div>
-                            <div style="text-align:right;">11,442</div>
-                        </div>
-                        <div class="ranking-row">
-                            <div style="color:var(--text-muted);">9</div>
-                            <div style="color:var(--text-primary); font-weight:600;">Avazxonov Jahongir</div>
-                            <div style="text-align:right;">9,356</div>
-                        </div>
-                        <div class="ranking-row">
-                            <div style="color:var(--text-muted);">10</div>
-                            <div style="color:var(--text-primary); font-weight:600;">Surya Pratap singh</div>
-                            <div style="text-align:right;">9,151</div>
-                        </div>
-                        <div class="ranking-row">
-                            <div style="color:var(--text-muted);">11</div>
-                            <div style="color:var(--text-primary); font-weight:600;">Dezhonger Zhang</div>
-                            <div style="text-align:right;">9,115</div>
-                        </div>
-                        <div class="ranking-row">
-                            <div style="color:var(--text-muted);">12</div>
-                            <div style="color:var(--text-primary); font-weight:600;">Ulug'bek Rahmatullayev</div>
-                            <div style="text-align:right;">9,065</div>
-                        </div>
-                        <div class="ranking-row">
-                            <div style="color:var(--text-muted);">13</div>
-                            <div style="color:var(--text-primary); font-weight:600;">Jim_X</div>
-                            <div style="text-align:right;">8,957</div>
-                        </div>
-                        <div class="ranking-row">
-                            <div style="color:var(--text-muted);">14</div>
-                            <div style="color:var(--text-primary); font-weight:600;">Mohammad Sajjad Akhavan Bah...</div>
-                            <div style="text-align:right;">8,808</div>
-                        </div>
-                        <div class="ranking-row">
-                            <div style="color:var(--text-muted);">15</div>
-                            <div style="color:var(--text-primary); font-weight:600;">Mousa Aboubaker Hamed</div>
-                            <div style="text-align:right;">8,736</div>
+                        <div class="arena-empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                            <div>No participants yet.</div>
                         </div>
                     </div>
                 </div>
@@ -252,108 +166,224 @@
         </div>
     </div>
 
-    <!-- Script to fetch contest details -->
+    <!-- Script: All data from real backend APIs -->
     <script>
+        const API_BASE = 'http://localhost:8080';
+        const token = localStorage.getItem('jwt_token');
+
+        function timeAgo(dateStr) {
+            const now = new Date();
+            const then = new Date(dateStr);
+            const diffMs = now - then;
+            const diffMin = Math.floor(diffMs / 60000);
+            if (diffMin < 1) return 'Just now';
+            if (diffMin < 60) return diffMin + 'm ago';
+            const diffHr = Math.floor(diffMin / 60);
+            if (diffHr < 24) return diffHr + 'h ago';
+            return Math.floor(diffHr / 24) + 'd ago';
+        }
+
+        function verdictColor(verdict) {
+            switch(verdict) {
+                case 'ACCEPTED': return '#10b981';
+                case 'WRONG_ANSWER': return '#ef4444';
+                case 'TIME_LIMIT_EXCEEDED': return '#f59e0b';
+                case 'RUNTIME_ERROR': return '#f97316';
+                case 'COMPILATION_ERROR': return '#a855f7';
+                case 'PENDING': return '#6b7280';
+                default: return 'var(--text-muted)';
+            }
+        }
+
+        function verdictText(verdict) {
+            return verdict.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        function rankColor(rank) {
+            if (rank === 1) return '#f59e0b';
+            if (rank === 2) return '#00f0ff';
+            if (rank === 3) return '#f97316';
+            if (rank <= 5) return '#10b981';
+            return 'var(--text-primary)';
+        }
+
+        // ── Load Contest Details ──
+        async function loadContestTitle(contestId) {
+            const titleEl = document.getElementById('contestName');
+            try {
+                const response = await fetch(`${API_BASE}/api/contests`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const contests = Array.isArray(data) ? data : (data.contests || []);
+                    const contest = contests.find(c => c.id == contestId);
+                    titleEl.textContent = contest ? contest.title : 'NicheCP Contest';
+                }
+            } catch (e) {
+                titleEl.textContent = 'NicheCP Contest';
+            }
+        }
+
+        // ── Load Problems ──
+        async function loadProblems(contestId) {
+            const probList = document.getElementById('problemsList');
+            try {
+                const res = await fetch(`${API_BASE}/api/contests/${contestId}/problems`);
+                if (res.ok) {
+                    const problems = await res.json();
+                    const contestProbs = Array.isArray(problems) ? problems : [];
+                    probList.innerHTML = '';
+                    
+                    if (contestProbs.length === 0) {
+                        probList.innerHTML = '<div class="arena-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg><div>No problems have been added to this contest yet.</div></div>';
+                    } else {
+                        const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+                        contestProbs.forEach((p, index) => {
+                            const points = (index + 1) * 500;
+                            probList.innerHTML += `
+                                <a href="problem.html?problem_id=${p.id}" class="problem-row" style="text-decoration:none; color:inherit; display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
+                                    <div class="status-circle" style="width:12px; height:12px; border-radius:50%; border:2px solid rgba(255,255,255,0.2);"></div>
+                                    <div style="display:flex; gap:16px; align-items:center; flex:1; margin-left:16px;">
+                                        <span style="font-weight:600; color:var(--primary-accent); font-size:15px;">${letters[index] || '?'}</span>
+                                        <span style="font-size:14px;">${p.title}</span>
+                                    </div>
+                                    <div style="font-size:13px; color:var(--text-secondary); width:60px; text-align:right;">${points}</div>
+                                    <div style="color:var(--text-muted); font-size:12px; width:60px; text-align:right;">—</div>
+                                </a>
+                            `;
+                        });
+                    }
+                }
+            } catch (e) {
+                probList.innerHTML = '<div class="arena-empty-state" style="color:#ef4444;">Failed to load problems.</div>';
+            }
+        }
+
+        // ── Load Leaderboard ──
+        async function loadLeaderboard(contestId) {
+            const rankingList = document.getElementById('rankingList');
+            try {
+                const res = await fetch(`${API_BASE}/api/contests/${contestId}/leaderboard`);
+                if (res.ok) {
+                    const entries = await res.json();
+                    const data = Array.isArray(entries) ? entries : [];
+                    
+                    if (data.length === 0) {
+                        rankingList.innerHTML = '<div class="arena-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg><div>No participants yet.</div></div>';
+                    } else {
+                        rankingList.innerHTML = '';
+                        data.forEach(entry => {
+                            rankingList.innerHTML += `
+                                <div class="ranking-row">
+                                    <div style="color:var(--text-muted);">${entry.rank}</div>
+                                    <div style="color:${rankColor(entry.rank)}; font-weight:600;">${entry.name}</div>
+                                    <div style="text-align:right;">${entry.solved} solved</div>
+                                </div>
+                            `;
+                        });
+                    }
+                }
+            } catch (e) {
+                rankingList.innerHTML = '<div class="arena-empty-state" style="color:#ef4444;">Failed to load leaderboard.</div>';
+            }
+        }
+
+        // ── Load Live Submissions Feed (Commentary) ──
+        async function loadSubmissionsFeed(contestId) {
+            const commentaryList = document.getElementById('commentaryList');
+            try {
+                const res = await fetch(`${API_BASE}/api/contests/${contestId}/submissions`);
+                if (res.ok) {
+                    const events = await res.json();
+                    const data = Array.isArray(events) ? events : [];
+                    
+                    if (data.length === 0) {
+                        commentaryList.innerHTML = '<div class="arena-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg><div>No submissions yet.</div></div>';
+                    } else {
+                        commentaryList.innerHTML = '';
+                        data.forEach(ev => {
+                            const vColor = verdictColor(ev.verdict);
+                            commentaryList.innerHTML += `
+                                <div class="commentary-row">
+                                    <div><span style="font-weight:600;">${ev.username}</span> got <span style="color:${vColor};">${verdictText(ev.verdict)}</span> on ${ev.problem}</div>
+                                    <div style="color:var(--text-muted);">${timeAgo(ev.timestamp)}</div>
+                                </div>
+                            `;
+                        });
+                    }
+                }
+            } catch (e) {
+                commentaryList.innerHTML = '<div class="arena-empty-state" style="color:#ef4444;">Failed to load submissions.</div>';
+            }
+        }
+
+        // ── Load My Submissions ──
+        async function loadMySubmissions(contestId) {
+            const mySubsList = document.getElementById('mySubmissionsList');
+            
+            if (!token) {
+                mySubsList.innerHTML = '<div class="arena-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><div>Log in to see your submissions.</div></div>';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/contests/${contestId}/my-submissions`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const subs = await res.json();
+                    const data = Array.isArray(subs) ? subs : [];
+                    
+                    if (data.length === 0) {
+                        mySubsList.innerHTML = '<div class="arena-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg><div>No submissions yet.</div></div>';
+                    } else {
+                        mySubsList.innerHTML = '';
+                        data.forEach(s => {
+                            const vColor = verdictColor(s.verdict);
+                            const execTime = s.execution_time_ms != null ? s.execution_time_ms + 'ms' : '—';
+                            mySubsList.innerHTML += `
+                                <div class="commentary-row" style="align-items:center;">
+                                    <div style="font-weight:500; font-size:13px; flex:1;">${s.problem}</div>
+                                    <div style="color:${vColor}; font-size:13px; width:120px;">${verdictText(s.verdict)}</div>
+                                    <div style="color:var(--text-muted); font-size:12px; width:50px;">${s.language}</div>
+                                    <div style="color:var(--text-muted); font-size:12px; width:50px; text-align:right;">${execTime}</div>
+                                    <div style="color:var(--text-muted); font-size:12px; width:60px; text-align:right;">${timeAgo(s.timestamp)}</div>
+                                </div>
+                            `;
+                        });
+                    }
+                } else if (res.status === 401) {
+                    mySubsList.innerHTML = '<div class="arena-empty-state">Log in to see your submissions.</div>';
+                }
+            } catch (e) {
+                mySubsList.innerHTML = '<div class="arena-empty-state" style="color:#ef4444;">Failed to load your submissions.</div>';
+            }
+        }
+
+        // ── Main Init ──
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const contestId = urlParams.get('id');
-            const titleEl = document.getElementById('contestName');
-            
-            if (contestId) {
-                try {
-                    const response = await fetch('http://localhost:8080/api/contests');
-                    if (response.ok) {
-                        const data = await response.json();
-                        const contests = data.contests || data || [];
-                        const contest = contests.find(c => c.id == contestId);
-                        if (contest) {
-                            titleEl.textContent = contest.title;
-                        } else {
-                            titleEl.textContent = "NicheCP Contest";
-                        }
-                    }
-                } catch (e) {
-                    titleEl.textContent = "NicheCP Contest";
-                }
 
-                try {
-                    const probRes = await fetch('http://localhost:8080/api/problems');
-                    if (probRes.ok) {
-                        const problems = await probRes.json();
-                        const probList = document.getElementById('problemsList');
-                        probList.innerHTML = '';
-                        
-                        // Pick first 5 as a mock for the contest
-                        const contestProbs = problems.slice(0, 5);
-                        
-                        if (contestProbs.length === 0) {
-                            probList.innerHTML = '<div style="text-align:center; color: var(--text-muted); margin-top: 40px; font-size:14px;">No problems available in this contest.</div>';
-                        } else {
-                            const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-                            contestProbs.forEach((p, index) => {
-                                const points = (index + 1) * 500;
-                                probList.innerHTML += `
-                                    <a href="problem.html?problem_id=${p.id}" class="problem-row" style="text-decoration:none; color:inherit; display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
-                                        <div class="status-circle" style="width:12px; height:12px; border-radius:50%; border:2px solid rgba(255,255,255,0.2);"></div>
-                                        <div style="display:flex; gap:16px; align-items:center; flex:1; margin-left:16px;">
-                                            <span style="font-weight:600; color:var(--primary-accent); font-size:15px;">${letters[index] || '?'}</span>
-                                            <span style="font-size:14px;">${p.title}</span>
-                                        </div>
-                                        <div style="font-size:13px; color:var(--text-secondary); width:60px; text-align:right;">${points}</div>
-                                        <div style="color:var(--text-muted); font-size:12px; width:60px; text-align:right;">0 / 0</div>
-                                    </a>
-                                `;
-                            });
-                        }
-                    }
-                } catch (e) {
-                    document.getElementById('problemsList').innerHTML = '<div style="text-align:center; color: #ef4444; margin-top: 40px;">Failed to load problems.</div>';
-                }
-            } else {
-                titleEl.textContent = "Contest Preview";
-                document.getElementById('problemsList').innerHTML = '<div style="text-align:center; color: var(--text-muted); margin-top: 40px; font-size:14px;">No contest selected.</div>';
+            if (!contestId) {
+                document.getElementById('contestName').textContent = 'Contest Preview';
+                document.getElementById('problemsList').innerHTML = '<div class="arena-empty-state">No contest selected.</div>';
+                return;
             }
 
-            // Phase 5: Mock WebSocket Integration for Live Commentary and Rankings
-            const commentaryList = document.getElementById('commentaryList');
-            const rankingList = document.getElementById('rankingList');
+            // Load all panels concurrently
+            await Promise.allSettled([
+                loadContestTitle(contestId),
+                loadProblems(contestId),
+                loadLeaderboard(contestId),
+                loadSubmissionsFeed(contestId),
+                loadMySubmissions(contestId)
+            ]);
 
-            const users = ['Pratik Mistry', 'seroze kim', 'Hello', 'Alex Wice', 'maspy', 'tourist', 'Benq'];
-            const problems = ['A', 'B', 'C', 'D', 'E'];
-            const verdicts = [
-                { text: 'Accepted', color: '#10b981' },
-                { text: 'Wrong Answer', color: '#ef4444' },
-                { text: 'Time Limit Exceeded', color: '#f59e0b' }
-            ];
-
-            function addMockCommentary() {
-                const user = users[Math.floor(Math.random() * users.length)];
-                const prob = problems[Math.floor(Math.random() * problems.length)];
-                // Weight Accepted higher
-                const verdict = Math.random() > 0.4 ? verdicts[0] : verdicts[Math.floor(Math.random() * verdicts.length)];
-                
-                const div = document.createElement('div');
-                div.className = 'commentary-row row-enter-active';
-                div.innerHTML = `
-                    <div><span style="font-weight:600;">${user}</span> got <span style="color:${verdict.color};">${verdict.text}</span> on ${prob}</div>
-                    <div style="color:var(--text-muted);">Just now</div>
-                `;
-                
-                commentaryList.insertBefore(div, commentaryList.firstChild);
-                
-                // Keep list small
-                if (commentaryList.children.length > 20) {
-                    commentaryList.removeChild(commentaryList.lastChild);
-                }
-            }
-
-            // Simulate incoming events
+            // Poll for live updates every 15 seconds
             setInterval(() => {
-                if(Math.random() > 0.3) {
-                    addMockCommentary();
-                }
-            }, 3500);
-
+                loadSubmissionsFeed(contestId);
+                loadLeaderboard(contestId);
+            }, 15000);
         });
     </script>
 <script src="js/components.js"></script>

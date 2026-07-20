@@ -1049,8 +1049,8 @@ h1, h2, h3, h4, h5, h6 {
     border-bottom: none;
 }
 
-/* Repovive Layout */
-.repovive-layout {
+/* NicheCP Layout */
+.niche-layout {
     display: grid;
     grid-template-columns: 280px 1fr;
     gap: 40px;
@@ -1060,18 +1060,18 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media screen and (max-width: 900px) {
-    .repovive-layout {
+    .niche-layout {
         grid-template-columns: 1fr;
     }
 }
 
-.repovive-sidebar {
+.niche-sidebar {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-.repovive-content {
+.niche-content {
     display: flex;
     flex-direction: column;
     gap: 32px;
@@ -1300,8 +1300,8 @@ h1, h2, h3, h4, h5, h6 {
     border-color: var(--primary-accent);
 }
 
-/* Repovive Contests */
-.repovive-contests-header {
+/* NicheCP Contests */
+.niche-contests-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
@@ -1310,7 +1310,7 @@ h1, h2, h3, h4, h5, h6 {
     padding-bottom: 8px;
     margin-top: 40px;
 }
-.repovive-contests-header h2 {
+.niche-contests-header h2 {
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
@@ -1318,47 +1318,47 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--text-muted);
     margin: 0;
 }
-.repovive-contests-header span {
+.niche-contests-header span {
     font-size: 11px;
     color: var(--text-muted);
     text-transform: uppercase;
 }
 
-.repovive-contest-row {
+.niche-contest-row {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr;
     align-items: center;
     padding: 16px 0;
     border-bottom: 1px solid rgba(255,255,255,0.05);
 }
-.repovive-contest-row:last-child {
+.niche-contest-row:last-child {
     border-bottom: none;
 }
-.repovive-contest-row .title {
+.niche-contest-row .title {
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 4px;
 }
-.repovive-contest-row .meta {
+.niche-contest-row .meta {
     font-size: 13px;
     color: var(--text-muted);
 }
-.repovive-contest-row .length {
+.niche-contest-row .length {
     font-size: 14px;
     color: #e0e0e0;
 }
-.repovive-contest-row .countdown {
+.niche-contest-row .countdown {
     font-family: monospace;
     font-size: 14px;
     color: #e0e0e0;
 }
-.repovive-contest-row .actions {
+.niche-contest-row .actions {
     display: flex;
     gap: 16px;
     justify-content: flex-end;
     align-items: center;
 }
-.repovive-contest-row .actions button {
+.niche-contest-row .actions button {
     background: transparent;
     border: none;
     color: #10b981;
@@ -1367,18 +1367,18 @@ h1, h2, h3, h4, h5, h6 {
     cursor: pointer;
     transition: opacity 0.2s;
 }
-.repovive-contest-row .actions button:hover {
+.niche-contest-row .actions button:hover {
     opacity: 0.8;
 }
-.repovive-contest-row .actions .btn-enter {
+.niche-contest-row .actions .btn-enter {
     background: rgba(16, 185, 129, 0.1);
     border: 1px solid rgba(16, 185, 129, 0.2);
     padding: 6px 16px;
     border-radius: 4px;
 }
 
-/* Repovive Arena */
-.repovive-arena-subheader {
+/* NicheCP Arena */
+.niche-arena-subheader {
     display: flex;
     justify-content: space-between;
     padding: 12px 24px;
@@ -1387,35 +1387,35 @@ h1, h2, h3, h4, h5, h6 {
     border-bottom: 1px solid rgba(255,255,255,0.05);
     font-size: 14px;
 }
-.repovive-arena-subheader .left {
+.niche-arena-subheader .left {
     display: flex;
     gap: 12px;
     align-items: center;
 }
-.repovive-arena-subheader .left .id { color: var(--text-muted); }
-.repovive-arena-subheader .left .title { font-weight: 600; color: #fff; }
-.repovive-arena-subheader .left .diff { color: #f59e0b; font-weight: 600;}
-.repovive-arena-subheader .right {
+.niche-arena-subheader .left .id { color: var(--text-muted); }
+.niche-arena-subheader .left .title { font-weight: 600; color: #fff; }
+.niche-arena-subheader .left .diff { color: #f59e0b; font-weight: 600;}
+.niche-arena-subheader .right {
     color: var(--text-muted);
 }
 
-.repovive-arena-layout {
+.niche-arena-layout {
     display: flex;
     height: calc(100vh - 190px);
     overflow: hidden;
 }
-.repovive-arena-left, .repovive-arena-right {
+.niche-arena-left, .niche-arena-right {
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
-.repovive-arena-left {
+.niche-arena-left {
     flex: 1;
     min-width: 200px;
     border-right: 1px solid rgba(255,255,255,0.05);
     background: rgba(20, 20, 22, 0.5);
 }
-.repovive-arena-right {
+.niche-arena-right {
     flex: 1;
     min-width: 300px;
 }
@@ -1431,12 +1431,12 @@ h1, h2, h3, h4, h5, h6 {
 .drag-divider:hover, .drag-divider.dragging {
     background: var(--primary-accent);
 }
-.repovive-arena-tabs {
+.niche-arena-tabs {
     display: flex;
     border-bottom: 1px solid rgba(255,255,255,0.05);
     padding: 0 12px;
 }
-.repovive-arena-tabs .tab {
+.niche-arena-tabs .tab {
     padding: 12px 16px;
     font-size: 13px;
     font-weight: 600;
@@ -1444,18 +1444,18 @@ h1, h2, h3, h4, h5, h6 {
     cursor: pointer;
     border-bottom: 2px solid transparent;
 }
-.repovive-arena-tabs .tab.active {
+.niche-arena-tabs .tab.active {
     color: var(--text-primary);
     border-bottom-color: var(--primary-accent);
 }
-.repovive-arena-content {
+.niche-arena-content {
     padding: 24px;
     overflow-y: auto;
     font-size: 14px;
     line-height: 1.6;
     color: #e0e0e0;
 }
-.repovive-arena-content .format-title {
+.niche-arena-content .format-title {
     font-size: 11px;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -1463,10 +1463,10 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 8px;
     letter-spacing: 0.5px;
 }
-.repovive-arena-right {
+.niche-arena-right {
     background: #0f0f11;
 }
-.repovive-arena-right .editor-top {
+.niche-arena-right .editor-top {
     display: flex;
     justify-content: space-between;
     padding: 12px 24px;
@@ -1475,12 +1475,12 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--text-muted);
     align-items: center;
 }
-.repovive-arena-right .editor-container {
+.niche-arena-right .editor-container {
     flex: 1;
     position: relative;
     padding-top: 12px;
 }
-.repovive-arena-right .action-bar {
+.niche-arena-right .action-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1488,7 +1488,7 @@ h1, h2, h3, h4, h5, h6 {
     border-top: 1px solid rgba(255,255,255,0.05);
     background: rgba(20,20,22,0.8);
 }
-.repovive-arena-right .terminal-pane {
+.niche-arena-right .terminal-pane {
     height: auto;
     min-height: 220px;
     flex: 0 0 220px;

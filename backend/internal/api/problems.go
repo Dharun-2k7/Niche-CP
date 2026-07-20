@@ -64,6 +64,151 @@ func GetAllProblems(c *gin.Context) {
 	c.JSON(http.StatusOK, problems)
 }
 
+func GetContestProblems(c *gin.Context) {
+	contestID := c.Param("id")
+
+	rows, err := db.DB.Query(`
+		SELECT p.id, p.title, p.difficulty, p.tags
+		FROM problems p
+		JOIN contest_problems cp ON p.id = cp.problem_id
+		WHERE cp.contest_id = $1
+		ORDER BY cp.order_index ASC
+	`, contestID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch contest problems"})
+		return
+	}
+	defer rows.Close()
+
+	problems := make([]map[string]interface{}, 0)
+	for rows.Next() {
+		var id int
+		var title, difficulty, tags string
+		if err := rows.Scan(&id, &title, &difficulty, &tags); err == nil {
+			problems = append(problems, map[string]interface{}{
+				"id":         id,
+				"title":      title,
+				"difficulty": difficulty,
+				"tags":       tags,
+			})
+		}
+	}
+	c.JSON(http.StatusOK, problems)
+}
+
+// GetContestLeaderboard returns ranked users for a contest based on accepted submissions
+func GetContestLeaderboard(c *gin.Context) {
+	contestID := c.Param("id")
+
+	rows, err := db.DB.Query(`
+		SELECT u.name, 
+			COUNT(DISTINCT s.problem_id) AS solved_count,
+			SUM(CASE WHEN s.execution_time_ms IS NOT NULL THEN s.execution_time_ms ELSE 0 END) AS total_time
+		FROM submissions s
+		JOIN users u ON s.user_id = u.id
+		WHERE s.contest_id = $1 AND s.status = 'ACCEPTED'
+		GROUP BY u.id, u.name
+		ORDER BY solved_count DESC, total_time ASC
+	`, contestID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch leaderboard"})
+		return
+	}
+	defer rows.Close()
+
+	type LeaderboardEntry struct {
+		Rank      int    `json:"rank"`
+		Name      string `json:"name"`
+		Solved    int    `json:"solved"`
+		TotalTime int    `json:"total_time"`
+	}
+
+	entries := make([]LeaderboardEntry, 0)
+	rank := 1
+	for rows.Next() {
+		var entry LeaderboardEntry
+		if err := rows.Scan(&entry.Name, &entry.Solved, &entry.TotalTime); err == nil {
+			entry.Rank = rank
+			entries = append(entries, entry)
+			rank++
+		}
+	}
+	c.JSON(http.StatusOK, entries)
+}
+
+// GetContestSubmissions returns recent submissions for the contest (live commentary feed)
+func GetContestSubmissions(c *gin.Context) {
+	contestID := c.Param("id")
+
+	rows, err := db.DB.Query(`
+		SELECT u.name, p.title, s.status, s.created_at
+		FROM submissions s
+		JOIN users u ON s.user_id = u.id
+		JOIN problems p ON s.problem_id = p.id
+		WHERE s.contest_id = $1
+		ORDER BY s.created_at DESC
+		LIMIT 50
+	`, contestID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch contest submissions"})
+		return
+	}
+	defer rows.Close()
+
+	type SubmissionEvent struct {
+		Username  string    `json:"username"`
+		Problem   string    `json:"problem"`
+		Verdict   string    `json:"verdict"`
+		Timestamp time.Time `json:"timestamp"`
+	}
+
+	events := make([]SubmissionEvent, 0)
+	for rows.Next() {
+		var ev SubmissionEvent
+		if err := rows.Scan(&ev.Username, &ev.Problem, &ev.Verdict, &ev.Timestamp); err == nil {
+			events = append(events, ev)
+		}
+	}
+	c.JSON(http.StatusOK, events)
+}
+
+// GetMyContestSubmissions returns the logged-in user's submissions for a specific contest
+func GetMyContestSubmissions(c *gin.Context) {
+	contestID := c.Param("id")
+	userID := c.GetInt("user_id")
+
+	rows, err := db.DB.Query(`
+		SELECT p.title, s.status, s.language, s.execution_time_ms, s.created_at
+		FROM submissions s
+		JOIN problems p ON s.problem_id = p.id
+		WHERE s.contest_id = $1 AND s.user_id = $2
+		ORDER BY s.created_at DESC
+		LIMIT 50
+	`, contestID, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch your submissions"})
+		return
+	}
+	defer rows.Close()
+
+	type MySubmission struct {
+		Problem       string    `json:"problem"`
+		Verdict       string    `json:"verdict"`
+		Language      string    `json:"language"`
+		ExecutionTime *int      `json:"execution_time_ms"`
+		Timestamp     time.Time `json:"timestamp"`
+	}
+
+	subs := make([]MySubmission, 0)
+	for rows.Next() {
+		var s MySubmission
+		if err := rows.Scan(&s.Problem, &s.Verdict, &s.Language, &s.ExecutionTime, &s.Timestamp); err == nil {
+			subs = append(subs, s)
+		}
+	}
+	c.JSON(http.StatusOK, subs)
+}
+
 func GetAllContests(c *gin.Context) {
 	rows, err := db.DB.Query(`SELECT id, title, type, start_time, duration_minutes FROM contests ORDER BY start_time DESC`)
 	if err != nil {

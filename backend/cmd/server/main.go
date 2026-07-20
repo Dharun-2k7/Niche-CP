@@ -61,6 +61,9 @@ func main() {
 	r.GET("/api/problems", api.GetAllProblems)
 	r.GET("/api/problems/:id", api.GetProblem)
 	r.GET("/api/contests", api.GetAllContests)
+	r.GET("/api/contests/:id/problems", api.GetContestProblems)
+	r.GET("/api/contests/:id/leaderboard", api.GetContestLeaderboard)
+	r.GET("/api/contests/:id/submissions", api.GetContestSubmissions)
 
 	// Protected Routes
 	protected := r.Group("/api")
@@ -80,6 +83,7 @@ func main() {
 		protected.POST("/profile/cf/verify", api.VerifyCF)
 		protected.POST("/profile/cf/disconnect", api.DisconnectCF)
 		protected.POST("/contests/register", api.RegisterForContest)
+		protected.GET("/contests/:id/my-submissions", api.GetMyContestSubmissions)
 	}
 
 	// Admin Routes
@@ -88,9 +92,12 @@ func main() {
 	{
 		admin.GET("/users", api.GetAllUsers)
 		admin.POST("/users/permissions", api.UpdateUserPermissions)
+		admin.POST("/promote", api.PromoteToAdmin)
 		admin.POST("/problems", api.CreateProblem)
 		admin.POST("/contests", api.CreateContest)
 		admin.PUT("/contests/:id", api.UpdateContest)
+		admin.DELETE("/contests/:id", api.DeleteContest)
+		admin.GET("/contests/:id/details", api.GetContestDetails)
 	}
 
 	// Start Server

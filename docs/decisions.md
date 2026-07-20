@@ -30,3 +30,11 @@ This document logs significant technical choices made during the development of 
 ## 5. JWT for Authentication
 - **Decision**: Use stateless JSON Web Tokens (Bearer) stored in `localStorage` rather than server-side sessions.
 - **Why**: Stateless architecture scales effortlessly across multiple API instances. It simplifies API interactions and keeps the Go backend fully RESTful and decoupled from the static HTML frontend.
+
+## 6. Explicit Delete Modes vs. CASCADE for Contest-Problem Relationships
+- **Decision**: Use explicit transactional delete modes (`contest_only`, `selected_problems`, `all_problems`) rather than relying on PostgreSQL `ON DELETE CASCADE`.
+- **Why**: 
+  - Contest-Problem is a many-to-many relationship. A problem may belong to multiple contests or exist as a standalone practice problem.
+  - CASCADE would blindly destroy problems when a contest is deleted, even if the admin only intended to remove the contest structure.
+  - Explicit modes give the admin full control over data preservation, with database transactions ensuring atomicity and rollback on failure.
+- **Alternatives Considered**: `ON DELETE CASCADE` (rejected: too destructive), soft deletes with `deleted_at` column (deferred for future consideration).

@@ -258,3 +258,225 @@ func UpdateUserPermissions(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Permissions updated successfully"})
 }
 
+type PromoteAdminRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+func PromoteToAdmin(c *gin.Context) {
+	var req PromoteAdminRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	callerEmail := c.GetString("email")
+	superAdmin := os.Getenv("SUPER_ADMIN_EMAIL")
+	if superAdmin == "" {
+		superAdmin = "dharunkaarthick07@gmail.com"
+	}
+	
+	// Only super admin can promote
+	if callerEmail != superAdmin {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only the Super Admin can promote users to admin."})
+		return
+	}
+
+	res, err := db.DB.Exec(`UPDATE users SET role = 'admin' WHERE email = $1`, req.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to promote user"})
+		return
+	}
+
+	rowsAffected, _ := res.RowsAffected()
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User successfully promoted to Admin"})
+}
+
+// GetContestDetails returns contest metadata for the delete confirmation modal
+func GetContestDetails(c *gin.Context) {
+	contestID := c.Param("id")
+
+	var title string
+	err := db.DB.QueryRow(`SELECT title FROM contests WHERE id = $1`, contestID).Scan(&title)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Contest not found"})
+		return
+	}
+
+	var problemCount int
+	db.DB.QueryRow(`SELECT COUNT(*) FROM contest_problems WHERE contest_id = $1`, contestID).Scan(&problemCount)
+
+	var submissionCount int
+	db.DB.QueryRow(`SELECT COUNT(*) FROM submissions WHERE contest_id = $1`, contestID).Scan(&submissionCount)
+
+	// Get attached problems
+	rows, err := db.DB.Query(`
+		SELECT p.id, p.title
+		FROM problems p
+		JOIN contest_problems cp ON p.id = cp.problem_id
+		WHERE cp.contest_id = $1
+		ORDER BY cp.order_index ASC
+	`, contestID)
+
+	type ProblemInfo struct {
+		ID    int    `json:"id"`
+		Title string `json:"title"`
+	}
+	problems := make([]ProblemInfo, 0)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var p ProblemInfo
+			if err := rows.Scan(&p.ID, &p.Title); err == nil {
+				problems = append(problems, p)
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"title":            title,
+		"problem_count":    problemCount,
+		"submission_count": submissionCount,
+		"problems":         problems,
+	})
+}
+
+type DeleteContestRequest struct {
+	DeleteMode string `json:"delete_mode"` // "contest_only", "selected_problems", "all_problems"
+	ProblemIDs []int  `json:"problem_ids"` // Only used for "selected_problems"
+}
+
+// DeleteContest handles contest deletion with three modes using database transactions
+func DeleteContest(c *gin.Context) {
+	contestID := c.Param("id")
+
+	var req DeleteContestRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		req.DeleteMode = "contest_only"
+	}
+	if req.DeleteMode == "" {
+		req.DeleteMode = "contest_only"
+	}
+
+	// Verify contest exists
+	var exists bool
+	err := db.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM contests WHERE id = $1)`, contestID).Scan(&exists)
+	if err != nil || !exists {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Contest not found"})
+		return
+	}
+
+	tx, err := db.DB.Begin()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		return
+	}
+
+	switch req.DeleteMode {
+	case "contest_only":
+		if _, err := tx.Exec(`DELETE FROM contest_problems WHERE contest_id = $1`, contestID); err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete contest-problem mappings"})
+			return
+		}
+		if _, err := tx.Exec(`DELETE FROM contests WHERE id = $1`, contestID); err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete contest"})
+			return
+		}
+
+	case "selected_problems":
+		if len(req.ProblemIDs) == 0 {
+			tx.Rollback()
+			c.JSON(http.StatusBadRequest, gin.H{"error": "No problem IDs provided for selected_problems mode"})
+			return
+		}
+		// Validate that selected problems belong to this contest
+		for _, pid := range req.ProblemIDs {
+			var belongs bool
+			err := tx.QueryRow(`SELECT EXISTS(SELECT 1 FROM contest_problems WHERE contest_id = $1 AND problem_id = $2)`, contestID, pid).Scan(&belongs)
+			if err != nil || !belongs {
+				tx.Rollback()
+				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Problem ID %d does not belong to this contest", pid)})
+				return
+			}
+		}
+		// Delete test cases and problems for selected IDs
+		for _, pid := range req.ProblemIDs {
+			if _, err := tx.Exec(`DELETE FROM contest_problems WHERE contest_id = $1 AND problem_id = $2`, contestID, pid); err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unlink problem"})
+				return
+			}
+			if _, err := tx.Exec(`DELETE FROM problems WHERE id = $1`, pid); err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete problem"})
+				return
+			}
+		}
+		// Delete remaining contest mappings and the contest itself
+		if _, err := tx.Exec(`DELETE FROM contest_problems WHERE contest_id = $1`, contestID); err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clean up mappings"})
+			return
+		}
+		if _, err := tx.Exec(`DELETE FROM contests WHERE id = $1`, contestID); err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete contest"})
+			return
+		}
+
+	case "all_problems":
+		// Get all problem IDs for this contest
+		rows, err := tx.Query(`SELECT problem_id FROM contest_problems WHERE contest_id = $1`, contestID)
+		if err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch contest problems"})
+			return
+		}
+		var problemIDs []int
+		for rows.Next() {
+			var pid int
+			if err := rows.Scan(&pid); err == nil {
+				problemIDs = append(problemIDs, pid)
+			}
+		}
+		rows.Close()
+
+		// Delete all linked problems
+		for _, pid := range problemIDs {
+			if _, err := tx.Exec(`DELETE FROM problems WHERE id = $1`, pid); err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete problem"})
+				return
+			}
+		}
+		// Delete mappings and contest
+		if _, err := tx.Exec(`DELETE FROM contest_problems WHERE contest_id = $1`, contestID); err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete mappings"})
+			return
+		}
+		if _, err := tx.Exec(`DELETE FROM contests WHERE id = $1`, contestID); err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete contest"})
+			return
+		}
+
+	default:
+		tx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid delete_mode. Use: contest_only, selected_problems, or all_problems"})
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Contest deleted successfully"})
+}

@@ -17,7 +17,7 @@
         should be dynamically fetched and rendered by JavaScript 
         based on the problem ID in the URL (e.g., ?problem_id=1). 
     -->
-    <div class="repovive-arena-subheader">
+    <div class="niche-arena-subheader">
         <div class="left">
             <span class="id" id="problemIdDisplay">Loading...</span>
             <span class="title" id="problemTitleDisplay">Please wait</span>
@@ -32,19 +32,19 @@
         </div>
     </div>
 
-    <main class="repovive-arena-layout">
-        <div class="repovive-arena-left" id="arenaLeft">
-            <div class="repovive-arena-tabs">
+    <main class="niche-arena-layout">
+        <div class="niche-arena-left" id="arenaLeft">
+            <div class="niche-arena-tabs">
                 <div class="tab active">Statement</div>
             </div>
-            <div class="repovive-arena-content" id="problemContentDisplay">
+            <div class="niche-arena-content" id="problemContentDisplay">
                 <p>Loading problem description...</p>
             </div>
         </div>
         
         <div class="drag-divider" id="dragDivider"></div>
         
-        <div class="repovive-arena-right" id="arenaRight" style="position: relative; display: flex; flex-direction: column;">
+        <div class="niche-arena-right" id="arenaRight" style="position: relative; display: flex; flex-direction: column;">
             <div class="editor-top" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px 16px; background: var(--card-bg);">
                 <div style="display: flex; gap: 16px; align-items: center;">
                     <select id="language" class="cyber-select" style="padding: 4px 12px; font-size: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: white;">
@@ -237,9 +237,9 @@
                 if (!isDragging) return;
                 
                 // Calculate percentage
-                const containerWidth = document.querySelector('.repovive-arena-layout').offsetWidth;
+                const containerWidth = document.querySelector('.niche-arena-layout').offsetWidth;
                 const newLeftWidth = e.clientX; // Assuming layout touches left edge. Actually let's use bounding client rect
-                const layoutRect = document.querySelector('.repovive-arena-layout').getBoundingClientRect();
+                const layoutRect = document.querySelector('.niche-arena-layout').getBoundingClientRect();
                 let percentage = ((e.clientX - layoutRect.left) / containerWidth) * 100;
                 
                 // Boundaries

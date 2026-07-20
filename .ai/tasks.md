@@ -10,8 +10,10 @@
 
 ## Medium Priority Tasks
 - [ ] **Profile Customization**: Finalize Codeforces handle integration and parsing metrics on the profile page.
-- [ ] **Leaderboard / Rankings**: Ensure real-time (or near real-time) updates to contest leaderboards.
-- [ ] **Admin Dashboard Permissions**: Finalize the API endpoints to dynamically update individual user roles and specific granular permissions (Create Problem, Manage Users, etc.) from the frontend modal.
+- [x] **Leaderboard / Rankings**: Real-time contest leaderboards now fetch from `GET /api/contests/:id/leaderboard` with 15s polling.
+- [x] **Admin Dashboard Permissions**: Finalize the API endpoints to dynamically update individual user roles and specific granular permissions (Create Problem, Manage Users, etc.) from the frontend modal.
+- [x] **Contest Arena Real Data**: Purged all simulated/hardcoded data. All panels (problems, leaderboard, commentary, submissions) fetch from real backend APIs.
+- [x] **Contest Deletion Workflow**: Admin can delete contests with 3 modes (contest only, selected problems, all problems) using database transactions.
 
 ## Low Priority Tasks
 - [ ] **Blogs & Resources**: Implement the placeholder pages (`blogs.html`, `learn.html`) with actual content or database-driven resources.

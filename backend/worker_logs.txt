@@ -1,0 +1,49 @@
+2026/07/20 13:15:23 Successfully connected to Postgres!
+2026/07/20 13:15:23 Successfully connected to Redis!
+2026/07/20 13:15:23 Worker pool started with 1 workers. Listening for submissions...
+2026/07/20 13:17:16 [Worker 1] Processing Submission 1002 (python) for Problem 1...
+2026/07/20 13:17:16 [Worker 1] Acquired Token a9142803-fce3-4b4b-8c66-377e6fdaa86b | Current Active Sandboxes: 1 | Peak: 1
+2026/07/20 13:17:19 [Worker 1] Sub 1002 Test 1 | Expected: No | Actual: 1
+DEBUG: expected='No', actual='1'
+2026/07/20 13:17:19 [Worker 1] Submission 1002 failed on test case 1
+2026/07/20 13:17:19 [Worker 1] Submission 1002 completed with status: WRONG_ANSWER
+2026/07/20 13:17:23 [Worker 1] Processing Submission 1003 (python) for Problem 1...
+2026/07/20 13:17:23 [Worker 1] Acquired Token fe57104c-fcd2-4945-883c-db294d2a0a51 | Current Active Sandboxes: 1 | Peak: 1
+2026/07/20 13:17:24 [Worker 1] Submission 1003 completed with status: RUNTIME_ERROR
+2026/07/20 13:18:04 [Worker 1] Processing Submission 1003 (python) for Problem 1...
+2026/07/20 13:18:04 [Worker 1] Acquired Token 22312693-3246-4aee-8264-f5f99e438d1e | Current Active Sandboxes: 1 | Peak: 1
+2026/07/20 13:18:06 [Worker 1] Sub 1003 Test 1 | Expected: No | Actual: No
+DEBUG: expected='No', actual='No'
+2026/07/20 13:18:08 [Worker 1] Sub 1003 Test 2 | Expected: No | Actual: No
+DEBUG: expected='No', actual='No'
+2026/07/20 13:18:10 [Worker 1] Sub 1003 Test 3 | Expected: Yes | Actual: No
+DEBUG: expected='Yes', actual='No'
+2026/07/20 13:18:10 [Worker 1] Submission 1003 failed on test case 3
+2026/07/20 13:18:10 [Worker 1] Submission 1003 completed with status: WRONG_ANSWER
+2026/07/20 13:18:10 [Worker 1] Processing Submission 1006 (python) for Problem 1...
+2026/07/20 13:18:10 [Worker 1] Acquired Token 567abca1-d850-4c03-a894-3e9f836ea918 | Current Active Sandboxes: 1 | Peak: 1
+2026/07/20 13:18:11 [Worker 1] Sub 1006 Test 1 | Expected: No | Actual: No
+DEBUG: expected='No', actual='No'
+2026/07/20 13:18:13 [Worker 1] Sub 1006 Test 2 | Expected: No | Actual: No
+DEBUG: expected='No', actual='No'
+2026/07/20 13:18:14 [Worker 1] Sub 1006 Test 3 | Expected: Yes |2026/07/20 13:18:15 [Worker 1] Submission 1002 failed on test case 3
+2026/07/20 13:18:15 [Worker 1] Submission 1002 completed with status: WRONG_ANSWER
+2026/07/20 13:18:16 [Worker 1] Processing Submi2026/07/20 13:18:16 [Worker 1] Proces2026/07/20 13:18:16 [Worker 12026/07/20 13:18:16 [Worker 1] Processing Submission 1002 (python) for Problem 1...
+2026/07/202026/07/20 13:18:27 [Worker 1] Submission 1000 completed with status: TIME_LIMIT_EXCEEDED
+2026/07/20 13:24:28 [Worker 1] Processing Submission 1006 (python) for Problem 1...
+2026/07/20 13:24:35 [Worker 1] Acquired Token 1ed0ee6c-a926-47e4-a095-22ee4866d0ae | Current Active Sandboxes: 1 | Peak: 1
+2026/07/20 13:24:40 [Worker 1] Submission 1006 failed on test case 3
+2026/07/20 13:24:40 [Worker 1] Submission 1006 completed with status: WRONG_ANSWER
+2026/07/20 16:23:48 Received termination signal. Shutting down worker pool...
+2026/07/20 16:23:48 Worker pool stopped cleanly. PEAK ACTIVE SANDBOXES: 1
+b 1007 Test 1 | Expected: "No" | Actual: "No"
+2026/07/20 13:24:38 [Worker 1] Sub 1007 Test 2 | Expected: "No" | Actual: "No"
+2026/07/20 13:24:40 [Worker 1] Sub 1007 Test 3 | Expected: "Yes" | Actual: "No"
+2026/07/20 13:24:40 [Worker 1] Submission 1007 failed on test case 3
+2026/07/20 13:24:40 [Worker 1] Submission 1007 completed with status: WRONG_ANSWER
+2026/07/20 16:23:48 Received termination signal. Shutting down worker pool...
+2026/07/20 16:23:49 Worker pool stopped cleanly. PEAK ACTIVE SANDBOXES: 1
+ failed on test case 3
+2026/07/20 13:24:39 [Worker 1] Submission 1004 completed with status: WRONG_ANSWER
+2026/07/20 16:23:48 Received termination signal. Shutting down worker pool...
+2026/07/20 16:23:48 Worker pool stopped cleanly. PEAK ACTIVE SANDBOXES: 1

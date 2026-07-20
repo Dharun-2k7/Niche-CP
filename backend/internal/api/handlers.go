@@ -55,11 +55,18 @@ func SubmitCode(c *gin.Context) {
 		return
 	}
 
-	// 2. Insert into Postgres as PENDING
+	// 2. Insert into Postgres as PENDING inside a Transaction
+	tx, err := db.DB.Begin()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		return
+	}
+	defer tx.Rollback()
+
 	var submissionID int
 	query := `INSERT INTO submissions (user_id, problem_id, contest_id, code, language, status) 
 			  VALUES ($1, $2, $3, $4, $5, 'PENDING') RETURNING id`
-	err = db.DB.QueryRow(query, userID, req.ProblemID, req.ContestID, req.Code, req.Language).Scan(&submissionID)
+	err = tx.QueryRow(query, userID, req.ProblemID, req.ContestID, req.Code, req.Language).Scan(&submissionID)
 	if err != nil {
 		fmt.Printf("DB Error in SubmitCode: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save submission"})
@@ -76,9 +83,12 @@ func SubmitCode(c *gin.Context) {
 
 	err = db.RedisClient.LPush(context.Background(), "submissions_queue", jobData).Err()
 	if err != nil {
-		// Rollback db insertion to prevent hanging submission
-		db.DB.Exec("DELETE FROM submissions WHERE id = $1", submissionID)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to enqueue submission, please try again."})
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit submission"})
 		return
 	}
 
@@ -105,9 +115,22 @@ func RunCode(c *gin.Context) {
 		return
 	}
 
+	// Acquire global execution capacity
+	acqCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	tokenID, err := judge.AcquireExecutionToken(acqCtx, 4, 30*time.Second)
+	if err != nil {
+		c.JSON(http.StatusTooManyRequests, gin.H{
+			"error": "Server is currently busy executing code. Please try again.",
+		})
+		return
+	}
+	defer judge.ReleaseExecutionToken(context.Background(), tokenID)
+
 	// Use our newly created Docker Sandbox
-	// Note: This blocks the HTTP request until execution finishes (up to 2.0s)
-	// which is perfectly fine for a manual "Run" check.
+	// Note: This blocks the HTTP request until execution finishes.
+
 	compRes, err := judge.CompileCode(req.Code, req.Language)
 	if err != nil || compRes.Error != "" {
 		errMsg := compRes.Error

@@ -144,7 +144,8 @@ func RunCode(c *gin.Context) {
 		return
 	}
 
-	res, err := judge.RunArtifact(compRes.ArtifactDir, req.Language, req.Input)
+	provider := judge.GetSandboxProvider()
+	res, err := provider.RunArtifact(compRes.ArtifactDir, req.Language, req.Input)
 
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{

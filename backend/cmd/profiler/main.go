@@ -22,7 +22,8 @@ func RunSecurelyProfiled(code, language string, inputs []string) {
 		log.Printf("--- Test Case %d ---", i+1)
 		
 		startDocker := time.Now()
-		res, err := judge.RunArtifact(compRes.ArtifactDir, language, tcInput)
+		provider := judge.GetSandboxProvider()
+		res, err := provider.RunArtifact(compRes.ArtifactDir, language, tcInput)
 		log.Printf("Docker execution (Startup + Run) took: %v", time.Since(startDocker))
 		
 		if err != nil {

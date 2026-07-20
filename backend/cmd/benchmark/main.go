@@ -42,7 +42,8 @@ func main() {
 	fmt.Printf("Cold Compile: %s\n", compileDur1)
 
 	startExec1 := time.Now()
-	goRes1, err := judge.RunArtifact(goComp1.ArtifactDir, "go", "42\n")
+	provider := judge.GetSandboxProvider()
+	goRes1, err := provider.RunArtifact(goComp1.ArtifactDir, "go", "42\n")
 	execDur1 := time.Since(startExec1)
 	fmt.Printf("Execution: %s\n", execDur1)
 	if goRes1 != nil {
@@ -73,7 +74,7 @@ func main() {
 	fmt.Printf("Warm Compile (GOCACHE): %s\n", compileDur3)
 
 	startExec3 := time.Now()
-	goRes3, err := judge.RunArtifact(goComp3.ArtifactDir, "go", "42\n")
+	goRes3, err := provider.RunArtifact(goComp3.ArtifactDir, "go", "42\n")
 	execDur3 := time.Since(startExec3)
 	fmt.Printf("Execution: %s\n", execDur3)
 	if goRes3 != nil {

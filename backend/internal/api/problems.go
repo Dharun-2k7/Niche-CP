@@ -281,3 +281,72 @@ func RegisterForContest(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully registered for contest"})
 }
+
+type ViolationRequest struct {
+	EventType string `json:"event_type" binding:"required"`
+}
+
+func LogContestViolation(c *gin.Context) {
+	userID := c.GetUint("userID")
+	contestID := c.Param("id")
+
+	var req ViolationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid payload"})
+		return
+	}
+
+	_, err := db.DB.Exec(`
+		INSERT INTO contest_violations (user_id, contest_id, event_type)
+		VALUES ($1, $2, $3)
+	`, userID, contestID, req.EventType)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to log violation"})
+		return
+	}
+
+	// Lock the user if this is a severe violation, e.g. third time switching tabs.
+	// For now, we just insert the log and the admin can review.
+	c.JSON(http.StatusOK, gin.H{"message": "Logged successfully"})
+}
+
+func GetContestViolations(c *gin.Context) {
+	contestID := c.Param("id")
+
+	rows, err := db.DB.Query(`
+		SELECT v.id, v.user_id, u.email, v.event_type, v.timestamp
+		FROM contest_violations v
+		JOIN users u ON v.user_id = u.id
+		WHERE v.contest_id = $1
+		ORDER BY v.timestamp DESC
+	`, contestID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch violations"})
+		return
+	}
+	defer rows.Close()
+
+	var violations []map[string]interface{}
+	for rows.Next() {
+		var id, userID int
+		var email, eventType string
+		var timestamp time.Time
+		if err := rows.Scan(&id, &userID, &email, &eventType, &timestamp); err != nil {
+			continue
+		}
+		violations = append(violations, map[string]interface{}{
+			"id":         id,
+			"user_id":    userID,
+			"email":      email,
+			"event_type": eventType,
+			"timestamp":  timestamp,
+		})
+	}
+
+	if violations == nil {
+		violations = make([]map[string]interface{}, 0)
+	}
+
+	c.JSON(http.StatusOK, violations)
+}

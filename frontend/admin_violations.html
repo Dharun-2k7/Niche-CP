@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NicheCP | Admin - Contest Violations</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body data-theme="quantum">
+    <div class="noise-bg" style="opacity: 0.4;"></div>
+    <div id="global-nav-container"></div>
+
+    <main class="app-container niche-layout fade-in-up" style="margin-top: 40px; grid-template-columns: 1fr;">
+        <div class="module-card glow-hover" style="border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(10, 10, 15, 0.5); backdrop-filter: blur(20px); border-radius: 16px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h2 class="title-massive" style="font-size: 36px; background: linear-gradient(90deg, #fff, #a1a1aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Contest Violations</h2>
+                    <p style="color: var(--text-muted); font-size: 15px; margin-top: 8px;">Monitor user violations (tab switches, exits) during contests.</p>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <select id="contestSelect" class="cyber-select" style="padding: 10px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 14px;">
+                        <option value="">Select Contest...</option>
+                    </select>
+                    <button onclick="loadViolations()" class="btn-magnetic" style="padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        Load Logs
+                    </button>
+                </div>
+            </div>
+            
+            <div style="overflow-x: auto;">
+                <table class="admin-data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User ID</th>
+                            <th>Email</th>
+                            <th>Event Type</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="violationsTableBody">
+                        <tr><td colspan="5" style="text-align:center;">Select a contest to load violations.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/components.js"></script>
+    <script>
+        const token = localStorage.getItem('jwt_token');
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+            try {
+                const res = await fetch('http://localhost:8080/api/contests');
+                if (res.ok) {
+                    const data = await res.json();
+                    const contests = Array.isArray(data) ? data : (data.contests || []);
+                    const select = document.getElementById('contestSelect');
+                    contests.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = `[ID: ${c.id}] ${c.title}`;
+                        select.appendChild(opt);
+                    });
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        });
+
+        async function loadViolations() {
+            const contestId = document.getElementById('contestSelect').value;
+            if (!contestId) {
+                alert('Select a contest first');
+                return;
+            }
+            
+            const tbody = document.getElementById('violationsTableBody');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
+            
+            try {
+                const res = await fetch(`http://localhost:8080/api/admin/contests/${contestId}/violations`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    if (!data || data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No violations recorded.</td></tr>';
+                        return;
+                    }
+                    
+                    tbody.innerHTML = '';
+                    data.forEach(v => {
+                        const time = new Date(v.timestamp).toLocaleString();
+                        let eventHtml = v.event_type;
+                        if (v.event_type === 'tab_switched') {
+                            eventHtml = `<span style="color: #f59e0b;">Tab Switched</span>`;
+                        } else if (v.event_type === 'fullscreen_exit') {
+                            eventHtml = `<span style="color: #ef4444;">Fullscreen Exit</span>`;
+                        } else {
+                            eventHtml = `<span style="color: #a855f7;">${v.event_type}</span>`;
+                        }
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${v.id}</td>
+                                <td>${v.user_id}</td>
+                                <td>${v.email}</td>
+                                <td style="font-weight: 600;">${eventHtml}</td>
+                                <td style="color: var(--text-muted); font-size: 13px;">${time}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444;">Error loading violations</td></tr>`;
+                }
+            } catch(e) {
+                console.error(e);
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444;">Network Error</td></tr>`;
+            }
+        }
+    </script>
+</body>
+</html>

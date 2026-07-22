@@ -38,3 +38,10 @@ This document logs significant technical choices made during the development of 
   - CASCADE would blindly destroy problems when a contest is deleted, even if the admin only intended to remove the contest structure.
   - Explicit modes give the admin full control over data preservation, with database transactions ensuring atomicity and rollback on failure.
 - **Alternatives Considered**: `ON DELETE CASCADE` (rejected: too destructive), soft deletes with `deleted_at` column (deferred for future consideration).
+
+## 2026-07-22: Single-Node Optimization (Semaphore & Sandbox)
+**Context:** NicheCP is deployed on a single Oracle Cloud VM (2 OCPU, 12GB RAM). The previous architecture used Redis for a distributed semaphore and spawned a new Docker container for *every* testcase to guarantee isolation.
+**Decision:** 
+1. **Local Go Semaphore:** Replaced the Redis distributed semaphore with a local Go buffered channel (`chan struct{}`). Redis was unnecessary for concurrency control on a single VM, and the network/I/O latency of Lua scripts was wasted.
+2. **Session-based Execution:** We shifted from "one container per testcase" to "one container per submission". `StartSession` creates a persistent container using `tail -f /dev/null`, and `RunTestcase` uses `docker exec` to run code within it. We run cleanup (`kill $(ps -o pid | tail -n +2 | grep -v '^ *1$')` and `rm -rf /tmp/*`) between testcases to prevent state leakage.
+**Reasoning:** Removing the Docker container lifecycle overhead (creation and destruction) per testcase saves ~350-500ms *per testcase*, dramatically increasing throughput. Switching from Redis to a native Go channel eliminates network hops and simplifies the architecture without sacrificing the strict concurrency limit required for a 2-OCPU machine.

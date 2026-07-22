@@ -119,14 +119,14 @@ func RunCode(c *gin.Context) {
 	acqCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	tokenID, err := judge.AcquireExecutionToken(acqCtx, 4, 30*time.Second)
+	err := judge.AcquireExecutionToken(acqCtx)
 	if err != nil {
 		c.JSON(http.StatusTooManyRequests, gin.H{
 			"error": "Server is currently busy executing code. Please try again.",
 		})
 		return
 	}
-	defer judge.ReleaseExecutionToken(context.Background(), tokenID)
+	defer judge.ReleaseExecutionToken()
 
 	// Use our newly created Docker Sandbox
 	// Note: This blocks the HTTP request until execution finishes.
@@ -145,7 +145,14 @@ func RunCode(c *gin.Context) {
 	}
 
 	provider := judge.GetSandboxProvider()
-	res, err := provider.RunArtifact(compRes.ArtifactDir, req.Language, req.Input)
+	session, err := provider.StartSession(compRes.ArtifactDir, req.Language)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to start sandbox session: %v", err)})
+		return
+	}
+	defer session.Close()
+
+	res, err := session.RunTestcase(req.Input)
 
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{

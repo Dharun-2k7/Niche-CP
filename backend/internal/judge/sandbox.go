@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	lru "github.com/hashicorp/golang-lru/v2"
 	"golang.org/x/sync/singleflight"
 )
@@ -192,9 +193,15 @@ func CompileCode(code, language string) (*CompilationResult, error) {
 	return res.(*CompilationResult), nil
 }
 
+// SandboxSession represents an active sandbox environment for a single submission.
+type SandboxSession interface {
+	RunTestcase(input string) (*SandboxResult, error)
+	Close() error
+}
+
 // SandboxProvider defines the abstraction for secure code execution
 type SandboxProvider interface {
-	RunArtifact(artifactDir, language, input string) (*SandboxResult, error)
+	StartSession(artifactDir, language string) (SandboxSession, error)
 }
 
 // GetSandboxProvider returns the configured sandbox implementation.
@@ -214,35 +221,31 @@ func GetSandboxProvider() SandboxProvider {
 // DockerSandbox is the battle-tested, production-ready execution environment.
 type DockerSandbox struct{}
 
-// RunArtifact executes a pre-compiled artifact or source file using Docker.
-func (s *DockerSandbox) RunArtifact(artifactDir, language, input string) (*SandboxResult, error) {
-	var image string
-	var runCmd []string
+type DockerSandboxSession struct {
+	containerName string
+	language      string
+}
 
+// StartSession boots a single Docker container that will be reused for all testcases.
+func (s *DockerSandbox) StartSession(artifactDir, language string) (SandboxSession, error) {
+	containerName := "nichecp-sandbox-" + uuid.New().String()
+	
+	var image string
 	switch language {
 	case "python":
 		image = "python:3.9-alpine"
-		runCmd = []string{"python3", "/workspace/main.py"}
-	case "go":
+	case "go", "cpp", "c":
 		image = "alpine:latest" // Static binary
-		runCmd = []string{"/workspace/main"}
-	case "cpp":
-		image = "alpine:latest" // Static binary
-		runCmd = []string{"/workspace/main"}
-	case "c":
-		image = "alpine:latest" // Static binary
-		runCmd = []string{"/workspace/main"}
 	case "java":
 		image = "eclipse-temurin:17-alpine"
-		// Set JVM max heap to 200m to leave room for JVM overhead within the 256m Docker limit
-		runCmd = []string{"java", "-Xmx200m", "-cp", "/workspace", "Main"}
 	default:
 		return nil, fmt.Errorf("unsupported language: %s", language)
 	}
 
 	// Execution Phase boundaries
 	dockerArgs := []string{
-		"run", "--rm",
+		"run", "-d", "--rm",
+		"--name", containerName,
 		"--network", "none",
 		"--memory", "256m",
 		"--cpus", "1.0",
@@ -250,39 +253,60 @@ func (s *DockerSandbox) RunArtifact(artifactDir, language, input string) (*Sandb
 		"--security-opt", "no-new-privileges",
 		"--read-only",
 		"--tmpfs", "/tmp",
-		// Mount artifact dir as read-only to prevent state leakage between tests
 		"-v", fmt.Sprintf("%s:/workspace:ro", artifactDir),
 		"-u", "1000:1000",
-		"-i",
+		image,
+		"tail", "-f", "/dev/null", // Keep container alive
 	}
 
-	if language == "python" {
-		// Add unbuffered flag for Python so stdout isn't delayed/blank
-		dockerArgs = append(dockerArgs, "-e", "PYTHONUNBUFFERED=1")
+	cmd := exec.Command("docker", dockerArgs...)
+	if err := cmd.Run(); err != nil {
+		return nil, fmt.Errorf("failed to start container: %w", err)
 	}
 
-	dockerArgs = append(dockerArgs, image)
-	dockerArgs = append(dockerArgs, runCmd...)
+	return &DockerSandboxSession{
+		containerName: containerName,
+		language:      language,
+	}, nil
+}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // 5s execution timeout
+// RunTestcase executes a testcase as a child process inside the existing Docker container.
+func (s *DockerSandboxSession) RunTestcase(input string) (*SandboxResult, error) {
+	var runCmd []string
+	switch s.language {
+	case "python":
+		runCmd = []string{"python3", "-u", "/workspace/main.py"}
+	case "go", "cpp", "c":
+		runCmd = []string{"/workspace/main"}
+	case "java":
+		runCmd = []string{"java", "-Xmx200m", "-cp", "/workspace", "Main"}
+	}
+
+	// We use 'docker exec' to spawn a fresh process.
+	// Memory limits, CPU limits, and PID limits of the container apply.
+	args := []string{"exec", "-i", s.containerName, "timeout", "2.0s"}
+	args = append(args, runCmd...)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // 5s absolute execution timeout
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "docker", dockerArgs...)
+	cmd := exec.CommandContext(ctx, "docker", args...)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-
-	// Always attach Stdin to guarantee EOF is sent, even on empty input.
-	// This prevents "docker run -i" from hanging indefinitely.
 	cmd.Stdin = strings.NewReader(input)
 
-	_ = cmd.Run()
+	err := cmd.Run()
 
-	if ctx.Err() == context.DeadlineExceeded {
+	// Clean up orphans and /tmp between test cases to prevent contamination
+	cleanupCmd := exec.Command("docker", "exec", s.containerName, "sh", "-c", "kill $(ps -o pid | tail -n +2 | grep -v '^ *1$') 2>/dev/null || true; rm -rf /tmp/*")
+	_ = cleanupCmd.Run()
+
+	if ctx.Err() == context.DeadlineExceeded || (err != nil && (strings.Contains(err.Error(), "exit status 124") || strings.Contains(err.Error(), "exit status 143"))) {
 		return &SandboxResult{
 			Stdout:       stdout.String(),
-			Stderr:       "Execution killed: Time Limit Exceeded (5.0s)",
+			Stderr:       "Execution killed: Time Limit Exceeded",
 			TimeExceeded: true,
 		}, nil
 	}
@@ -294,27 +318,40 @@ func (s *DockerSandbox) RunArtifact(artifactDir, language, input string) (*Sandb
 	}, nil
 }
 
+func (s *DockerSandboxSession) Close() error {
+	cmd := exec.Command("docker", "rm", "-f", s.containerName)
+	return cmd.Run()
+}
+
 // NsJailSandbox is the experimental, ultra-low-latency kernel sandbox.
 // Note: Requires nsjail to be installed on the host and unprivileged cgroup v2 delegation.
 type NsJailSandbox struct{}
 
-func (s *NsJailSandbox) RunArtifact(artifactDir, language, input string) (*SandboxResult, error) {
+type NsJailSandboxSession struct {
+	artifactDir string
+	language    string
+}
+
+func (s *NsJailSandbox) StartSession(artifactDir, language string) (SandboxSession, error) {
+	return &NsJailSandboxSession{
+		artifactDir: artifactDir,
+		language:    language,
+	}, nil
+}
+
+func (s *NsJailSandboxSession) RunTestcase(input string) (*SandboxResult, error) {
 	var runCmd []string
 
-	switch language {
+	switch s.language {
 	case "python":
 		runCmd = []string{"/usr/bin/python3", "/workspace/main.py"}
-	case "go":
-		runCmd = []string{"/workspace/main"}
-	case "cpp":
-		runCmd = []string{"/workspace/main"}
-	case "c":
+	case "go", "cpp", "c":
 		runCmd = []string{"/workspace/main"}
 	case "java":
 		// JVM needs memory ceiling slightly under cgroup limit to avoid SIGKILL.
 		runCmd = []string{"/usr/bin/java", "-Xmx200m", "-cp", "/workspace", "Main"}
 	default:
-		return nil, fmt.Errorf("unsupported language: %s", language)
+		return nil, fmt.Errorf("unsupported language: %s", s.language)
 	}
 
 	// NsJail arguments for maximum security and resource limits
@@ -325,7 +362,7 @@ func (s *NsJailSandbox) RunArtifact(artifactDir, language, input string) (*Sandb
 		"--user", "1000",                 // Unprivileged user
 		"--group", "1000",
 		"--disable_clone_newnet",         // Prevent network access
-		"--bindmount_ro", fmt.Sprintf("%s:/workspace", artifactDir),
+		"--bindmount_ro", fmt.Sprintf("%s:/workspace", s.artifactDir),
 		"--time_limit", "5",              // 5 seconds total run time
 		"--cgroup_mem_max", "268435456",  // 256MB memory limit (cgroup v2)
 		"--cgroup_cpu_ms_per_sec", "1000",// 1 CPU core
@@ -342,7 +379,7 @@ func (s *NsJailSandbox) RunArtifact(artifactDir, language, input string) (*Sandb
 
 	cmd := exec.CommandContext(ctx, "nsjail", nsjailArgs...)
 	
-	if language == "python" {
+	if s.language == "python" {
 		cmd.Env = append(cmd.Env, "PYTHONUNBUFFERED=1")
 	}
 
@@ -354,8 +391,6 @@ func (s *NsJailSandbox) RunArtifact(artifactDir, language, input string) (*Sandb
 	err := cmd.Run()
 
 	// Check if nsjail terminated the process due to timeout
-	// Nsjail returns exit code 137 (SIGKILL) or similar if time_limit is hit.
-	// But our context might also timeout if nsjail is completely frozen.
 	if ctx.Err() == context.DeadlineExceeded || (err != nil && strings.Contains(err.Error(), "signal: killed")) {
 		return &SandboxResult{
 			Stdout:       stdout.String(),
@@ -364,12 +399,13 @@ func (s *NsJailSandbox) RunArtifact(artifactDir, language, input string) (*Sandb
 		}, nil
 	}
 	
-	// Note: Proper MLE (Memory Limit Exceeded) parsing would check if the exit code is 137
-	// and if it was caused by OOM killer, but for now we mirror the Docker behavior structure.
-
 	return &SandboxResult{
 		Stdout:       stdout.String(),
 		Stderr:       stderr.String(),
 		TimeExceeded: false,
 	}, nil
+}
+
+func (s *NsJailSandboxSession) Close() error {
+	return nil // No-op for NsJail since it spins up in 2ms per testcase anyway
 }

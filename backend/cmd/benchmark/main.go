@@ -43,7 +43,13 @@ func main() {
 
 	startExec1 := time.Now()
 	provider := judge.GetSandboxProvider()
-	goRes1, err := provider.RunArtifact(goComp1.ArtifactDir, "go", "42\n")
+	session, err := provider.StartSession(goComp1.ArtifactDir, "go")
+	if err != nil {
+		fmt.Printf("Provider error: %v\n", err)
+		return
+	}
+	goRes1, err := session.RunTestcase("42\n")
+	session.Close()
 	execDur1 := time.Since(startExec1)
 	fmt.Printf("Execution: %s\n", execDur1)
 	if goRes1 != nil {
@@ -74,7 +80,13 @@ func main() {
 	fmt.Printf("Warm Compile (GOCACHE): %s\n", compileDur3)
 
 	startExec3 := time.Now()
-	goRes3, err := provider.RunArtifact(goComp3.ArtifactDir, "go", "42\n")
+	session2, err := provider.StartSession(goComp3.ArtifactDir, "go")
+	if err != nil {
+		fmt.Printf("Provider error: %v\n", err)
+		return
+	}
+	goRes3, err := session2.RunTestcase("42\n")
+	session2.Close()
 	execDur3 := time.Since(startExec3)
 	fmt.Printf("Execution: %s\n", execDur3)
 	if goRes3 != nil {

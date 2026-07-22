@@ -6,6 +6,7 @@ import (
 	"github.com/Dharun-2k7/online-coding-platform/internal/api"
 	"github.com/Dharun-2k7/online-coding-platform/internal/auth"
 	"github.com/Dharun-2k7/online-coding-platform/internal/db"
+	"github.com/Dharun-2k7/online-coding-platform/internal/judge"
 	"github.com/Dharun-2k7/online-coding-platform/internal/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -17,10 +18,10 @@ func main() {
 		log.Println("No .env file found. Using default environment variables.")
 	}
 
-	// Initialize Postgres and Redis
 	db.InitPostgres()
 	db.InitRedis()
 	auth.InitOAuth()
+	judge.InitSemaphore()
 
 	// Setup Router
 	r := gin.Default()
@@ -83,6 +84,7 @@ func main() {
 		protected.POST("/profile/cf/verify", api.VerifyCF)
 		protected.POST("/profile/cf/disconnect", api.DisconnectCF)
 		protected.POST("/contests/register", api.RegisterForContest)
+		protected.POST("/contests/:id/log", api.LogContestViolation)
 		protected.GET("/contests/:id/my-submissions", api.GetMyContestSubmissions)
 	}
 
@@ -98,6 +100,7 @@ func main() {
 		admin.PUT("/contests/:id", api.UpdateContest)
 		admin.DELETE("/contests/:id", api.DeleteContest)
 		admin.GET("/contests/:id/details", api.GetContestDetails)
+		admin.GET("/contests/:id/violations", api.GetContestViolations)
 	}
 
 	// Start Server

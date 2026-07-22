@@ -82,7 +82,13 @@ func main() {
 		}
 		
 		// 2. Run Docker
-		res, err := dockerSandbox.RunArtifact(compRes.ArtifactDir, tc.Language, tc.Input)
+		session, err := dockerSandbox.StartSession(compRes.ArtifactDir, tc.Language)
+		if err != nil {
+			fmt.Printf("Docker Start Error: %v\n", err)
+			continue
+		}
+		res, err := session.RunTestcase(tc.Input)
+		session.Close()
 		if err != nil {
 			fmt.Printf("Docker Execution Error: %v\n", err)
 			continue

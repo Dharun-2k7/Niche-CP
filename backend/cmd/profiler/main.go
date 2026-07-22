@@ -23,7 +23,12 @@ func RunSecurelyProfiled(code, language string, inputs []string) {
 		
 		startDocker := time.Now()
 		provider := judge.GetSandboxProvider()
-		res, err := provider.RunArtifact(compRes.ArtifactDir, language, tcInput)
+		session, err := provider.StartSession(compRes.ArtifactDir, language)
+		if err != nil {
+			log.Fatalf("Failed to start session: %v", err)
+		}
+		res, err := session.RunTestcase(tcInput)
+		session.Close()
 		log.Printf("Docker execution (Startup + Run) took: %v", time.Since(startDocker))
 		
 		if err != nil {

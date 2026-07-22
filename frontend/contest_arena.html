@@ -240,7 +240,7 @@
                         contestProbs.forEach((p, index) => {
                             const points = (index + 1) * 500;
                             probList.innerHTML += `
-                                <a href="problem.html?problem_id=${p.id}" class="problem-row" style="text-decoration:none; color:inherit; display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
+                                <a href="problem.html?problem_id=${p.id}&contest_id=${contestId}" class="problem-row" style="text-decoration:none; color:inherit; display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
                                     <div class="status-circle" style="width:12px; height:12px; border-radius:50%; border:2px solid rgba(255,255,255,0.2);"></div>
                                     <div style="display:flex; gap:16px; align-items:center; flex:1; margin-left:16px;">
                                         <span style="font-weight:600; color:var(--primary-accent); font-size:15px;">${letters[index] || '?'}</span>

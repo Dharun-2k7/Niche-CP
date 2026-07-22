@@ -36,6 +36,7 @@ func main() {
 
 	db.InitPostgres()
 	db.InitRedis()
+	judge.InitSemaphore()
 
 	maxWorkers := 2 // Default configuration
 	if val := os.Getenv("MAX_EXECUTION_WORKERS"); val != "" {
@@ -149,27 +150,17 @@ func processSubmission(ctx context.Context, workerID int, payload string) {
 		return
 	}
 
-	// Acquire Global Execution Token BEFORE spawning docker containers
 	acqCtx, cancelAcq := context.WithTimeout(ctx, 5*time.Minute) // Wait up to 5 mins in queue
 	defer cancelAcq()
 
-	// The global max is explicitly 4 based on 2 OCPU, 12GB RAM, preventing system exhaustion.
-	leaseDuration := 30 * time.Second
-	tokenID, err := judge.AcquireExecutionToken(acqCtx, 4, leaseDuration)
+	err = judge.AcquireExecutionToken(acqCtx)
 	if err != nil {
 		log.Printf("[Worker %d] Dropping Sub %d due to semaphore acquisition failure: %v", workerID, submissionID, err)
 		_, _ = db.DB.Exec("UPDATE submissions SET status = $1 WHERE id = $2", "INTERNAL_ERROR", submissionID)
 		return
 	}
 	
-	// Create context for heartbeat
-	executionCtx, cancelExecution := context.WithCancel(context.Background())
-	defer cancelExecution()
-	
-	defer judge.ReleaseExecutionToken(context.Background(), tokenID) // Guaranteed release even on panic
-	
-	// Start heartbeat to prevent token expiry during long runs
-	judge.KeepAliveToken(executionCtx, tokenID, leaseDuration)
+	defer judge.ReleaseExecutionToken() // Guaranteed release even on panic
 
 	// INSTRUMENTATION: Track concurrency
 	currentActive := atomic.AddInt32(&activeSandboxes, 1)
@@ -184,7 +175,7 @@ func processSubmission(ctx context.Context, workerID int, payload string) {
 			break
 		}
 	}
-	log.Printf("[Worker %d] Acquired Token %s | Current Active Sandboxes: %d | Peak: %d", workerID, tokenID, currentActive, atomic.LoadInt32(&peakSandboxes))
+	log.Printf("[Worker %d] Acquired Token | Current Active Sandboxes: %d | Peak: %d", workerID, currentActive, atomic.LoadInt32(&peakSandboxes))
 
 	// Compile code once before iterating test cases
 	compRes, err := judge.CompileCode(code, language)
@@ -203,9 +194,16 @@ func processSubmission(ctx context.Context, workerID int, payload string) {
 	
 	// Fetch the configured Sandbox Provider
 	provider := judge.GetSandboxProvider()
-	
+	session, err := provider.StartSession(compRes.ArtifactDir, language)
+	if err != nil {
+		log.Printf("[Worker %d] Failed to start sandbox session for Sub %d: %v", workerID, submissionID, err)
+		_, _ = db.DB.Exec("UPDATE submissions SET status = $1 WHERE id = $2", "INTERNAL_ERROR", submissionID)
+		return
+	}
+	defer session.Close()
+
 	for i, tc := range testCases {
-		res, err := provider.RunArtifact(compRes.ArtifactDir, language, tc.Input)
+		res, err := session.RunTestcase(tc.Input)
 
 		if err != nil {
 			status = "RUNTIME_ERROR"

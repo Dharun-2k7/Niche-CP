@@ -86,5 +86,14 @@ CREATE TABLE IF NOT EXISTS contest_registrations (
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     contest_id INTEGER REFERENCES contests(id) ON DELETE CASCADE,
     registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50) DEFAULT 'ACTIVE', -- 'ACTIVE', 'LOCKED'
     PRIMARY KEY (user_id, contest_id)
+);
+
+CREATE TABLE IF NOT EXISTS contest_violations (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    contest_id INTEGER REFERENCES contests(id) ON DELETE CASCADE,
+    event_type VARCHAR(50) NOT NULL, -- 'fullscreen_exit', 'tab_switched', 'blur'
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

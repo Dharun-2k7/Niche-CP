@@ -128,6 +128,62 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const pid = urlParams.get('problem_id');
+            const contestId = urlParams.get('contest_id');
+            
+            // Contest Mode Enforcement
+            if (contestId) {
+                document.getElementById('problemRoundDisplay').textContent = 'Contest Mode Active';
+                document.getElementById('problemRoundDisplay').style.color = '#ff4081';
+                
+                // Copy/paste restrictions
+                const problemContent = document.getElementById('problemContentDisplay');
+                problemContent.addEventListener('copy', e => {
+                    e.preventDefault();
+                    alert("Copying is disabled during contests.");
+                });
+                problemContent.style.userSelect = 'none';
+
+                // Log violations to backend
+                const logViolation = async (type) => {
+                    const token = localStorage.getItem('jwt_token');
+                    if (!token) return;
+                    try {
+                        await fetch(`http://localhost:8080/api/contests/${contestId}/log`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({ event_type: type })
+                        });
+                    } catch (e) {
+                        console.error('Failed to log violation', e);
+                    }
+                };
+
+                // Fullscreen enforcement
+                const enforceFullscreen = () => {
+                    if (!document.fullscreenElement) {
+                        alert("WARNING: You must remain in fullscreen during the contest!");
+                        logViolation('fullscreen_exit');
+                    }
+                };
+                
+                document.addEventListener('fullscreenchange', enforceFullscreen);
+
+                // Visibility / Tab switching enforcement
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        logViolation('tab_switched');
+                        alert("WARNING: Tab switching is recorded as a contest violation.");
+                    }
+                });
+
+                // Window blur
+                window.addEventListener('blur', () => {
+                    logViolation('blur');
+                });
+            }
             
             if (pid) {
                 try {

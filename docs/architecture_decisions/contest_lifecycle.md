@@ -32,8 +32,14 @@ We implemented a strict backend-enforced lifecycle model for contests.
 - It is applied to `/problems`, `/submissions`, `/my-submissions`, and a new `/access` endpoint.
 - **Frontend Validation**: The frontend (`contest_arena.html`) now performs an explicit request to `GET /api/contests/:id/access` immediately upon load. Only upon a successful `200 OK` response will it attempt to trigger fullscreen mode and initialize the arena panels. This prevents unauthorized users from rendering the arena locally.
 
-### Clock Synchronization
+### Clock Synchronization & UI Matrix
 - To prevent issues with desynchronized client clocks, the `GET /api/contests` endpoint returns a `server_time` (UTC). The frontend computes an offset (`serverTime - localTime`) and applies it to the countdown timer, ensuring all clients observe the contest starting at the exact same moment.
+- The `GetAllContests` payload now exposes a `registration_open` boolean calculated by the backend (`now >= registration_open_time && now <= start_time`).
+- The frontend enforces a strict UI state matrix:
+  - **Upcoming**: `Registered` (disabled) | `Register` | `Registration Closed` (disabled)
+  - **Running**: `Enter Contest` | `Registration Closed` (disabled) | `Contest Leaderboard`
+  - **Previous**: `View Results` | `Practice`
+- A dedicated, public `rankings.html?contest_id=X` page exists for viewing individual contest leaderboards, fulfilling the Codeforces-style requirement that leaderboards are publicly accessible during and after the contest without arena registration.
 
 ## Consequences
 - **Positive**: Complete security against early access or post-contest submissions. Synchronization of countdown timers across all time zones and client devices.

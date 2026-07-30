@@ -3,11 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NicheCP | Feature in Development</title>
+    <title>NicheCP | Contest Leaderboard</title>
     
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        .leaderboard-container {
+            max-width: 900px;
+            margin: 0 auto;
+            margin-top: 40px;
+        }
+        .ranking-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px 150px;
+            gap: 16px;
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            align-items: center;
+        }
+        .ranking-header {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 13px;
+            text-transform: uppercase;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .rank-1 { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .rank-2 { background: rgba(0, 240, 255, 0.2); color: #00f0ff; }
+        .rank-3 { background: rgba(249, 115, 22, 0.2); color: #f97316; }
+        .rank-other { background: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
+    </style>
 </head>
 <body data-theme="quantum">
     <div class="noise-bg" style="opacity: 0.4;"></div>
@@ -15,19 +51,109 @@
     <!-- Unified Navigation -->
     <div id="global-nav-container"></div>
 
-    <main class="app-container" style="display: flex; align-items: center; justify-content: center; min-height: 80vh; flex-direction: column; text-align: center;">
-        <svg class="outline-icon" viewBox="0 0 24 24" style="width: 80px; height: 80px; margin-bottom: 24px; color: var(--primary-accent); opacity: 0.8;">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-        </svg>
-        <h1 style="font-size: 32px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">Feature in Development</h1>
-        <p style="font-size: 16px; color: var(--text-muted); max-width: 400px; line-height: 1.6; margin-bottom: 32px;">
-            We are currently building this section to meet our high-performance standards. Check back soon for updates.
-        </p>
-        <a href="index.html" class="btn-ghost" style="padding: 12px 24px; font-size: 14px; border-radius: 8px; text-decoration: none;">Return Home</a>
+    <main class="app-container">
+        <div class="leaderboard-container">
+            <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <a href="contests.html" style="color:var(--primary-accent); text-decoration:none; font-size:14px; margin-bottom:8px; display:inline-block;">&larr; Back to Contests</a>
+                    <h1 style="font-family:'Space Grotesk', sans-serif; font-size:32px; margin:0;" id="contestTitle">Contest Leaderboard</h1>
+                </div>
+                <div id="liveIndicator" style="display:none; color:var(--success-color); font-weight:600; font-size:14px;">
+                    <span class="live-indicator" style="display:inline-block; width:8px; height:8px; background:var(--success-color); border-radius:50%; margin-right:6px; animation:pulse 2s infinite;"></span>
+                    LIVE NOW
+                </div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden;">
+                <div class="ranking-row ranking-header">
+                    <div>Rank</div>
+                    <div>Participant</div>
+                    <div style="text-align: right;">Solved</div>
+                    <div style="text-align: right;">Time (ms)</div>
+                </div>
+                <div id="leaderboardList">
+                    <div style="padding: 40px; text-align: center; color: var(--text-muted);">Loading leaderboard...</div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Scripts -->
     <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const contestId = urlParams.get('contest_id');
+            
+            if (!contestId) {
+                window.location.href = 'contests.html';
+                return;
+            }
+
+            // Fetch Contest Info for Title and Live Status
+            try {
+                const cRes = await fetch('/api/contests');
+                if (cRes.ok) {
+                    const cData = await cRes.json();
+                    const contests = Array.isArray(cData) ? cData : (cData.contests || []);
+                    const contest = contests.find(c => c.id == contestId);
+                    if (contest) {
+                        document.getElementById('contestTitle').textContent = contest.title;
+                        if (contest.status === 'RUNNING') {
+                            document.getElementById('liveIndicator').style.display = 'block';
+                        }
+                    }
+                }
+            } catch (e) {}
+
+            async function loadBoard() {
+                try {
+                    const res = await fetch(`/api/contests/${contestId}/leaderboard`);
+                    const listEl = document.getElementById('leaderboardList');
+                    
+                    if (!res.ok) {
+                        listEl.innerHTML = '<div style="padding:40px; text-align:center; color:#ef4444;">Failed to load leaderboard.</div>';
+                        return;
+                    }
+
+                    const data = await res.json();
+                    const entries = Array.isArray(data) ? data : [];
+
+                    if (entries.length === 0) {
+                        listEl.innerHTML = '<div style="padding:40px; text-align:center; color:var(--text-muted);">No participants yet.</div>';
+                        return;
+                    }
+
+                    let html = '';
+                    entries.forEach(e => {
+                        let badgeClass = 'rank-other';
+                        if (e.rank === 1) badgeClass = 'rank-1';
+                        else if (e.rank === 2) badgeClass = 'rank-2';
+                        else if (e.rank === 3) badgeClass = 'rank-3';
+
+                        html += `
+                            <div class="ranking-row" style="transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                                <div><span class="rank-badge ${badgeClass}">${e.rank}</span></div>
+                                <div style="font-weight: 500; font-size: 16px;">${e.name}</div>
+                                <div style="text-align: right; font-weight: 600; color: var(--primary-accent);">${e.solved}</div>
+                                <div style="text-align: right; color: var(--text-muted); font-variant-numeric: tabular-nums;">${e.total_time}</div>
+                            </div>
+                        `;
+                    });
+                    listEl.innerHTML = html;
+                } catch (e) {
+                    document.getElementById('leaderboardList').innerHTML = '<div style="padding:40px; text-align:center; color:#ef4444;">Network error while fetching leaderboard.</div>';
+                }
+            }
+
+            // Initial load
+            await loadBoard();
+
+            // Poll if it's running
+            if (document.getElementById('liveIndicator').style.display === 'block') {
+                setInterval(loadBoard, 15000);
+            }
+        });
+    </script>
 </body>
 </html>

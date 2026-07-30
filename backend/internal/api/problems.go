@@ -210,23 +210,29 @@ func GetMyContestSubmissions(c *gin.Context) {
 }
 
 func GetAllContests(c *gin.Context) {
-	rows, err := db.DB.Query(`SELECT id, title, type, description, start_time, end_time, duration_minutes, status FROM contests ORDER BY start_time DESC`)
+	rows, err := db.DB.Query(`SELECT id, title, type, description, start_time, end_time, duration_minutes, status, registration_open_time FROM contests ORDER BY start_time DESC`)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch contests"})
 		return
 	}
 	defer rows.Close()
 
+	now := time.Now().UTC()
 	contests := make([]map[string]interface{}, 0)
 	for rows.Next() {
 		var id, duration int
 		var title, typeStr, status string
 		var description sql.NullString
 		var startTime, endTime time.Time
-		if err := rows.Scan(&id, &title, &typeStr, &description, &startTime, &endTime, &duration, &status); err == nil {
+		var regOpenTime sql.NullTime
+		if err := rows.Scan(&id, &title, &typeStr, &description, &startTime, &endTime, &duration, &status, &regOpenTime); err == nil {
 			desc := ""
 			if description.Valid {
 				desc = description.String
+			}
+			regOpen := false
+			if regOpenTime.Valid {
+				regOpen = !now.Before(regOpenTime.Time) && now.Before(startTime) && status == "UPCOMING"
 			}
 			contests = append(contests, map[string]interface{}{
 				"id":               id,
@@ -237,6 +243,7 @@ func GetAllContests(c *gin.Context) {
 				"end_time":         endTime.Format(time.RFC3339),
 				"duration_minutes": duration,
 				"status":           status,
+				"registration_open": regOpen,
 			})
 		}
 	}

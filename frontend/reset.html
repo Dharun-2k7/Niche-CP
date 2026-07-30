@@ -170,7 +170,7 @@
                 if (token) {
                     // Reset Password Flow
                     const new_password = passInput.value;
-                    const res = await fetch('http://localhost:8080/api/auth/password/reset', {
+                    const res = await fetch('/api/auth/password/reset', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ token, new_password })
@@ -184,7 +184,7 @@
                 } else {
                     // Forgot Password Flow
                     const email = emailInput.value;
-                    const res = await fetch('http://localhost:8080/api/auth/password/forgot', {
+                    const res = await fetch('/api/auth/password/forgot', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email })

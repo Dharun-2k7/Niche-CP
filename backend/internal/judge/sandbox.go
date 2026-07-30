@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	cacheDir     = "/dev/shm/nichecp-cache-v3"
-	goCacheDir   = "/dev/shm/nichecp-go-cache-v3"
+	cacheDir     = "/tmp/nichecp-cache-v3"
+	goCacheDir   = "/tmp/nichecp-go-cache-v3"
 	binaryCache  *lru.Cache[string, string]
 	compileGroup singleflight.Group
 )

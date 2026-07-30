@@ -55,6 +55,30 @@ func SubmitCode(c *gin.Context) {
 		return
 	}
 
+	// 1.6 Contest Lifecycle Constraints
+	if req.ContestID != nil {
+		var status string
+		var endTime time.Time
+		err = db.DB.QueryRow("SELECT status, end_time FROM contests WHERE id = $1", *req.ContestID).Scan(&status, &endTime)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Contest not found"})
+			return
+		}
+
+		if status == "CREATED" || status == "UPCOMING" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Contest has not started yet."})
+			return
+		}
+
+		if status == "ENDED" {
+			// Practice submissions allowed only 1 hour after contest ends
+			if time.Now().UTC().Before(endTime.Add(1 * time.Hour)) {
+				c.JSON(http.StatusForbidden, gin.H{"error": "Practice submissions are only allowed 1 hour after the contest ends."})
+				return
+			}
+		}
+	}
+
 	// 2. Insert into Postgres as PENDING inside a Transaction
 	tx, err := db.DB.Begin()
 	if err != nil {

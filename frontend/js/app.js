@@ -45,6 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render Global Glassmorphic Navigation
     renderGlobalNav(token);
 
+    // Fetch and render homepage dynamic data if on the homepage
+    if (document.getElementById('dynamic-upcoming-contests')) {
+        initHomepageData(token);
+    }
+
     // Theme switcher logic removed (NicheCP uses a strict premium dark theme).    // We only enforce login on the arena page. If we are on index.html, we don't redirect.
     // (Disabled for now so you can view the arena UI locally without logging in)
     /*
@@ -152,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 for (let i = 0; i < runs.length; i++) {
                     terminalOutput.value += `=== Test ${i+1} ===\n`;
-                    const response = await fetch('http://localhost:8080/api/run', {
+                    const response = await fetch('/api/run', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ code, language, input: runs[i].input })
@@ -218,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // This URL points to our Go Backend
-                const response = await fetch('http://localhost:8080/api/submit', {
+                const response = await fetch('/api/submit', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -246,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
 
                         try {
-                            const statusRes = await fetch(`http://localhost:8080/api/submissions/${data.submission_id}`, {
+                            const statusRes = await fetch(`/api/submissions/${data.submission_id}`, {
                                 headers: {
                                     'Authorization': `Bearer ${token}`
                                 }
@@ -326,6 +331,89 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ==========================================
 // ==========================================
+// Homepage Data Fetcher
+// ==========================================
+async function initHomepageData(token) {
+    try {
+        // Fetch Upcoming Contests
+        const contestsRes = await fetch('/api/public/upcoming-contests');
+        const contestsContainer = document.getElementById('dynamic-upcoming-contests');
+        if (contestsRes.ok) {
+            const contests = await contestsRes.json();
+            if (!contests || contests.length === 0) {
+                contestsContainer.innerHTML = `<div class="mobile-table-card" style="padding: 40px 24px; text-align: center; color: var(--text-muted); font-size: 14px;">No upcoming contests scheduled at the moment.</div>`;
+            } else {
+                let html = '';
+                contests.forEach(c => {
+                    let statusColor = c.status === 'RUNNING' ? 'var(--primary-accent)' : 'var(--text-muted)';
+                    let actionBtn = `<a href="contest_arena.html?id=${c.id}" class="btn-ghost" style="padding: 6px 12px; font-size: 12px;">View</a>`;
+                    
+                    html += `
+                        <div class="mobile-table-row" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap: 16px; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center;">
+                            <div style="font-weight: 500;">${c.title}</div>
+                            <div><span class="tag tag-primary">${c.type}</span></div>
+                            <div style="color: var(--text-muted); font-size: 13px;">${new Date(c.start_time).toLocaleString()}</div>
+                            <div style="color: var(--text-muted); font-size: 13px;">${c.duration_minutes}m</div>
+                            <div style="color: ${statusColor}; font-weight: 500; font-size: 12px;">${c.status}</div>
+                            <div>${actionBtn}</div>
+                        </div>
+                    `;
+                });
+                contestsContainer.innerHTML = html;
+            }
+        } else {
+            contestsContainer.innerHTML = `<div class="mobile-table-card" style="padding: 40px 24px; text-align: center; color: #ef4444; font-size: 14px;">Failed to load contests.</div>`;
+        }
+
+        // Fetch Recent Problems
+        const problemsRes = await fetch('/api/public/recent-problems');
+        const problemsContainer = document.getElementById('dynamic-recent-problems');
+        if (problemsRes.ok) {
+            const problems = await problemsRes.json();
+            if (!problems || problems.length === 0) {
+                problemsContainer.innerHTML = `<div class="mobile-table-card" style="padding: 40px 24px; text-align: center; color: var(--text-muted); font-size: 14px;">No problems available.</div>`;
+            } else {
+                let html = '';
+                problems.forEach(p => {
+                    let difficultyColor = p.difficulty === 'Easy' ? '#10b981' : p.difficulty === 'Medium' ? '#f59e0b' : '#ef4444';
+                    html += `
+                        <div class="mobile-table-row" style="display: grid; grid-template-columns: 2fr 1fr 2fr 1fr; gap: 16px; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center; cursor: pointer; transition: background 0.2s;" onclick="window.location.href='arena.html?problem_id=${p.id}'" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                            <div style="font-weight: 500;">${p.title}</div>
+                            <div style="color: ${difficultyColor}; font-weight: 500;">${p.difficulty}</div>
+                            <div><span class="tag" style="background: rgba(255,255,255,0.05);">${p.tags || 'General'}</span></div>
+                            <div style="color: var(--text-muted); font-size: 12px;">${new Date(p.created_at).toLocaleDateString()}</div>
+                        </div>
+                    `;
+                });
+                problemsContainer.innerHTML = html;
+            }
+        } else {
+            problemsContainer.innerHTML = `<div class="mobile-table-card" style="padding: 40px 24px; text-align: center; color: #ef4444; font-size: 14px;">Failed to load problems.</div>`;
+        }
+
+        // Fetch User Statistics if logged in
+        if (token) {
+            const statsSection = document.getElementById('user-statistics-section');
+            if (statsSection) statsSection.style.display = 'block';
+
+            const statsRes = await fetch('/api/profile/stats', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (statsRes.ok) {
+                const stats = await statsRes.json();
+                document.getElementById('stat-solved').innerText = stats.problems_solved;
+                document.getElementById('stat-contests').innerText = stats.contest_participation;
+                document.getElementById('stat-rating').innerText = stats.rating;
+                document.getElementById('stat-submissions').innerText = stats.submission_count;
+            }
+        }
+    } catch (err) {
+        console.error("Failed to load homepage data:", err);
+    }
+}
+
+// ==========================================
+// ==========================================
 // Global Navigation Renderer
 // ==========================================
 async function renderGlobalNav(token) {
@@ -338,7 +426,7 @@ async function renderGlobalNav(token) {
     
     if (token) {
         try {
-            const res = await fetch('http://localhost:8080/api/profile', {
+            const res = await fetch('/api/profile', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {

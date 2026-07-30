@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/Dharun-2k7/online-coding-platform/internal/api"
 	"github.com/Dharun-2k7/online-coding-platform/internal/auth"
@@ -22,15 +23,21 @@ func main() {
 	db.InitRedis()
 	auth.InitOAuth()
 	judge.InitSemaphore()
+	api.StartContestStateTicker()
 
 	// Setup Router
 	r := gin.Default()
 
 	// Basic CORS middleware
 	r.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		allowedOrigin := os.Getenv("FRONTEND_URL")
+		if allowedOrigin == "" {
+			allowedOrigin = "*" // Fallback for local testing if env is missing
+		}
+		c.Writer.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
 			return
@@ -66,6 +73,10 @@ func main() {
 	r.GET("/api/contests/:id/leaderboard", api.GetContestLeaderboard)
 	r.GET("/api/contests/:id/submissions", api.GetContestSubmissions)
 
+	// Public Homepage Routes
+	r.GET("/api/public/upcoming-contests", api.GetUpcomingContests)
+	r.GET("/api/public/recent-problems", api.GetRecentProblems)
+
 	// Protected Routes
 	protected := r.Group("/api")
 	protected.Use(middleware.RequireAuth())
@@ -73,6 +84,7 @@ func main() {
 		protected.POST("/submit", api.SubmitCode)
 		protected.GET("/submissions/:id", api.GetSubmissionStatus)
 		protected.GET("/profile", api.GetProfile)
+		protected.GET("/profile/stats", api.GetUserStats)
 		protected.GET("/profile/solved", api.GetSolvedProblems)
 		protected.PUT("/profile", api.UpdateProfile)
 		protected.POST("/profile/upload-dp", api.UploadProfilePicture)
@@ -96,6 +108,8 @@ func main() {
 		admin.POST("/users/permissions", api.UpdateUserPermissions)
 		admin.POST("/promote", api.PromoteToAdmin)
 		admin.POST("/problems", api.CreateProblem)
+		admin.GET("/problems/:id", api.GetAdminProblem)
+		admin.PUT("/problems/:id", api.UpdateProblem)
 		admin.POST("/contests", api.CreateContest)
 		admin.PUT("/contests/:id", api.UpdateContest)
 		admin.DELETE("/contests/:id", api.DeleteContest)

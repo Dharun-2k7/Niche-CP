@@ -1,11 +1,13 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"time"
+
 	"github.com/Dharun-2k7/online-coding-platform/internal/db"
 	"github.com/gin-gonic/gin"
 )
@@ -107,9 +109,11 @@ func CreateProblem(c *gin.Context) {
 type CreateContestRequest struct {
 	Title           string `json:"title" binding:"required"`
 	Type            string `json:"type" binding:"required"`
-	StartTime       string `json:"start_time" binding:"required"`
-	DurationMinutes int    `json:"duration_minutes" binding:"required"`
+	StartTime            string `json:"start_time" binding:"required"`
+	DurationMinutes      int    `json:"duration_minutes" binding:"required"`
 	RegistrationOpenTime string `json:"registration_open_time"`
+	Description          string `json:"description"`
+	Status               string `json:"status"`
 }
 
 func CreateContest(c *gin.Context) {
@@ -136,12 +140,19 @@ func CreateContest(c *gin.Context) {
 		}
 	}
 
+	status := req.Status
+	if status == "" {
+		status = "CREATED"
+	}
+
+	endTime := importTime.Add(time.Duration(req.DurationMinutes) * time.Minute)
+
 	var contestID int
 	err = db.DB.QueryRow(`
-		INSERT INTO contests (title, type, start_time, duration_minutes, registration_open_time)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO contests (title, type, start_time, end_time, duration_minutes, registration_open_time, description, status)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING id
-	`, req.Title, req.Type, importTime.UTC(), req.DurationMinutes, regOpenTime.UTC()).Scan(&contestID)
+	`, req.Title, req.Type, importTime.UTC(), endTime.UTC(), req.DurationMinutes, regOpenTime.UTC(), req.Description, status).Scan(&contestID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create contest"})
@@ -157,6 +168,8 @@ type UpdateContestRequest struct {
 	StartTime            string `json:"start_time" binding:"required"`
 	DurationMinutes      int    `json:"duration_minutes" binding:"required"`
 	RegistrationOpenTime string `json:"registration_open_time"`
+	Description          string `json:"description"`
+	Status               string `json:"status"`
 }
 
 func UpdateContest(c *gin.Context) {
@@ -184,11 +197,18 @@ func UpdateContest(c *gin.Context) {
 		}
 	}
 
+	status := req.Status
+	if status == "" {
+		status = "CREATED"
+	}
+
+	endTime := importTime.Add(time.Duration(req.DurationMinutes) * time.Minute)
+
 	res, err := db.DB.Exec(`
 		UPDATE contests 
-		SET title = $1, type = $2, start_time = $3, duration_minutes = $4, registration_open_time = $5
-		WHERE id = $6
-	`, req.Title, req.Type, importTime.UTC(), req.DurationMinutes, regOpenTime.UTC(), contestID)
+		SET title = $1, type = $2, start_time = $3, end_time = $4, duration_minutes = $5, registration_open_time = $6, description = $7, status = $8
+		WHERE id = $9
+	`, req.Title, req.Type, importTime.UTC(), endTime.UTC(), req.DurationMinutes, regOpenTime.UTC(), req.Description, status, contestID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update contest"})
@@ -479,4 +499,118 @@ func DeleteContest(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Contest deleted successfully"})
+}
+
+func GetAdminProblem(c *gin.Context) {
+	id := c.Param("id")
+
+	var title, description, difficulty, inputFormat, outputFormat, constraints, sampleTestcases, hiddenTestcases string
+	var tags string
+
+	err := db.DB.QueryRow(`
+		SELECT title, difficulty, tags, description, input_format, output_format, constraints, sample_testcases, hidden_testcases 
+		FROM problems WHERE id = $1
+	`, id).Scan(&title, &difficulty, &tags, &description, &inputFormat, &outputFormat, &constraints, &sampleTestcases, &hiddenTestcases)
+
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Problem not found"})
+		return
+	} else if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch problem"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":               id,
+		"title":            title,
+		"difficulty":       difficulty,
+		"tags":             tags,
+		"description":      description,
+		"input_format":     inputFormat,
+		"output_format":    outputFormat,
+		"constraints":      constraints,
+		"sample_testcases": sampleTestcases,
+		"hidden_testcases": hiddenTestcases,
+	})
+}
+
+type UpdateProblemRequest struct {
+	Title           string      `json:"title" binding:"required"`
+	Difficulty      string      `json:"difficulty"`
+	Tags            string      `json:"tags"` // JSON string array
+	Description     string      `json:"description" binding:"required"`
+	InputFormat     string      `json:"input_format"`
+	OutputFormat    string      `json:"output_format"`
+	Constraints     string      `json:"constraints"`
+	SampleTestcases string      `json:"sample_testcases"` // JSON string array of objects
+	HiddenTestcases string      `json:"hidden_testcases"` // JSON string array of objects
+	ContestID       *int        `json:"contest_id"`
+}
+
+func UpdateProblem(c *gin.Context) {
+	id := c.Param("id")
+	var req UpdateProblemRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	tx, err := db.DB.Begin()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		return
+	}
+
+	res, err := tx.Exec(`
+		UPDATE problems 
+		SET title=$1, difficulty=$2, tags=$3, description=$4, input_format=$5, output_format=$6, constraints=$7, sample_testcases=$8, hidden_testcases=$9
+		WHERE id=$10
+	`, req.Title, req.Difficulty, req.Tags, req.Description, req.InputFormat, req.OutputFormat, req.Constraints, req.SampleTestcases, req.HiddenTestcases, id)
+	
+	if err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update problem"})
+		return
+	}
+
+	rowsAffected, _ := res.RowsAffected()
+	if rowsAffected == 0 {
+		tx.Rollback()
+		c.JSON(http.StatusNotFound, gin.H{"error": "Problem not found"})
+		return
+	}
+
+	// Update contest mapping if contest_id is provided
+	if req.ContestID != nil {
+		var existingCount int
+		tx.QueryRow(`SELECT COUNT(*) FROM contest_problems WHERE problem_id = $1 AND contest_id = $2`, id, *req.ContestID).Scan(&existingCount)
+		
+		if existingCount == 0 {
+			var maxOrder sql.NullInt64
+			tx.QueryRow(`SELECT MAX(order_index) FROM contest_problems WHERE contest_id = $1`, *req.ContestID).Scan(&maxOrder)
+			
+			nextOrder := 1
+			if maxOrder.Valid {
+				nextOrder = int(maxOrder.Int64) + 1
+			}
+
+			_, err = tx.Exec(`
+				INSERT INTO contest_problems (contest_id, problem_id, order_index)
+				VALUES ($1, $2, $3)
+			`, *req.ContestID, id, nextOrder)
+			
+			if err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to link problem to contest"})
+				return
+			}
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Problem updated successfully!"})
 }

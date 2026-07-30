@@ -38,3 +38,5 @@ backend/uploads/
 
 # AI Session Log
 .ai/session.md
+backend/server
+backend/worker

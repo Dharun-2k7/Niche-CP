@@ -78,7 +78,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                const res = await fetch('http://localhost:8080/api/problems');
+                const res = await fetch('/api/problems');
                 if (!res.ok) throw new Error('Failed to fetch');
                 const problems = await res.json();
                 
@@ -89,7 +89,7 @@
                 const token = localStorage.getItem('jwt_token');
                 if (token) {
                     try {
-                        const solvedRes = await fetch('http://localhost:8080/api/profile/solved', {
+                        const solvedRes = await fetch('/api/profile/solved', {
                             headers: { 'Authorization': `Bearer ${token}` }
                         });
                         if (solvedRes.ok) {

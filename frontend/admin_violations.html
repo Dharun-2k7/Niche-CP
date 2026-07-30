@@ -57,7 +57,7 @@
                 return;
             }
             try {
-                const res = await fetch('http://localhost:8080/api/contests');
+                const res = await fetch('/api/contests');
                 if (res.ok) {
                     const data = await res.json();
                     const contests = Array.isArray(data) ? data : (data.contests || []);
@@ -85,7 +85,7 @@
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
             
             try {
-                const res = await fetch(`http://localhost:8080/api/admin/contests/${contestId}/violations`, {
+                const res = await fetch(`/api/admin/contests/${contestId}/violations`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 

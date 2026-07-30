@@ -43,13 +43,29 @@
                 </div>
             </div>
 
+            <div class="form-group fade-in-up stagger-4" style="margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div>
+                    <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; display: block;">Penalty Type</label>
+                    <select id="cType" class="cyber-select form-input" style="width: 100%; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px;">
+                        <option value="ICPC">ICPC (Time + 20m penalty)</option>
+                        <option value="IOI">IOI (Partial Scoring)</option>
+                        <option value="CUSTOM">Custom (Base Scoring)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; display: block;">Status</label>
+                    <select id="cStatus" class="cyber-select form-input" style="width: 100%; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px;">
+                        <option value="CREATED">CREATED</option>
+                        <option value="UPCOMING">UPCOMING</option>
+                        <option value="RUNNING">RUNNING</option>
+                        <option value="ENDED">ENDED</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="form-group fade-in-up stagger-4" style="margin-bottom: 32px;">
-                <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; display: block;">Penalty Type</label>
-                <select id="cType" class="cyber-select form-input" style="width: 100%; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px;">
-                    <option value="ICPC">ICPC (Time + 20m penalty)</option>
-                    <option value="IOI">IOI (Partial Scoring)</option>
-                    <option value="CUSTOM">Custom (Base Scoring)</option>
-                </select>
+                <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; display: block;">Description</label>
+                <textarea id="cDescription" class="form-input" placeholder="Rules, sponsors, or other details..." rows="4" style="width: 100%; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px; resize: vertical;"></textarea>
             </div>
 
             <div class="fade-in-up stagger-5" style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 24px;">
@@ -144,7 +160,7 @@
 
         async function loadContests() {
             try {
-                const res = await fetch('http://localhost:8080/api/contests');
+                const res = await fetch('/api/contests');
                 if (res.ok) {
                     const data = await res.json();
                     currentContests = Array.isArray(data) ? data : (data.contests || []);
@@ -185,6 +201,8 @@
                     document.getElementById('cTitle').value = c.title;
                     document.getElementById('cType').value = c.type;
                     document.getElementById('cDuration').value = c.duration_minutes;
+                    document.getElementById('cStatus').value = c.status || 'CREATED';
+                    document.getElementById('cDescription').value = c.description || '';
                     
                     if (c.start_time) {
                         const dateObj = new Date(c.start_time);
@@ -204,6 +222,8 @@
             const startTimeStr = document.getElementById('cStartTime').value;
             const durationStr = document.getElementById('cDuration').value;
             const type = document.getElementById('cType').value;
+            const status = document.getElementById('cStatus').value;
+            const description = document.getElementById('cDescription').value;
 
             if(!title || !startTimeStr || !durationStr) {
                 msg.style.color = '#ff4d4d';
@@ -218,8 +238,8 @@
             btn.disabled = true;
 
             const url = selectedContestId 
-                ? `http://localhost:8080/api/admin/contests/${selectedContestId}`
-                : `http://localhost:8080/api/admin/contests`;
+                ? `/api/admin/contests/${selectedContestId}`
+                : `/api/admin/contests`;
             
             const method = selectedContestId ? 'PUT' : 'POST';
 
@@ -234,7 +254,9 @@
                         title: title,
                         type: type,
                         start_time: startTime,
-                        duration_minutes: parseInt(durationStr)
+                        duration_minutes: parseInt(durationStr),
+                        status: status,
+                        description: description
                     })
                 });
 
@@ -280,7 +302,7 @@
             document.getElementById('confirmAllDelete').checked = false;
 
             try {
-                const res = await fetch(`http://localhost:8080/api/admin/contests/${selectedContestId}/details`, {
+                const res = await fetch(`/api/admin/contests/${selectedContestId}/details`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -351,7 +373,7 @@
             btn.textContent = 'Deleting...';
 
             try {
-                const res = await fetch(`http://localhost:8080/api/admin/contests/${selectedContestId}`, {
+                const res = await fetch(`/api/admin/contests/${selectedContestId}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

@@ -205,7 +205,7 @@ func InitCFVerification(c *gin.Context) {
 
 	// Generate a random 8-character string for CF verification
 	verifyString := generateOTP() + generateOTP() // Reuse existing generateOTP (usually 6 digits, so this makes 12)
-	
+
 	_, err := db.DB.Exec(`UPDATE users SET cf_handle = $1, cf_verify_string = $2, is_cf_verified = false WHERE id = $3`, req.Handle, verifyString, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to initialize verification"})
@@ -213,7 +213,7 @@ func InitCFVerification(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Initialized",
+		"message":       "Initialized",
 		"verify_string": verifyString,
 	})
 }
@@ -251,7 +251,7 @@ func VerifyCF(c *gin.Context) {
 	}
 
 	cfUser := cfResp.Result[0]
-	
+
 	// Check if the verifyString is in FirstName or LastName
 	if !strings.Contains(cfUser.FirstName, verifyString) && !strings.Contains(cfUser.LastName, verifyString) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Verification string not found in Codeforces First Name or Last Name."})
@@ -315,7 +315,7 @@ func UpdateProfile(c *gin.Context) {
 		// Start Email OTP Flow - Step 1: Send OTP to EXISTING email
 		otp := generateOTP()
 		key := fmt.Sprintf("email_update_old_otp:%d", userID)
-		
+
 		// Store the new email along with the OTP
 		err := db.RedisClient.Set(context.Background(), key, req.Email+":"+otp, 10*time.Minute).Err()
 		if err != nil {
@@ -484,6 +484,12 @@ func UploadProfilePicture(c *gin.Context) {
 		return
 	}
 
+	// Ensure the uploads directory exists (Docker volume may be freshly mounted)
+	if err := os.MkdirAll("uploads", 0755); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare upload directory"})
+		return
+	}
+
 	// Create unique filename
 	filename := fmt.Sprintf("dp_%d_%d%s", userID, time.Now().Unix(), ext)
 	uploadPath := filepath.Join("uploads", filename)
@@ -502,12 +508,14 @@ func UploadProfilePicture(c *gin.Context) {
 		return
 	}
 
-	// Update DB with URL
-	backendURL := os.Getenv("BACKEND_URL")
-	if backendURL == "" {
-		backendURL = "http://localhost:8080"
+	// Build the public URL. If BACKEND_URL is set use it; otherwise use a
+	// relative path so it resolves correctly through the Nginx proxy.
+	var picURL string
+	if backendURL := os.Getenv("BACKEND_URL"); backendURL != "" {
+		picURL = backendURL + "/uploads/" + filename
+	} else {
+		picURL = "/uploads/" + filename
 	}
-	picURL := backendURL + "/uploads/" + filename
 	_, err = db.DB.Exec(`UPDATE users SET profile_picture_url = $1 WHERE id = $2`, picURL, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile picture in database"})
@@ -515,4 +523,27 @@ func UploadProfilePicture(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Profile picture uploaded", "url": picURL})
+}
+
+func GetUserStats(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+
+	var totalSolved int
+	db.DB.QueryRow(`SELECT COUNT(DISTINCT problem_id) FROM user_problem_status WHERE user_id = $1 AND status = 'ACCEPTED'`, userID).Scan(&totalSolved)
+
+	var contestCount int
+	db.DB.QueryRow(`SELECT COUNT(DISTINCT contest_id) FROM contest_registrations WHERE user_id = $1`, userID).Scan(&contestCount)
+
+	var submissionCount int
+	db.DB.QueryRow(`SELECT COUNT(*) FROM submissions WHERE user_id = $1`, userID).Scan(&submissionCount)
+
+	// Rating is not implemented yet, so we return a placeholder or 0
+	var rating int = 0
+
+	c.JSON(http.StatusOK, gin.H{
+		"problems_solved":       totalSolved,
+		"contest_participation": contestCount,
+		"rating":                rating,
+		"submission_count":      submissionCount,
+	})
 }

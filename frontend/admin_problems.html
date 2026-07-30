@@ -136,9 +136,18 @@
 
         <div class="module-card" style="padding: 32px;">
             
+            <!-- Problem Selection -->
+            <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--card-border);">
+                <label style="display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 14px;">Select Problem to Edit (or Create New)</label>
+                <select id="problemSelect" class="cyber-select" style="width: 100%; max-width: 400px; padding: 10px; border-radius: 6px; background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--card-border);">
+                    <option value="new">-- Create New Problem --</option>
+                </select>
+                <span id="loadMsg" style="margin-left: 12px; font-size: 13px; color: var(--text-muted);"></span>
+            </div>
+
             <!-- STEP 1: Basic Details -->
             <div class="wizard-section">
-                <h3>1. Basic Details</h3>
+                <h3 id="formTitle">1. Basic Details</h3>
                 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
                     <div class="form-group">
                         <label>Problem Title</label>
@@ -363,6 +372,106 @@
                 this.render();
             }
         }
+        
+        let selectedProblemId = null;
+        let allProblems = [];
+
+        // Load existing problems for dropdown
+        async function loadProblems() {
+            try {
+                const res = await fetch('/api/problems');
+                if (res.ok) {
+                    allProblems = await res.json();
+                    const select = document.getElementById('problemSelect');
+                    select.innerHTML = '<option value="new">-- Create New Problem --</option>';
+                    if (allProblems && Array.isArray(allProblems)) {
+                        allProblems.forEach(p => {
+                            const opt = document.createElement('option');
+                            opt.value = p.id;
+                            opt.textContent = `[ID: ${p.id}] ${p.title}`;
+                            select.appendChild(opt);
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to load problems", e);
+            }
+        }
+        
+        loadProblems();
+
+        // Handle problem selection
+        document.getElementById('problemSelect').addEventListener('change', async (e) => {
+            const val = e.target.value;
+            const btn = document.getElementById('createProblemBtn');
+            const msg = document.getElementById('pMsg');
+            const loadMsg = document.getElementById('loadMsg');
+            msg.style.display = 'none';
+
+            if (val === 'new') {
+                selectedProblemId = null;
+                btn.textContent = 'Publish Problem';
+                document.getElementById('formTitle').textContent = '1. Basic Details (New Problem)';
+                
+                // Clear form
+                document.querySelectorAll('.form-input').forEach(el => el.value = '');
+                easyMDE.value('');
+                sampleManager.reset();
+                hiddenManager.reset();
+                document.getElementById('pDifficulty').value = 'Medium';
+            } else {
+                selectedProblemId = val;
+                btn.textContent = 'Update Problem';
+                document.getElementById('formTitle').textContent = `1. Basic Details (Editing ID: ${val})`;
+                
+                loadMsg.textContent = "Loading problem details...";
+                try {
+                    const res = await fetch(`/api/admin/problems/${val}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const p = await res.json();
+                        
+                        document.getElementById('pTitle').value = p.title;
+                        document.getElementById('pDifficulty').value = p.difficulty;
+                        // tags is json array, convert to comma string
+                        try {
+                            const tags = JSON.parse(p.tags);
+                            document.getElementById('pTags').value = Array.isArray(tags) ? tags.join(', ') : '';
+                        } catch(e) { document.getElementById('pTags').value = p.tags; }
+                        
+                        easyMDE.value(p.description);
+                        document.getElementById('pInputFormat').value = p.input_format || '';
+                        document.getElementById('pOutputFormat').value = p.output_format || '';
+                        document.getElementById('pConstraints').value = p.constraints || '';
+                        
+                        // Load JSON test cases into builders
+                        document.getElementById('pSampleTestCases').value = p.sample_testcases;
+                        document.getElementById('pHiddenTestCases').value = p.hidden_testcases;
+                        
+                        sampleManager.reset();
+                        hiddenManager.reset();
+                        
+                        try {
+                            const samples = JSON.parse(p.sample_testcases || '[]');
+                            samples.forEach(s => sampleManager.addTab(s.input, s.output, s.explanation));
+                        } catch(e) { console.error("Error parsing sample testcases"); }
+                        
+                        try {
+                            const hiddens = JSON.parse(p.hidden_testcases || '[]');
+                            hiddens.forEach(h => hiddenManager.addTab(h.input, h.output));
+                        } catch(e) { console.error("Error parsing hidden testcases"); }
+                        
+                    } else {
+                        loadMsg.textContent = "Failed to load problem.";
+                    }
+                } catch (e) {
+                    loadMsg.textContent = "Error loading problem.";
+                } finally {
+                    setTimeout(() => loadMsg.textContent = "", 2000);
+                }
+            }
+        });
 
         const sampleManager = new TestcaseManager('sample', 'sampleTabsList', 'sampleTabContent');
         const hiddenManager = new TestcaseManager('hidden', 'hiddenTabsList', 'hiddenTabContent');
@@ -374,7 +483,7 @@
             if (e.target.value === 'contest') {
                 group.style.display = 'block';
                 try {
-                    const res = await fetch('http://localhost:8080/api/contests');
+                    const res = await fetch('/api/contests');
                     const data = await res.json();
                     const contests = Array.isArray(data) ? data : (data.contests || []);
                     const select = document.getElementById('pContestId');
@@ -456,9 +565,12 @@
             btn.textContent = 'Publishing...';
             btn.disabled = true;
 
+            const url = selectedProblemId ? `/api/admin/problems/${selectedProblemId}` : '/api/admin/problems';
+            const method = selectedProblemId ? 'PUT' : 'POST';
+
             try {
-                const res = await fetch('http://localhost:8080/api/admin/problems', {
-                    method: 'POST',
+                const res = await fetch(url, {
+                    method: method,
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
@@ -483,11 +595,18 @@
                     msg.textContent = data.message;
                     msg.style.display = 'inline-block';
                     
-                    // Reset UI
-                    document.querySelectorAll('.form-input').forEach(el => el.value = '');
-                    easyMDE.value('');
-                    sampleManager.reset();
-                    hiddenManager.reset();
+                    
+                    if (!selectedProblemId) {
+                        // Reset UI if created new
+                        document.querySelectorAll('.form-input').forEach(el => el.value = '');
+                        easyMDE.value('');
+                        sampleManager.reset();
+                        hiddenManager.reset();
+                        loadProblems(); // Refresh list
+                    } else {
+                        // Refresh to sync name changes in dropdown
+                        loadProblems();
+                    }
                 } else {
                     msg.style.color = '#ff4d4d';
                     msg.textContent = data.error;
@@ -498,7 +617,7 @@
                 msg.textContent = 'Network error';
                 msg.style.display = 'inline-block';
             } finally {
-                btn.textContent = 'Publish Problem';
+                btn.textContent = selectedProblemId ? 'Update Problem' : 'Publish Problem';
                 btn.disabled = false;
             }
         });

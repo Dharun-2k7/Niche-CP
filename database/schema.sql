@@ -37,9 +37,12 @@ CREATE TABLE IF NOT EXISTS contests (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     type VARCHAR(50) NOT NULL, -- 'ICPC', 'IOI', 'CUSTOM'
+    description TEXT,
     start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ NOT NULL,
     duration_minutes INTEGER NOT NULL,
     registration_open_time TIMESTAMPTZ NOT NULL,
+    status VARCHAR(50) DEFAULT 'CREATED', -- 'CREATED', 'UPCOMING', 'RUNNING', 'ENDED'
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 

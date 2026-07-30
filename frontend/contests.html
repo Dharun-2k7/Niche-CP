@@ -32,7 +32,7 @@
             const container = document.getElementById('contestsContainer');
             
             try {
-                const response = await fetch('http://localhost:8080/api/contests');
+                const response = await fetch('/api/contests');
                 if (!response.ok) throw new Error('Failed to fetch contests');
                 const data = await response.json();
                 

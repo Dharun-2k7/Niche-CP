@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: niche_cp_postgres_prod
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-niche_cp}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    restart: unless-stopped
+    networks:
+      - nichecp_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: niche_cp_redis_prod
+    volumes:
+      - redis_data_prod:/data
+    restart: unless-stopped
+    networks:
+      - nichecp_network
+
+  api:
+    build:
+      context: ./backend
+    container_name: niche_cp_api_prod
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-niche_cp}?sslmode=disable
+      REDIS_URL: redis://redis:6379
+      BACKEND_URL: http://localhost
+      # Add other ENVs via .env file or environment variables
+    volumes:
+      - uploads_data:/app/uploads
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/nichecp-cache-v3:/tmp/nichecp-cache-v3
+      - /tmp/nichecp-go-cache-v3:/tmp/nichecp-go-cache-v3
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    command: ["/app/server"]
+    networks:
+      - nichecp_network
+
+  worker:
+    build:
+      context: ./backend
+    container_name: niche_cp_worker_prod
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-niche_cp}?sslmode=disable
+      REDIS_URL: redis://redis:6379
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/nichecp-cache-v3:/tmp/nichecp-cache-v3
+      - /tmp/nichecp-go-cache-v3:/tmp/nichecp-go-cache-v3
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    command: ["/app/worker"]
+    networks:
+      - nichecp_network
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: niche_cp_frontend_prod
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    networks:
+      - nichecp_network
+
+volumes:
+  postgres_data_prod:
+  redis_data_prod:
+  uploads_data:
+
+networks:
+  nichecp_network:

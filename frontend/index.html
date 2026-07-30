@@ -103,7 +103,7 @@
     <section class="section-container" id="contests">
         <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px;">
             <h2 class="display-font" style="font-size: 24px;">Upcoming Contests</h2>
-            <a href="coming-soon.html" style="color: var(--text-muted); font-size: 13px; text-decoration: none;">View Archive →</a>
+            <a href="contests.html" style="color: var(--text-muted); font-size: 13px; text-decoration: none;">View Archive →</a>
         </div>
 
         <div class="module-card premium-glass-panel" style="padding: 0; overflow: hidden;">
@@ -112,13 +112,59 @@
                 <div>Format</div>
                 <div>Start Time</div>
                 <div>Duration</div>
-                <div>Registered</div>
-                <div></div>
+                <div>Status</div>
+                <div>Action</div>
             </div>
             
-            <!-- Empty State -->
-            <div class="mobile-table-card" style="padding: 40px 24px; text-align: center; color: var(--text-muted); font-size: 14px;">
-                No upcoming contests scheduled at the moment.
+            <!-- Dynamic Content Container -->
+            <div id="dynamic-upcoming-contests">
+                <div class="mobile-table-card" style="padding: 40px 24px; text-align: center; color: var(--text-muted); font-size: 14px;">
+                    Loading contests...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3.5. Recent Problems -->
+    <section class="section-container" id="recent-problems">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px;">
+            <h2 class="display-font" style="font-size: 24px;">Recent Problems</h2>
+            <a href="practice.html" style="color: var(--text-muted); font-size: 13px; text-decoration: none;">View Problem Bank →</a>
+        </div>
+        <div class="module-card premium-glass-panel" style="padding: 0; overflow: hidden;">
+            <div class="mobile-table-header" style="display: grid; grid-template-columns: 2fr 1fr 2fr 1fr; gap: 16px; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+                <div>Title</div>
+                <div>Difficulty</div>
+                <div>Tags</div>
+                <div>Added</div>
+            </div>
+            <div id="dynamic-recent-problems">
+                <div class="mobile-table-card" style="padding: 40px 24px; text-align: center; color: var(--text-muted); font-size: 14px;">
+                    Loading problems...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3.6. User Statistics -->
+    <section class="section-container" id="user-statistics-section" style="display: none;">
+        <h2 class="display-font" style="font-size: 24px; margin-bottom: 24px;">Your Statistics</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;" id="dynamic-user-stats">
+            <div class="module-card premium-glass-panel" style="text-align: center; padding: 32px 24px;">
+                <h3 style="font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">Problems Solved</h3>
+                <div style="font-size: 32px; font-weight: 700; color: var(--primary-accent);" id="stat-solved">0</div>
+            </div>
+            <div class="module-card premium-glass-panel" style="text-align: center; padding: 32px 24px;">
+                <h3 style="font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">Contests</h3>
+                <div style="font-size: 32px; font-weight: 700; color: var(--text-primary);" id="stat-contests">0</div>
+            </div>
+            <div class="module-card premium-glass-panel" style="text-align: center; padding: 32px 24px;">
+                <h3 style="font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">Rating</h3>
+                <div style="font-size: 32px; font-weight: 700; color: var(--text-primary);" id="stat-rating">Unrated</div>
+            </div>
+            <div class="module-card premium-glass-panel" style="text-align: center; padding: 32px 24px;">
+                <h3 style="font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">Submissions</h3>
+                <div style="font-size: 32px; font-weight: 700; color: var(--text-primary);" id="stat-submissions">0</div>
             </div>
         </div>
     </section>
@@ -239,68 +285,7 @@
         </div>
     </section>
 
-    <!-- 7. Editorials -->
-    <section class="section-container" style="padding: 60px 40px;">
-        <h2 class="display-font" style="font-size: 24px; margin-bottom: 24px;">Latest Editorials</h2>
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-            
-            <div class="module-card" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px;">
-                <div>
-                    <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
-                        <span class="tag tag-primary">Sprint #15</span>
-                        <span style="font-size: 12px; color: var(--text-muted);">Published 2 days ago</span>
-                    </div>
-                    <h3 style="font-size: 16px; margin-bottom: 4px; font-weight: 500;">Optimal Substructure in Problem C</h3>
-                    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">A breakdown of how to reduce O(N^2) to O(N log N) using a segment tree.</p>
-                </div>
-                <a href="coming-soon.html" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; border-radius: 6px; text-decoration: none; border-color: rgba(255,255,255,0.1);">Read</a>
-            </div>
 
-            <div class="module-card" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px;">
-                <div>
-                    <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
-                        <span class="tag">Tutorial</span>
-                        <span style="font-size: 12px; color: var(--text-muted);">Published 1 week ago</span>
-                    </div>
-                    <h3 style="font-size: 16px; margin-bottom: 4px; font-weight: 500;">Introduction to Trie Data Structure</h3>
-                    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">String prefix queries explained with C++ template code.</p>
-                </div>
-                <a href="coming-soon.html" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; border-radius: 6px; text-decoration: none; border-color: rgba(255,255,255,0.1);">Read</a>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- 8. Platform Features -->
-    <section class="section-container" style="padding: 60px 40px;">
-        <h2 class="display-font" style="font-size: 24px; margin-bottom: 24px;">Platform Capabilities</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
-            <div class="module-card">
-                <h3 style="font-size: 15px; margin-bottom: 8px;">Contest Hosting</h3>
-                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0;">Automated scheduling and evaluation.</p>
-            </div>
-            <div class="module-card">
-                <h3 style="font-size: 15px; margin-bottom: 8px;">Virtual Contests</h3>
-                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0;">Replay past events in a simulated timeline.</p>
-            </div>
-            <div class="module-card">
-                <h3 style="font-size: 15px; margin-bottom: 8px;">Submission History</h3>
-                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0;">Execution time and memory tracking logs.</p>
-            </div>
-            <div class="module-card">
-                <h3 style="font-size: 15px; margin-bottom: 8px;">Clarification System</h3>
-                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0;">Live messaging between users and setters.</p>
-            </div>
-            <div class="module-card">
-                <h3 style="font-size: 15px; margin-bottom: 8px;">Admin Dashboard</h3>
-                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0;">User management and role assignment tools.</p>
-            </div>
-            <div class="module-card">
-                <h3 style="font-size: 15px; margin-bottom: 8px;">Problem Setter Portal</h3>
-                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0;">Draft problems and configure test cases.</p>
-            </div>
-        </div>
-    </section>
 
     <!-- 9. How NicheCP Works -->
     <section class="section-container" style="padding: 60px 40px;">
@@ -318,27 +303,7 @@
         </div>
     </section>
 
-    <!-- 10. Recent Updates -->
-    <section class="section-container" style="padding: 60px 40px;">
-        <h2 class="display-font" style="font-size: 24px; margin-bottom: 24px;">Recent Updates</h2>
-        <div style="display: flex; flex-direction: column; gap: 1px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; overflow: hidden;">
-            <div style="background: var(--bg-base); padding: 16px 24px; display: grid; grid-template-columns: 100px 100px 1fr; gap: 16px; align-items: center;">
-                <div style="font-size: 13px; color: var(--text-muted); font-variant-numeric: tabular-nums;">2026-06-25</div>
-                <div><span class="tag tag-primary">Contest</span></div>
-                <div style="font-size: 14px;">Sprint #16 registration opened.</div>
-            </div>
-            <div style="background: var(--bg-base); padding: 16px 24px; display: grid; grid-template-columns: 100px 100px 1fr; gap: 16px; align-items: center;">
-                <div style="font-size: 13px; color: var(--text-muted); font-variant-numeric: tabular-nums;">2026-06-24</div>
-                <div><span class="tag">Resource</span></div>
-                <div style="font-size: 14px;">Graph Theory practice sheet published.</div>
-            </div>
-            <div style="background: var(--bg-base); padding: 16px 24px; display: grid; grid-template-columns: 100px 100px 1fr; gap: 16px; align-items: center;">
-                <div style="font-size: 13px; color: var(--text-muted); font-variant-numeric: tabular-nums;">2026-06-20</div>
-                <div><span class="tag tag-secondary">System</span></div>
-                <div style="font-size: 14px;">Execution memory limit increased to 512MB.</div>
-            </div>
-        </div>
-    </section>
+
 
     <!-- 11. About NicheCP -->
     <section class="section-container" style="padding: 60px 40px; border-top: 1px solid rgba(255,255,255,0.05);">

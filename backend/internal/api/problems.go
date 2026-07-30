@@ -210,7 +210,7 @@ func GetMyContestSubmissions(c *gin.Context) {
 }
 
 func GetAllContests(c *gin.Context) {
-	rows, err := db.DB.Query(`SELECT id, title, type, start_time, duration_minutes FROM contests ORDER BY start_time DESC`)
+	rows, err := db.DB.Query(`SELECT id, title, type, description, start_time, end_time, duration_minutes, status FROM contests ORDER BY start_time DESC`)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch contests"})
 		return
@@ -220,15 +220,23 @@ func GetAllContests(c *gin.Context) {
 	contests := make([]map[string]interface{}, 0)
 	for rows.Next() {
 		var id, duration int
-		var title, typeStr string
-		var startTime time.Time
-		if err := rows.Scan(&id, &title, &typeStr, &startTime, &duration); err == nil {
+		var title, typeStr, status string
+		var description sql.NullString
+		var startTime, endTime time.Time
+		if err := rows.Scan(&id, &title, &typeStr, &description, &startTime, &endTime, &duration, &status); err == nil {
+			desc := ""
+			if description.Valid {
+				desc = description.String
+			}
 			contests = append(contests, map[string]interface{}{
 				"id":               id,
 				"title":            title,
 				"type":             typeStr,
+				"description":      desc,
 				"start_time":       startTime.Format(time.RFC3339),
+				"end_time":         endTime.Format(time.RFC3339),
 				"duration_minutes": duration,
+				"status":           status,
 			})
 		}
 	}
@@ -287,7 +295,7 @@ type ViolationRequest struct {
 }
 
 func LogContestViolation(c *gin.Context) {
-	userID := c.GetUint("userID")
+	userID := c.GetInt("user_id")
 	contestID := c.Param("id")
 
 	var req ViolationRequest
@@ -306,9 +314,20 @@ func LogContestViolation(c *gin.Context) {
 		return
 	}
 
-	// Lock the user if this is a severe violation, e.g. third time switching tabs.
-	// For now, we just insert the log and the admin can review.
-	c.JSON(http.StatusOK, gin.H{"message": "Logged successfully"})
+	// Check if this user has exceeded the 3 warning limit
+	var count int
+	err = db.DB.QueryRow(`
+		SELECT COUNT(*) FROM contest_violations WHERE user_id = $1 AND contest_id = $2
+	`, userID, contestID).Scan(&count)
+	
+	if err == nil && count >= 3 {
+		// Log disqualified or ban logic
+		// We could update a contest_registrations table to mark them disqualified
+		c.JSON(http.StatusOK, gin.H{"message": "Logged successfully", "disqualified": true})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Logged successfully", "disqualified": false})
 }
 
 func GetContestViolations(c *gin.Context) {

@@ -11,7 +11,7 @@ var GoogleOAuthConfig *oauth2.Config
 
 func InitOAuth() {
 	GoogleOAuthConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:8080/api/auth/google/callback", // Update this in production
+		RedirectURL:  os.Getenv("GOOGLE_REDIRECT_URL"), // Update this in production
 		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
 		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 		Scopes: []string{

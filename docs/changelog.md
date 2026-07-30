@@ -5,6 +5,11 @@ All notable changes to the NicheCP project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Contest System Lifecycle**: Introduced formal state transitions (`CREATED`, `UPCOMING`, `RUNNING`, `ENDED`) via a background ticker. Added `description`, `status`, and `end_time` to contest configurations.
+- **Contest Anti-Cheat System**: Implemented automated monitoring for fullscreen exits and tab switching during active contests. Added a 3-warning limit with automatic disqualification and visual UI alerts in the arena. Blocked copy/paste on problem statements during contests.
+- **Admin Contest Management**: Added UI controls for manually updating contest descriptions and states in `admin_contests.html`. Created `admin_violations.html` with a dedicated backend API to monitor contest participant violations.
+- **Docker Production Deployment**: Provided full containerization support by creating `backend/Dockerfile`, `frontend/Dockerfile`, and `docker-compose.prod.yml` to spin up PostgreSQL, Redis, the Go API server, worker, and frontend.
+- **Testcase Generator ADR**: Documented architectural decisions for building a testcase generation system inside `docs/architecture_decisions/testcase_generator.md`.
 - **AGENTS.md**: Persistent AI instruction manual outlining repository structures, conventions, and context rules.
 - **.ai/**: Directory containing `context.md`, `tasks.md`, and `session.md` to ensure continuous AI synchronization.
 - **docs/**: Comprehensive documentation directory containing architecture guidelines, setup instructions, decision logs, and this changelog.

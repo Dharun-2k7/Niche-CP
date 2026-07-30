@@ -133,7 +133,7 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                const res = await fetch('http://localhost:8080/api/admin/users', {
+                const res = await fetch('/api/admin/users', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
@@ -189,7 +189,7 @@
         async function savePermissions() {
             const permissions = Array.from(document.querySelectorAll('#permissionsModal input[type="checkbox"]:checked')).map(cb => cb.value);
             try {
-                const res = await fetch('http://localhost:8080/api/admin/users/permissions', {
+                const res = await fetch('/api/admin/users/permissions', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -216,7 +216,7 @@
             if (!email) return;
 
             try {
-                const res = await fetch('http://localhost:8080/api/admin/promote', {
+                const res = await fetch('/api/admin/promote', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',

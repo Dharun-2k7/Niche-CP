@@ -148,7 +148,7 @@
                     const token = localStorage.getItem('jwt_token');
                     if (!token) return;
                     try {
-                        await fetch(`http://localhost:8080/api/contests/${contestId}/log`, {
+                        const res = await fetch(`/api/contests/${contestId}/log`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -156,6 +156,16 @@
                             },
                             body: JSON.stringify({ event_type: type })
                         });
+                        const data = await res.json();
+                        if (data.disqualified) {
+                            alert("CRITICAL: You have been disqualified from this contest due to repeated violations.");
+                            document.getElementById('submitBtn').disabled = true;
+                            document.getElementById('submitBtn').style.opacity = '0.5';
+                            document.getElementById('runBtn').disabled = true;
+                            if (window.monacoEditor) {
+                                window.monacoEditor.updateOptions({ readOnly: true });
+                            }
+                        }
                     } catch (e) {
                         console.error('Failed to log violation', e);
                     }
@@ -187,7 +197,7 @@
             
             if (pid) {
                 try {
-                    const res = await fetch(`http://localhost:8080/api/problems/${pid}`);
+                    const res = await fetch(`/api/problems/${pid}`);
                     if (res.ok) {
                         const problem = await res.json();
                         document.getElementById('problemIdDisplay').textContent = `NCP-${problem.id}`;
@@ -197,7 +207,7 @@
                         const token = localStorage.getItem('jwt_token');
                         if (token) {
                             try {
-                                const solvedRes = await fetch('http://localhost:8080/api/profile/solved', {
+                                const solvedRes = await fetch('/api/profile/solved', {
                                     headers: { 'Authorization': `Bearer ${token}` }
                                 });
                                 if (solvedRes.ok) {

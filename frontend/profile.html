@@ -415,7 +415,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             // Load Profile Data
             try {
-                const res = await fetch('http://localhost:8080/api/profile', {
+                const res = await fetch('/api/profile', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
@@ -492,7 +492,7 @@
                 
                 try {
                     // Update Name and Email
-                    const res = await fetch('http://localhost:8080/api/profile', {
+                    const res = await fetch('/api/profile', {
                         method: 'PUT',
                         headers: { 
                             'Content-Type': 'application/json',
@@ -512,7 +512,7 @@
                         const formData = new FormData();
                         formData.append('profile_picture', dpFile);
                         
-                        const dpRes = await fetch('http://localhost:8080/api/profile/upload-dp', {
+                        const dpRes = await fetch('/api/profile/upload-dp', {
                             method: 'POST',
                             headers: { 'Authorization': `Bearer ${token}` },
                             body: formData
@@ -555,7 +555,7 @@
 
                 btn.textContent = 'Verifying...';
                 try {
-                    const res = await fetch('http://localhost:8080/api/profile/verify-email-update', {
+                    const res = await fetch('/api/profile/verify-email-update', {
                         method: 'POST',
                         headers: { 
                             'Content-Type': 'application/json',
@@ -593,7 +593,7 @@
 
                 try {
                     document.getElementById('verifyBtn').textContent = 'Sending...';
-                    const res = await fetch('http://localhost:8080/api/profile/verify-college-email', {
+                    const res = await fetch('/api/profile/verify-college-email', {
                         method: 'POST',
                         headers: { 
                             'Content-Type': 'application/json',
@@ -631,7 +631,7 @@
                 
                 try {
                     document.getElementById('submitOtpBtn').textContent = 'Verifying...';
-                    const res = await fetch('http://localhost:8080/api/profile/verify-otp', {
+                    const res = await fetch('/api/profile/verify-otp', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({ email, otp })
@@ -660,7 +660,7 @@
                 if(!handle) { msg.textContent = 'Enter handle'; msg.style.display = 'block'; return; }
                 
                 try {
-                    const res = await fetch('http://localhost:8080/api/profile/cf/init', {
+                    const res = await fetch('/api/profile/cf/init', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({ handle })
@@ -684,7 +684,7 @@
                 const msg = document.getElementById('cfVerifyMsg');
                 btn.textContent = 'Verifying with Codeforces...';
                 try {
-                    const res = await fetch('http://localhost:8080/api/profile/cf/verify', {
+                    const res = await fetch('/api/profile/cf/verify', {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
@@ -708,7 +708,7 @@
                     if (!confirm('Are you sure you want to disconnect your Codeforces account?')) return;
                     
                     try {
-                        const res = await fetch('http://localhost:8080/api/profile/cf/disconnect', {
+                        const res = await fetch('/api/profile/cf/disconnect', {
                             method: 'POST',
                             headers: { 'Authorization': `Bearer ${token}` }
                         });

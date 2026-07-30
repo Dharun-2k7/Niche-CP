@@ -69,9 +69,7 @@ func main() {
 	r.GET("/api/problems", api.GetAllProblems)
 	r.GET("/api/problems/:id", api.GetProblem)
 	r.GET("/api/contests", api.GetAllContests)
-	r.GET("/api/contests/:id/problems", api.GetContestProblems)
 	r.GET("/api/contests/:id/leaderboard", api.GetContestLeaderboard)
-	r.GET("/api/contests/:id/submissions", api.GetContestSubmissions)
 
 	// Public Homepage Routes
 	r.GET("/api/public/upcoming-contests", api.GetUpcomingContests)
@@ -80,6 +78,16 @@ func main() {
 	// Protected Routes
 	protected := r.Group("/api")
 	protected.Use(middleware.RequireAuth())
+
+	// Contest Lifecycle Routes
+	contestProtected := r.Group("/api/contests")
+	contestProtected.Use(middleware.RequireContestLifecycle())
+	{
+		contestProtected.GET("/:id/problems", api.GetContestProblems)
+		contestProtected.GET("/:id/submissions", api.GetContestSubmissions)
+		contestProtected.GET("/:id/my-submissions", api.GetMyContestSubmissions)
+		contestProtected.GET("/:id/access", api.CheckContestAccess)
+	}
 	{
 		protected.POST("/submit", api.SubmitCode)
 		protected.GET("/submissions/:id", api.GetSubmissionStatus)
@@ -95,9 +103,9 @@ func main() {
 		protected.POST("/profile/cf/init", api.InitCFVerification)
 		protected.POST("/profile/cf/verify", api.VerifyCF)
 		protected.POST("/profile/cf/disconnect", api.DisconnectCF)
-		protected.POST("/contests/register", api.RegisterForContest)
+		protected.GET("/contests/my-registrations", api.GetMyRegistrations)
+		protected.POST("/contests/:id/register", api.RegisterForContest)
 		protected.POST("/contests/:id/log", api.LogContestViolation)
-		protected.GET("/contests/:id/my-submissions", api.GetMyContestSubmissions)
 	}
 
 	// Admin Routes

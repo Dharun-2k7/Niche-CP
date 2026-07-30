@@ -63,11 +63,42 @@
             stroke: rgba(255,255,255,0.15);
             margin-bottom: 12px;
         }
+
+        /* Overlay for blocked users */
+        #arena-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(13,13,15,0.95);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
     </style>
 </head>
 <body data-theme="quantum">
+<body data-theme="quantum">
 
-    <div class="arena-wrapper">
+    <!-- Block Overlay -->
+    <div id="arena-overlay">
+        <div style="text-align:center; max-width: 400px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5" style="width:64px; height:64px; margin-bottom:20px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <h2 style="font-family: 'Space Grotesk', sans-serif; color: #fff; margin-bottom:10px;" id="overlay-title">Access Denied</h2>
+            <p style="color: var(--text-muted); margin-bottom:20px;" id="overlay-desc">You must register for this contest.</p>
+            <a href="contests.html" class="btn-enter" id="overlay-btn">Back to Contests</a>
+        </div>
+    </div>
+
+    <!-- Fullscreen Prompt Overlay -->
+    <div id="fullscreen-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(13,13,15,0.98); z-index:9998; flex-direction:column; align-items:center; justify-content:center;">
+        <h2 style="font-family: 'Space Grotesk', sans-serif; color: #fff; margin-bottom:10px;">Enter Contest Mode</h2>
+        <p style="color: var(--text-muted); margin-bottom:20px;">This contest requires fullscreen mode. Exiting fullscreen will log a violation.</p>
+        <button class="btn-enter" onclick="enterFullscreen()">Enter Fullscreen</button>
+    </div>
+
+    <div class="arena-wrapper" id="arena-main" style="display:none;">
         <!-- Thin Left Sidebar -->
         <div class="arena-sidebar">
             <div style="margin-bottom: 20px; font-family: 'Space Grotesk', sans-serif; font-weight: bold; font-size: 18px; color: var(--text-primary);">[N]</div>
@@ -226,35 +257,44 @@
         // ── Load Problems ──
         async function loadProblems(contestId) {
             const probList = document.getElementById('problemsList');
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+            
             try {
-                const res = await fetch(`${API_BASE}/api/contests/${contestId}/problems`);
-                if (res.ok) {
-                    const problems = await res.json();
-                    const contestProbs = Array.isArray(problems) ? problems : [];
-                    probList.innerHTML = '';
-                    
-                    if (contestProbs.length === 0) {
-                        probList.innerHTML = '<div class="arena-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg><div>No problems have been added to this contest yet.</div></div>';
-                    } else {
-                        const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-                        contestProbs.forEach((p, index) => {
-                            const points = (index + 1) * 500;
-                            probList.innerHTML += `
-                                <a href="problem.html?problem_id=${p.id}&contest_id=${contestId}" class="problem-row" style="text-decoration:none; color:inherit; display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
-                                    <div class="status-circle" style="width:12px; height:12px; border-radius:50%; border:2px solid rgba(255,255,255,0.2);"></div>
-                                    <div style="display:flex; gap:16px; align-items:center; flex:1; margin-left:16px;">
-                                        <span style="font-weight:600; color:var(--primary-accent); font-size:15px;">${letters[index] || '?'}</span>
-                                        <span style="font-size:14px;">${p.title}</span>
-                                    </div>
-                                    <div style="font-size:13px; color:var(--text-secondary); width:60px; text-align:right;">${points}</div>
-                                    <div style="color:var(--text-muted); font-size:12px; width:60px; text-align:right;">—</div>
-                                </a>
-                            `;
-                        });
-                    }
+                const res = await fetch(`${API_BASE}/api/contests/${contestId}/problems`, { headers });
+                if (!res.ok) {
+                    const errData = await res.json();
+                    document.getElementById('arena-overlay').style.display = 'flex';
+                    document.getElementById('overlay-desc').textContent = errData.error || 'Access Denied';
+                    return false;
                 }
+                
+                const problems = await res.json();
+                const contestProbs = Array.isArray(problems) ? problems : [];
+                probList.innerHTML = '';
+                
+                if (contestProbs.length === 0) {
+                    probList.innerHTML = '<div class="arena-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg><div>No problems have been added to this contest yet.</div></div>';
+                } else {
+                    const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+                    contestProbs.forEach((p, index) => {
+                        const points = (index + 1) * 500;
+                        probList.innerHTML += `
+                            <a href="problem.html?problem_id=${p.id}&contest_id=${contestId}" class="problem-row" style="text-decoration:none; color:inherit; display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
+                                <div class="status-circle" style="width:12px; height:12px; border-radius:50%; border:2px solid rgba(255,255,255,0.2);"></div>
+                                <div style="display:flex; gap:16px; align-items:center; flex:1; margin-left:16px;">
+                                    <span style="font-weight:600; color:var(--primary-accent); font-size:15px;">${letters[index] || '?'}</span>
+                                    <span style="font-size:14px;">${p.title}</span>
+                                </div>
+                                <div style="font-size:13px; color:var(--text-secondary); width:60px; text-align:right;">${points}</div>
+                                <div style="color:var(--text-muted); font-size:12px; width:60px; text-align:right;">—</div>
+                            </a>
+                        `;
+                    });
+                }
+                return true;
             } catch (e) {
                 probList.innerHTML = '<div class="arena-empty-state" style="color:#ef4444;">Failed to load problems.</div>';
+                return false;
             }
         }
 
@@ -359,32 +399,109 @@
             }
         }
 
+        let isLiveContest = false;
+        let globalContestId = null;
+
         // ── Main Init ──
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const contestId = urlParams.get('id');
+            globalContestId = contestId;
 
             if (!contestId) {
+                document.getElementById('arena-main').style.display = 'block';
                 document.getElementById('contestName').textContent = 'Contest Preview';
                 document.getElementById('problemsList').innerHTML = '<div class="arena-empty-state">No contest selected.</div>';
                 return;
             }
 
-            // Load all panels concurrently
-            await Promise.allSettled([
-                loadContestTitle(contestId),
-                loadProblems(contestId),
-                loadLeaderboard(contestId),
-                loadSubmissionsFeed(contestId),
-                loadMySubmissions(contestId)
-            ]);
+            // Explicit backend validation for access BEFORE allowing arena or fullscreen
+            try {
+                const accessRes = await fetch(`${API_BASE}/api/contests/${contestId}/access`, {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
+                if (!accessRes.ok) {
+                    const errData = await accessRes.json();
+                    document.getElementById('arena-overlay').style.display = 'flex';
+                    document.getElementById('overlay-desc').textContent = errData.error || 'Access Denied';
+                    return;
+                }
+            } catch(e) {
+                document.getElementById('arena-overlay').style.display = 'flex';
+                document.getElementById('overlay-desc').textContent = 'Failed to verify access.';
+                return;
+            }
+
+            // Check if contest is LIVE to enforce fullscreen
+            try {
+                const response = await fetch(`${API_BASE}/api/contests`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const contests = Array.isArray(data) ? data : (data.contests || []);
+                    const contest = contests.find(c => c.id == contestId);
+                    if (contest && contest.status === 'RUNNING') {
+                        isLiveContest = true;
+                    }
+                }
+            } catch(e) {}
+
+            if (isLiveContest) {
+                document.getElementById('fullscreen-overlay').style.display = 'flex';
+            } else {
+                document.getElementById('arena-main').style.display = 'block';
+                initArena(contestId);
+            }
+        });
+
+        function enterFullscreen() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().then(() => {
+                    document.getElementById('fullscreen-overlay').style.display = 'none';
+                    document.getElementById('arena-main').style.display = 'block';
+                    initArena(globalContestId);
+                    setupViolationMonitoring();
+                }).catch(err => alert("Error enabling fullscreen"));
+            }
+        }
+
+        function initArena(contestId) {
+            loadContestTitle(contestId);
+            loadProblems(contestId);
+            loadLeaderboard(contestId);
+            loadSubmissionsFeed(contestId);
+            loadMySubmissions(contestId);
 
             // Poll for live updates every 15 seconds
             setInterval(() => {
                 loadSubmissionsFeed(contestId);
                 loadLeaderboard(contestId);
             }, 15000);
-        });
+        }
+
+        // ── Violation Monitoring ──
+        function setupViolationMonitoring() {
+            document.addEventListener("fullscreenchange", () => {
+                if (!document.fullscreenElement) logViolation('fullscreen_exit');
+            });
+            document.addEventListener("visibilitychange", () => {
+                if (document.hidden) logViolation('tab_switched');
+            });
+            window.addEventListener("blur", () => {
+                logViolation('blur');
+            });
+        }
+
+        async function logViolation(type) {
+            if (!token || !globalContestId) return;
+            try {
+                await fetch(`${API_BASE}/api/contests/${globalContestId}/log`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ event_type: type })
+                });
+                console.warn("Violation logged: " + type);
+            } catch(e) {}
+        }
     </script>
 <script src="js/components.js"></script>
 </body>

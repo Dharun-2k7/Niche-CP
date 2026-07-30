@@ -30,66 +30,136 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const container = document.getElementById('contestsContainer');
+            const token = localStorage.getItem('token');
             
             try {
+                // Fetch contests
                 const response = await fetch('/api/contests');
                 if (!response.ok) throw new Error('Failed to fetch contests');
                 const data = await response.json();
-                
-                const now = new Date();
-                
-                const upcoming = [];
-                const past = [];
-                
-                // If it's returning a map/array wrapper
-                const contestList = (data && (data.contests || data)) || [];
+                const contestList = data.contests || (Array.isArray(data) ? data : []);
+                const serverTime = data.server_time ? new Date(data.server_time).getTime() : new Date().getTime();
+                const timeOffset = serverTime - new Date().getTime();
                 
                 if (!Array.isArray(contestList)) {
                     container.innerHTML = '<div style="text-align:center; color: var(--text-muted); margin-top: 40px;">No contests available.</div>';
                     return;
                 }
 
-                contestList.forEach(c => {
-                    // strict UTC parsing
-                    const startTime = new Date(c.start_time);
-                    if (startTime > now) {
-                        upcoming.push(c);
-                    } else {
-                        past.push(c);
+                // Fetch registrations if logged in
+                let myRegistrations = [];
+                if (token) {
+                    const regRes = await fetch('/api/contests/my-registrations', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (regRes.ok) {
+                        const regData = await regRes.json();
+                        if (regData.registered_contests) {
+                            myRegistrations = regData.registered_contests;
+                        }
                     }
+                }
+
+                const upcoming = [];
+                const running = [];
+                const past = [];
+                
+                contestList.forEach(c => {
+                    if (c.status === 'CREATED' || c.status === 'UPCOMING') upcoming.push(c);
+                    else if (c.status === 'RUNNING') running.push(c);
+                    else past.push(c);
                 });
 
                 let html = '';
 
+                // HELPER: Format date
+                const formatDate = (ds) => new Date(ds).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+                const formatLen = (m) => `${Math.floor(m / 60)}:${(m % 60).toString().padStart(2, '0')}`;
+
+                // ACTIVE / RUNNING SECTION
+                if (running.length > 0) {
+                    html += `
+                        <div class="contest-list-header">
+                            <div>LIVE NOW</div>
+                            <div>LENGTH</div>
+                            <div></div>
+                        </div>
+                    `;
+                    running.forEach(c => {
+                        const isReg = myRegistrations.includes(c.id);
+                        let actionBtn = '';
+                        if (isReg) {
+                            actionBtn = `<a href="contest_arena.html?id=${c.id}" class="btn-enter" style="background:var(--success-color); color:#000;">Enter Contest</a>`;
+                        } else {
+                            actionBtn = `<button class="btn-enter" disabled style="background:#333; cursor:not-allowed; border:none; color:#888;">Registration Closed</button>`;
+                        }
+                        
+                        html += `
+                            <div class="contest-row" style="border-left: 3px solid var(--success-color);">
+                                <div>
+                                    <div class="contest-title" style="color:var(--success-color);">${c.title} <span style="font-size:12px; margin-left:8px; border:1px solid var(--success-color); padding:2px 6px; border-radius:12px;">LIVE</span></div>
+                                    <div class="contest-meta">Started: ${formatDate(c.start_time)}</div>
+                                </div>
+                                <div class="contest-meta">${formatLen(c.duration_minutes)}</div>
+                                <div class="contest-actions">
+                                    ${actionBtn}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
                 // UPCOMING SECTION
                 if (upcoming.length > 0) {
                     html += `
-                        <div class="contest-list-header">
+                        <div class="contest-list-header" style="margin-top: ${running.length > 0 ? '60px' : '0'};">
                             <div>UPCOMING</div>
                             <div>LENGTH</div>
                             <div></div>
                         </div>
                     `;
                     upcoming.forEach(c => {
-                        const startTime = new Date(c.start_time);
-                        const dateStr = startTime.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
-                        const h = Math.floor(c.duration_minutes / 60);
-                        const m = (c.duration_minutes % 60).toString().padStart(2, '0');
+                        const isReg = myRegistrations.includes(c.id);
+                        let actionBtn = '';
+                        if (isReg) {
+                            actionBtn = `<button class="btn-enter" disabled style="background:#2a2a35; border:none; color:var(--text-muted); cursor:wait;">Registered</button>`;
+                        } else {
+                            if (token) {
+                                actionBtn = `<button class="btn-enter" onclick="registerForContest(${c.id}, this)">Register</button>`;
+                            } else {
+                                actionBtn = `<a href="login.html" class="btn-enter">Log in to Register</a>`;
+                            }
+                        }
                         
                         html += `
                             <div class="contest-row">
                                 <div>
                                     <div class="contest-title">${c.title}</div>
-                                    <div class="contest-meta">${dateStr}</div>
+                                    <div class="contest-meta">${formatDate(c.start_time)}</div>
                                 </div>
-                                <div class="contest-meta">${h}:${m}</div>
+                                <div class="contest-meta">${formatLen(c.duration_minutes)}</div>
                                 <div class="contest-actions">
-                                    <div class="contest-countdown">06:08:44:02</div>
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                                    <a href="contest_arena.html?id=${c.id}" class="btn-enter">Enter</a>
+                                    <div class="contest-countdown" id="countdown-${c.id}">00:00:00:00</div>
+                                    ${actionBtn}
                                 </div>
                             </div>
                         `;
+                        
+                        // Start countdown loop
+                        setInterval(() => {
+                            const now = new Date().getTime() + timeOffset;
+                            const distance = new Date(c.start_time).getTime() - now;
+                            const el = document.getElementById(`countdown-${c.id}`);
+                            if(el && distance > 0) {
+                                const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+                                const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                                const s = Math.floor((distance % (1000 * 60)) / 1000);
+                                el.innerText = `${d.toString().padStart(2,'0')}:${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                            } else if (el) {
+                                el.innerText = "STARTING...";
+                            }
+                        }, 1000);
                     });
                 }
 
@@ -103,37 +173,65 @@
                         </div>
                     `;
                     past.forEach(c => {
-                        const startTime = new Date(c.start_time);
-                        const dateStr = startTime.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
-                        const h = Math.floor(c.duration_minutes / 60);
-                        const m = (c.duration_minutes % 60).toString().padStart(2, '0');
-                        
                         html += `
-                            <div class="contest-row">
+                            <div class="contest-row" style="opacity: 0.7;">
                                 <div>
                                     <div class="contest-title">${c.title}</div>
-                                    <div class="contest-meta">${dateStr}</div>
+                                    <div class="contest-meta">${formatDate(c.start_time)}</div>
                                 </div>
-                                <div class="contest-meta">${h}:${m}</div>
+                                <div class="contest-meta">${formatLen(c.duration_minutes)}</div>
                                 <div class="contest-actions">
-                                    <a href="coming-soon.html" class="contest-action-link">Ranking</a>
-                                    <a href="coming-soon.html" class="contest-action-link">Virtual</a>
+                                    <a href="contest_arena.html?id=${c.id}" class="btn-enter" style="background:transparent; border:1px solid #444; color:#fff;">Practice / Results</a>
                                 </div>
                             </div>
                         `;
                     });
                 }
 
-                if (upcoming.length === 0 && past.length === 0) {
+                if (html === '') {
                     html = `<div style="text-align:center; padding: 40px; color: var(--text-muted);">No contests found.</div>`;
                 }
 
                 container.innerHTML = html;
 
             } catch (err) {
-                container.innerHTML = `<div style="color: #ef4444; padding: 20px;">Error loading contests. Is the backend running?</div>`;
+                container.innerHTML = `<div style="color: #ef4444; padding: 20px; text-align:center;">Error loading contests. ${err.message}</div>`;
             }
         });
+
+        // Global Registration Function
+        async function registerForContest(contestId, btn) {
+            const token = localStorage.getItem('token');
+            if(!token) return window.location.href = 'login.html';
+            
+            btn.innerHTML = 'Registering...';
+            btn.disabled = true;
+            
+            try {
+                const res = await fetch(`/api/contests/${contestId}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({})
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    btn.innerHTML = 'Registered';
+                    btn.style.background = '#2a2a35';
+                    btn.style.color = 'var(--text-muted)';
+                    btn.style.border = 'none';
+                    // Don't re-enable button
+                } else {
+                    alert('Registration failed: ' + (data.error || 'Unknown error'));
+                    btn.innerHTML = 'Register';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                alert('Network error');
+                btn.innerHTML = 'Register';
+                btn.disabled = false;
+            }
+        }
     </script>
     <script src="js/app.js"></script>
 <script src="js/components.js"></script>

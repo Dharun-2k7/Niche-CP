@@ -70,12 +70,24 @@ func SubmitCode(c *gin.Context) {
 			return
 		}
 
-		if status == "ENDED" {
-			// Practice submissions allowed only 1 hour after contest ends
-			if time.Now().UTC().Before(endTime.Add(1 * time.Hour)) {
-				c.JSON(http.StatusForbidden, gin.H{"error": "Practice submissions are only allowed 1 hour after the contest ends."})
+		if status == "RUNNING" {
+			var registered bool
+			err = db.DB.QueryRow(`
+				SELECT EXISTS(
+					SELECT 1 FROM contest_registrations 
+					WHERE user_id = $1 AND contest_id = $2
+				)
+			`, userID, *req.ContestID).Scan(&registered)
+			
+			if err != nil || !registered {
+				c.JSON(http.StatusForbidden, gin.H{"error": "You must register for this contest to submit code."})
 				return
 			}
+		}
+
+		if status == "ENDED" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Contest has ended. Practice submissions must be made outside the contest."})
+			return
 		}
 	}
 

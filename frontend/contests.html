@@ -17,7 +17,7 @@
     <!-- Floating Glass Navigation (Injected via JS) -->
     <div id="global-nav-container"></div>
 
-    <main class="app-container" style="max-width: 1000px; padding-top: 20px;">
+    <main class="app-container" style="max-width: 1000px; padding-top: 100px;">
         <div id="contestsContainer">
             <div style="display:flex; flex-direction:column; gap:16px; margin-top:40px;">
                 <div class="skeleton" style="height: 80px; width: 100%;"></div>
@@ -30,7 +30,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const container = document.getElementById('contestsContainer');
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('jwt_token');
             
             try {
                 // Fetch contests
@@ -101,11 +101,33 @@
                                     <div class="contest-meta">Started: ${formatDate(c.start_time)}</div>
                                 </div>
                                 <div class="contest-meta">${formatLen(c.duration_minutes)}</div>
-                                <div class="contest-actions">
+                                <div class="contest-actions" style="display:flex; gap:12px; align-items:center;">
+                                    <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                                        <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Remaining Time</div>
+                                        <div class="contest-countdown" id="countdown-${c.id}" style="color:var(--success-color);">00:00:00:00</div>
+                                    </div>
+                                    <a href="rankings.html?contest_id=${c.id}" class="btn-ghost" style="padding: 10px 16px;">Leaderboard</a>
                                     ${actionBtn}
                                 </div>
                             </div>
                         `;
+                        
+                        // Running Countdown Loop
+                        setInterval(() => {
+                            const now = new Date().getTime() + timeOffset;
+                            const distance = new Date(c.end_time).getTime() - now;
+                            const el = document.getElementById(`countdown-${c.id}`);
+                            if(el && distance > 0) {
+                                const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+                                const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                                const s = Math.floor((distance % (1000 * 60)) / 1000);
+                                el.innerText = `${d.toString().padStart(2,'0')}:${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                            } else if (el && !el.dataset.finished) {
+                                el.dataset.finished = "true";
+                                el.innerText = "00:00:00:00";
+                            }
+                        }, 1000);
                     });
                 }
 
@@ -122,12 +144,16 @@
                         const isReg = myRegistrations.includes(c.id);
                         let actionBtn = '';
                         if (isReg) {
-                            actionBtn = `<button class="btn-enter" disabled style="background:#2a2a35; border:none; color:var(--text-muted); cursor:wait;">Registered</button>`;
+                            actionBtn = `<button class="btn-enter" disabled style="background:#2a2a35; border:none; color:var(--text-muted); cursor:not-allowed;">Registered</button>`;
                         } else {
-                            if (token) {
-                                actionBtn = `<button class="btn-enter" onclick="registerForContest(${c.id}, this)">Register</button>`;
+                            if (c.registration_open) {
+                                if (token) {
+                                    actionBtn = `<button class="btn-enter" onclick="registerForContest(${c.id}, this)">Register</button>`;
+                                } else {
+                                    actionBtn = `<a href="login.html" class="btn-enter">Log in to Register</a>`;
+                                }
                             } else {
-                                actionBtn = `<a href="login.html" class="btn-enter">Log in to Register</a>`;
+                                actionBtn = `<button class="btn-enter" disabled style="background:#2a2a35; border:none; color:var(--text-muted); cursor:not-allowed;">Registration Closed</button>`;
                             }
                         }
                         
@@ -138,8 +164,11 @@
                                     <div class="contest-meta">${formatDate(c.start_time)}</div>
                                 </div>
                                 <div class="contest-meta">${formatLen(c.duration_minutes)}</div>
-                                <div class="contest-actions">
-                                    <div class="contest-countdown" id="countdown-${c.id}">00:00:00:00</div>
+                                <div class="contest-actions" style="display:flex; gap:12px; align-items:center;">
+                                    <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                                        <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Starts In</div>
+                                        <div class="contest-countdown" id="countdown-${c.id}">00:00:00:00</div>
+                                    </div>
                                     ${actionBtn}
                                 </div>
                             </div>
@@ -156,8 +185,16 @@
                                 const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                                 const s = Math.floor((distance % (1000 * 60)) / 1000);
                                 el.innerText = `${d.toString().padStart(2,'0')}:${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                            } else if (el) {
-                                el.innerText = "STARTING...";
+                            } else if (el && !el.dataset.finished) {
+                                el.dataset.finished = "true";
+                                el.innerText = "00:00:00:00";
+                                if (isReg) {
+                                    const actionDiv = el.closest('.contest-actions');
+                                    if (actionDiv) {
+                                        const btn = actionDiv.querySelector('.btn-enter');
+                                        if (btn) btn.outerHTML = `<a href="contest_arena.html?id=${c.id}" class="btn-enter" style="background:var(--success-color); color:#000;">Enter Contest</a>`;
+                                    }
+                                }
                             }
                         }, 1000);
                     });
@@ -166,7 +203,7 @@
                 // PREVIOUS SECTION
                 if (past.length > 0) {
                     html += `
-                        <div class="contest-list-header" style="margin-top: 60px;">
+                        <div class="contest-list-header" style="margin-top: ${(running.length > 0 || upcoming.length > 0) ? '60px' : '0'};">
                             <div>PREVIOUS</div>
                             <div>LENGTH</div>
                             <div></div>
@@ -181,7 +218,8 @@
                                 </div>
                                 <div class="contest-meta">${formatLen(c.duration_minutes)}</div>
                                 <div class="contest-actions">
-                                    <a href="contest_arena.html?id=${c.id}" class="btn-enter" style="background:transparent; border:1px solid #444; color:#fff;">Practice / Results</a>
+                                    <a href="rankings.html?contest_id=${c.id}" class="btn-ghost" style="padding: 10px 16px;">View Results</a>
+                                    <a href="contest_arena.html?id=${c.id}" class="btn-enter" style="background:transparent; border:1px solid #444; color:#fff;">Practice</a>
                                 </div>
                             </div>
                         `;
@@ -201,7 +239,7 @@
 
         // Global Registration Function
         async function registerForContest(contestId, btn) {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('jwt_token');
             if(!token) return window.location.href = 'login.html';
             
             btn.innerHTML = 'Registering...';

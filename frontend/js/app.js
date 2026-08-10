@@ -420,9 +420,10 @@ async function renderGlobalNav(token) {
     const container = document.getElementById('global-nav-container');
     if (!container) return;
 
-    let role = 'student';
+    let role = '';
     let avatarUrl = '';
     let userEmail = '';
+    let userName = '';
     
     if (token) {
         try {
@@ -434,6 +435,7 @@ async function renderGlobalNav(token) {
                 role = data.role;
                 avatarUrl = data.profile_picture_url || '';
                 userEmail = data.email || '';
+                userName = data.name || '';
             }
         } catch (e) {
             console.error("Failed to fetch profile for nav:", e);
@@ -444,7 +446,8 @@ async function renderGlobalNav(token) {
     if (currentPath === '') currentPath = 'index.html';
 
     let navLinksHTML = '';
-    let rightSideHTML = '';
+    let closedRightSideHTML = '';
+    let openedDrawerBottomHTML = '';
 
     if (token) {
         // Authenticated Navbar
@@ -454,11 +457,12 @@ async function renderGlobalNav(token) {
             { label: 'Contests', path: 'contests.html' },
             { label: 'Practice', path: 'practice.html' },
             { label: 'Learn', path: 'learn.html' },
-
             { label: 'Blogs', path: 'blogs.html' }
         ];
 
-        if (userEmail === 'dharunkaarthick07@gmail.com') {
+        const normRole = (role || '').trim().toLowerCase();
+        const isSuperAdminEmail = (userEmail || '').trim().toLowerCase() === 'dharunkaarthick07@gmail.com';
+        if (normRole === 'admin' || normRole === 'superadmin' || isSuperAdminEmail) {
             authNavItems.push({ label: 'Admin', path: 'admin.html' });
         }
 
@@ -467,21 +471,69 @@ async function renderGlobalNav(token) {
             return `<a href="${item.path}" class="glass-nav-item ${isActive}">${item.label}</a>`;
         }).join('');
 
-        rightSideHTML = `
-            <img src="${avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=fallback'}" class="nav-avatar" style="margin-right: 16px; cursor: pointer;" onclick="window.location.href='profile.html'" alt="Profile">
-            <div class="glass-nav-item" style="cursor: pointer; display: flex; align-items: center; gap: 4px;" onclick="window.handleLogout()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                Logout
+        // Closed Bar: Interactive Avatar Trigger & Smooth Dropdown Menu
+        const normRole = (role || '').trim().toLowerCase();
+        const isSuperAdminEmail = (userEmail || '').trim().toLowerCase() === 'dharunkaarthick07@gmail.com';
+        const isAdmin = normRole === 'admin' || normRole === 'superadmin' || isSuperAdminEmail;
+
+        closedRightSideHTML = `
+            <div class="nav-profile-dropdown-container" id="navProfileDropdownContainer">
+                <button type="button" class="nav-profile-trigger" id="navProfileTrigger" aria-label="User menu" aria-expanded="false" aria-haspopup="true">
+                    <img src="${avatarUrl || 'https://api.dicebear.com/10.x/critters/svg?seed=Felix'}" class="nav-avatar" alt="${userName || 'User'} Profile">
+                    <svg class="nav-avatar-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="nav-profile-dropdown" id="navProfileDropdown">
+                    <div class="nav-profile-header">
+                        <img src="${avatarUrl || 'https://api.dicebear.com/10.x/critters/svg?seed=Felix'}" class="nav-profile-header-avatar" alt="Avatar">
+                        <div class="nav-profile-header-info">
+                            <div class="nav-profile-name">${userName || 'User'}</div>
+                            <div class="nav-profile-email">${userEmail || 'Member'}</div>
+                        </div>
+                        ${isAdmin ? `<span class="nav-profile-role-badge">ADMIN</span>` : `<span class="nav-profile-role-badge user">MEMBER</span>`}
+                    </div>
+                    <div class="nav-profile-divider"></div>
+                    <a href="profile.html" class="nav-profile-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span>Profile</span>
+                    </a>
+                    ${isAdmin ? `
+                    <a href="admin.html" class="nav-profile-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        <span>Admin Portal</span>
+                    </a>
+                    ` : ''}
+                    <div class="nav-profile-divider"></div>
+                    <button type="button" class="nav-profile-item nav-profile-logout" onclick="window.handleLogout()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        <span>Logout</span>
+                    </button>
+                </div>
             </div>
         `;
+
+        // Opened Drawer: User info & Logout button
+        openedDrawerBottomHTML = `
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <img src="${avatarUrl || 'https://api.dicebear.com/10.x/critters/svg?seed=Felix'}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" alt="Profile">
+                <div style="text-align: left;">
+                    <div style="font-weight: 600; font-size: 14px; color: #fff;">${userName || 'User'}</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">${userEmail}</div>
+                </div>
+            </div>
+            <button class="btn-ghost" style="width: 100%; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; color: #ef4444; background: rgba(239, 68, 68, 0.08); cursor: pointer;" onclick="window.handleLogout()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                Logout
+            </button>
+        `;
     } else {
-        // Unauthenticated Navbar (Landing Page)
+        // Unauthenticated Navbar
         const unauthNavItems = [
             { label: 'Home', path: 'index.html' },
             { label: 'Problems', path: 'arena.html' },
             { label: 'Contests', path: 'contests.html' },
             { label: 'Learn', path: 'learn.html' },
-
             { label: 'Blogs', path: 'blogs.html' },
             { label: 'About', path: 'about.html' }
         ];
@@ -491,14 +543,20 @@ async function renderGlobalNav(token) {
             return `<a href="${item.path}" class="glass-nav-item ${isActive}">${item.label}</a>`;
         }).join('');
 
-        rightSideHTML = `
-            <a href="login.html" class="glass-nav-item" style="margin-right: 8px;">Login</a>
-            <a href="register.html" class="btn-primary" style="padding: 8px 20px; font-size: 14px; border-radius: 20px;">Sign Up</a>
+        // Closed Bar: ONLY Login button
+        closedRightSideHTML = `
+            <a href="login.html" class="glass-nav-item" style="padding: 6px 16px; border-radius: 20px; background: rgba(255,255,255,0.08);">Login</a>
+        `;
+
+        // Opened Drawer: Login & Sign Up buttons
+        openedDrawerBottomHTML = `
+            <a href="login.html" class="glass-nav-item" style="width: 100%; text-align: center; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.08); font-size: 15px;">Login</a>
+            <a href="register.html" class="btn-primary" style="width: 100%; text-align: center; padding: 12px; border-radius: 12px; text-decoration: none; font-size: 15px;">Sign Up</a>
         `;
     }
 
     container.innerHTML = `
-        <div class="glass-nav fade-in-down" style="backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); background: rgba(6, 6, 6, 0.6); padding: 12px 24px;">
+        <div class="glass-nav fade-in-down">
             <a href="index.html" class="nav-brand">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-accent)" stroke-width="2" style="margin-right:8px;"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line><polyline points="22 8.5 12 15.5 2 8.5"></polyline><polyline points="2 15.5 12 8.5 22 15.5"></polyline><line x1="12" y1="2" x2="12" y2="8.5"></line></svg>
                 NicheCP
@@ -508,23 +566,41 @@ async function renderGlobalNav(token) {
             </div>
             <div class="glass-nav-right">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    ${rightSideHTML}
+                    ${closedRightSideHTML}
                 </div>
-                <button class="hamburger-btn" onclick="document.getElementById('mobileNavDrawer').classList.add('active')">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                <button class="hamburger-btn" onclick="document.getElementById('mobileNavDrawer').classList.add('active')" aria-label="Open Menu">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                 </button>
             </div>
         </div>
         <div class="mobile-nav-drawer" id="mobileNavDrawer">
-            <button class="close-drawer-btn" onclick="document.getElementById('mobileNavDrawer').classList.remove('active')">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <button class="close-drawer-btn" onclick="document.getElementById('mobileNavDrawer').classList.remove('active')" aria-label="Close Menu">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; width: 100%;">
                 ${navLinksHTML}
             </div>
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; width: 80%;">
-                ${rightSideHTML}
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; width: 85%;">
+                ${openedDrawerBottomHTML}
             </div>
         </div>
     `;
+
+    // Interactive click/tap handler & outside click listener for profile dropdown
+    const trigger = document.getElementById('navProfileTrigger');
+    const dropdownContainer = document.getElementById('navProfileDropdownContainer');
+    if (trigger && dropdownContainer) {
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isExpanded = dropdownContainer.classList.toggle('active');
+            trigger.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!dropdownContainer.contains(e.target)) {
+                dropdownContainer.classList.remove('active');
+                trigger.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
 }

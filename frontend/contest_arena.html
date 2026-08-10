@@ -14,21 +14,13 @@
             overflow-y: auto;
             flex: 1;
         }
-        .arena-panel-scroll::-webkit-scrollbar {
-            width: 4px;
-        }
-        .arena-panel-scroll::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .arena-panel-scroll::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.1);
-            border-radius: 4px;
-        }
+        .arena-panel-scroll::-webkit-scrollbar { width: 4px; }
+        .arena-panel-scroll::-webkit-scrollbar-track { background: transparent; }
+        .arena-panel-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
         
         .live-indicator {
             display: inline-block;
-            width: 6px;
-            height: 6px;
+            width: 6px; height: 6px;
             background: #ef4444;
             border-radius: 50%;
             margin-left: 4px;
@@ -41,10 +33,7 @@
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
         
-        .row-enter-active {
-            animation: slideIn 0.4s ease-out forwards;
-        }
-        
+        .row-enter-active { animation: slideIn 0.4s ease-out forwards; }
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -58,8 +47,7 @@
             line-height: 1.6;
         }
         .arena-empty-state svg {
-            width: 32px;
-            height: 32px;
+            width: 32px; height: 32px;
             stroke: rgba(255,255,255,0.15);
             margin-bottom: 12px;
         }
@@ -76,9 +64,222 @@
             justify-content: center;
             backdrop-filter: blur(10px);
         }
+
+        /* ── IDE View (Embedded in Arena) ── */
+        .arena-ide-view {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: row;
+        }
+        .arena-ide-view.active {
+            display: flex;
+        }
+
+        .arena-problems-view {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+        .arena-problems-view.hidden {
+            display: none;
+        }
+
+        /* IDE Left: Problem Statement */
+        .ide-problem-pane {
+            width: 45%;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255,255,255,0.05);
+            background: #0a0a0c;
+        }
+        .ide-problem-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.02);
+        }
+        .ide-back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 6px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ide-back-btn:hover {
+            background: rgba(255,255,255,0.08);
+        }
+        .ide-problem-title {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .ide-problem-diff {
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            background: rgba(59, 130, 246, 0.1);
+            color: #3B82F6;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            font-weight: 500;
+        }
+        .ide-problem-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #d1d5db;
+        }
+        .ide-problem-content::-webkit-scrollbar { width: 4px; }
+        .ide-problem-content::-webkit-scrollbar-track { background: transparent; }
+        .ide-problem-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        .ide-problem-content .format-title {
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-top: 16px;
+            margin-bottom: 6px;
+        }
+
+        /* IDE Right: Code Editor + Terminal */
+        .ide-editor-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .ide-editor-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.02);
+        }
+        .ide-editor-container {
+            flex: 1;
+            min-height: 0;
+        }
+        .ide-terminal-pane {
+            height: 220px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            background: #0a0a0c;
+        }
+        .ide-terminal-tabs {
+            display: flex;
+            gap: 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 0 16px;
+        }
+        .ide-terminal-tab {
+            padding: 10px 0;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .ide-terminal-tab.active {
+            color: #10b981;
+            border-bottom-color: #10b981;
+        }
+        .ide-terminal-content {
+            flex: 1;
+            padding: 12px 16px;
+            overflow-y: auto;
+        }
+        .ide-terminal-textarea {
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            color: #e0e0e0;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 13px;
+            resize: none;
+            outline: none;
+        }
+        .ide-select {
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            padding-right: 28px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 12px;
+        }
+        .ide-select option { background: #0d0f17; color: #e0e0e0; }
+        .ide-btn {
+            padding: 6px 14px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .ide-btn.run {
+            background: transparent;
+            color: var(--text-muted);
+        }
+        .ide-btn.run:hover { color: var(--text-primary); }
+        .ide-btn.submit {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .ide-btn.submit:hover { background: rgba(16, 185, 129, 0.2); }
+
+        /* IDE Status Banner */
+        .ide-status-banner {
+            padding: 8px 16px;
+            font-size: 13px;
+            text-align: center;
+            display: none;
+        }
+        .ide-status-banner.show { display: block; }
+        .ide-status-banner.pending { background: rgba(245,158,11,0.1); color: #F59E0B; }
+        .ide-status-banner.accepted { background: rgba(16,185,129,0.1); color: #10b981; }
+        .ide-status-banner.rejected { background: rgba(239,68,68,0.1); color: #EF4444; }
+
+        /* Divider for IDE resizing */
+        .ide-divider {
+            width: 4px;
+            cursor: col-resize;
+            background: transparent;
+            transition: background 0.2s;
+        }
+        .ide-divider:hover, .ide-divider.dragging {
+            background: rgba(59, 130, 246, 0.3);
+        }
     </style>
 </head>
-<body data-theme="quantum">
 <body data-theme="quantum">
 
     <!-- Block Overlay -->
@@ -113,10 +314,13 @@
                 <a href="contests.html" style="color:var(--text-muted); text-decoration:none;">Contests</a>
                 <span>&gt;</span>
                 <span style="color:var(--text-primary); font-weight:500;" id="contestName">Loading...</span>
+                <span id="ideCurrentProblem" style="display:none; color: var(--primary-accent);"></span>
             </div>
 
-            <!-- Main Grid Layout -->
-            <div class="arena-grid">
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <!-- VIEW 1: Problems List + Leaderboard (default) -->
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <div class="arena-grid arena-problems-view" id="problemsView">
                 
                 <!-- Left Column (Problems & Bottom Panels) -->
                 <div class="arena-left-pane">
@@ -136,10 +340,8 @@
                         </div>
                     </div>
 
-                    <!-- Bottom Row: Commentary & My Submissions -->
+                    <!-- Bottom Row: Submissions -->
                     <div class="arena-bottom-grid">
-                        
-                        <!-- Commentary Panel -->
                         <div class="arena-panel">
                             <div class="arena-panel-header" style="justify-content: space-between;">
                                 <span>SUBMISSIONS FEED</span>
@@ -153,7 +355,6 @@
                             </div>
                         </div>
 
-                        <!-- My Submissions Panel -->
                         <div class="arena-panel">
                             <div class="arena-panel-header" style="justify-content: space-between;">
                                 <span>MY SUBMISSIONS</span>
@@ -165,11 +366,10 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
-                <!-- Right Column: Ranking (Leaderboard) -->
+                <!-- Right Column: Ranking -->
                 <div class="arena-panel">
                     <div class="arena-panel-header" style="justify-content: space-between;">
                         <span>RANKING</span>
@@ -183,14 +383,85 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <!-- VIEW 2: Embedded IDE (shows when problem is clicked) -->
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <div class="arena-ide-view" id="ideView">
+                <!-- Problem Statement Pane -->
+                <div class="ide-problem-pane" id="ideProblemPane">
+                    <div class="ide-problem-header">
+                        <button class="ide-back-btn" onclick="closeIDE()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            Problems
+                        </button>
+                        <span class="ide-problem-title" id="ideProblemTitle">--</span>
+                        <span class="ide-problem-diff" id="ideProblemDiff">--</span>
+                    </div>
+                    <div class="ide-problem-content" id="ideProblemContent">
+                        <p>Loading problem description...</p>
+                    </div>
+                </div>
+
+                <!-- Resize Divider -->
+                <div class="ide-divider" id="ideDivider"></div>
+
+                <!-- Code Editor Pane -->
+                <div class="ide-editor-pane">
+                    <div class="ide-editor-toolbar">
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <select id="ideLanguage" class="ide-select">
+                                <option value="cpp">C++ 23</option>
+                                <option value="python">Python 3</option>
+                                <option value="go">Go</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button class="ide-btn run" id="ideRunBtn" onclick="ideRunCode()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                Run
+                            </button>
+                            <button class="ide-btn submit" id="ideSubmitBtn" onclick="ideSubmitCode()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                    <div class="ide-status-banner" id="ideStatusBanner"></div>
+                    <div class="ide-editor-container" id="ideEditorContainer"></div>
+                    <div class="ide-terminal-pane">
+                        <div class="ide-terminal-tabs">
+                            <div class="ide-terminal-tab active" data-pane="ideTestcasePane" onclick="switchTerminalTab(this)">Testcase</div>
+                            <div class="ide-terminal-tab" data-pane="ideResultPane" onclick="switchTerminalTab(this)">Test Result</div>
+                        </div>
+                        <div class="ide-terminal-content">
+                            <div id="ideTestcasePane">
+                                <textarea class="ide-terminal-textarea" id="ideCustomInput" placeholder="Enter custom input here..."></textarea>
+                            </div>
+                            <div id="ideResultPane" style="display:none;">
+                                <textarea class="ide-terminal-textarea" id="ideTerminalOutput" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Script: All data from real backend APIs -->
+    <!-- Monaco Editor Loader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.js"></script>
+
     <script>
         const API_BASE = '';
         const token = localStorage.getItem('jwt_token');
+        let isLiveContest = false;
+        let globalContestId = null;
+        let currentProblemId = null;
+        let ideEditor = null;
+        let ideEditorReady = false;
+        let cachedProblems = [];
 
+        // ── Utility Functions ──
         function timeAgo(dateStr) {
             const now = new Date();
             const then = new Date(dateStr);
@@ -227,7 +498,7 @@
             return 'var(--text-primary)';
         }
 
-        // ── Load Contest Details ──
+        // ── Load Contest Title ──
         async function loadContestTitle(contestId) {
             const titleEl = document.getElementById('contestName');
             try {
@@ -243,7 +514,7 @@
             }
         }
 
-        // ── Load Problems ──
+        // ── Load Problems (click opens embedded IDE instead of navigating) ──
         async function loadProblems(contestId) {
             const probList = document.getElementById('problemsList');
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -258,26 +529,31 @@
                 }
                 
                 const problems = await res.json();
-                const contestProbs = Array.isArray(problems) ? problems : [];
+                cachedProblems = Array.isArray(problems) ? problems : [];
                 probList.innerHTML = '';
                 
-                if (contestProbs.length === 0) {
+                if (cachedProblems.length === 0) {
                     probList.innerHTML = '<div class="arena-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg><div>No problems have been added to this contest yet.</div></div>';
                 } else {
                     const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-                    contestProbs.forEach((p, index) => {
+                    cachedProblems.forEach((p, index) => {
                         const points = (index + 1) * 500;
-                        probList.innerHTML += `
-                            <a href="problem.html?problem_id=${p.id}&contest_id=${contestId}" class="problem-row" style="text-decoration:none; color:inherit; display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
-                                <div class="status-circle" style="width:12px; height:12px; border-radius:50%; border:2px solid rgba(255,255,255,0.2);"></div>
-                                <div style="display:flex; gap:16px; align-items:center; flex:1; margin-left:16px;">
-                                    <span style="font-weight:600; color:var(--primary-accent); font-size:15px;">${letters[index] || '?'}</span>
-                                    <span style="font-size:14px;">${p.title}</span>
-                                </div>
-                                <div style="font-size:13px; color:var(--text-secondary); width:60px; text-align:right;">${points}</div>
-                                <div style="color:var(--text-muted); font-size:12px; width:60px; text-align:right;">—</div>
-                            </a>
+                        const row = document.createElement('div');
+                        row.className = 'problem-row';
+                        row.style.cssText = 'cursor:pointer; display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;';
+                        row.onmouseover = () => row.style.background = 'rgba(255,255,255,0.03)';
+                        row.onmouseout = () => row.style.background = '';
+                        row.onclick = () => openIDE(p.id, letters[index] || '?', p.title);
+                        row.innerHTML = `
+                            <div class="status-circle" style="width:12px; height:12px; border-radius:50%; border:2px solid rgba(255,255,255,0.2);"></div>
+                            <div style="display:flex; gap:16px; align-items:center; flex:1; margin-left:16px;">
+                                <span style="font-weight:600; color:var(--primary-accent); font-size:15px;">${letters[index] || '?'}</span>
+                                <span style="font-size:14px;">${p.title}</span>
+                            </div>
+                            <div style="font-size:13px; color:var(--text-secondary); width:60px; text-align:right;">${points}</div>
+                            <div style="color:var(--text-muted); font-size:12px; width:60px; text-align:right;">—</div>
                         `;
+                        probList.appendChild(row);
                     });
                 }
                 return true;
@@ -295,7 +571,6 @@
                 if (res.ok) {
                     const entries = await res.json();
                     const data = Array.isArray(entries) ? entries : [];
-                    
                     if (data.length === 0) {
                         rankingList.innerHTML = '<div class="arena-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg><div>No participants yet.</div></div>';
                     } else {
@@ -316,7 +591,7 @@
             }
         }
 
-        // ── Load Live Submissions Feed (Commentary) ──
+        // ── Load Live Submissions Feed ──
         async function loadSubmissionsFeed(contestId) {
             const commentaryList = document.getElementById('commentaryList');
             try {
@@ -324,7 +599,6 @@
                 if (res.ok) {
                     const events = await res.json();
                     const data = Array.isArray(events) ? events : [];
-                    
                     if (data.length === 0) {
                         commentaryList.innerHTML = '<div class="arena-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg><div>No submissions yet.</div></div>';
                     } else {
@@ -348,12 +622,10 @@
         // ── Load My Submissions ──
         async function loadMySubmissions(contestId) {
             const mySubsList = document.getElementById('mySubmissionsList');
-            
             if (!token) {
                 mySubsList.innerHTML = '<div class="arena-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><div>Log in to see your submissions.</div></div>';
                 return;
             }
-
             try {
                 const res = await fetch(`${API_BASE}/api/contests/${contestId}/my-submissions`, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -361,7 +633,6 @@
                 if (res.ok) {
                     const subs = await res.json();
                     const data = Array.isArray(subs) ? subs : [];
-                    
                     if (data.length === 0) {
                         mySubsList.innerHTML = '<div class="arena-empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg><div>No submissions yet.</div></div>';
                     } else {
@@ -388,59 +659,329 @@
             }
         }
 
-        let isLiveContest = false;
-        let globalContestId = null;
+        // ═══════════════════════════════════════════════════════════════
+        // EMBEDDED IDE — Opens problem inline without leaving the page
+        // ═══════════════════════════════════════════════════════════════
 
-        // ── Main Init ──
-        document.addEventListener('DOMContentLoaded', async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const contestId = urlParams.get('id');
-            globalContestId = contestId;
+        async function openIDE(problemId, letter, title) {
+            currentProblemId = problemId;
 
-            if (!contestId) {
-                document.getElementById('arena-main').style.display = 'block';
-                document.getElementById('contestName').textContent = 'Contest Preview';
-                document.getElementById('problemsList').innerHTML = '<div class="arena-empty-state">No contest selected.</div>';
-                return;
-            }
+            // Switch views (no navigation = no fullscreen exit)
+            document.getElementById('problemsView').classList.add('hidden');
+            document.getElementById('ideView').classList.add('active');
 
-            // Explicit backend validation for access BEFORE allowing arena or fullscreen
+            // Update breadcrumb
+            const breadcrumb = document.getElementById('ideCurrentProblem');
+            breadcrumb.style.display = 'inline';
+            breadcrumb.textContent = `> ${letter}. ${title}`;
+
+            document.getElementById('ideProblemTitle').textContent = `${letter}. ${title}`;
+
+            // Load problem statement
             try {
-                const accessRes = await fetch(`${API_BASE}/api/contests/${contestId}/access`, {
-                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-                });
-                if (!accessRes.ok) {
-                    const errData = await accessRes.json();
-                    document.getElementById('arena-overlay').style.display = 'flex';
-                    document.getElementById('overlay-desc').textContent = errData.error || 'Access Denied';
-                    return;
+                const res = await fetch(`${API_BASE}/api/problems/${problemId}`);
+                if (res.ok) {
+                    const problem = await res.json();
+                    document.getElementById('ideProblemDiff').textContent = problem.difficulty || 'Medium';
+
+                    let tagsHtml = '';
+                    try {
+                        const tags = JSON.parse(problem.tags);
+                        if (tags.length > 0) {
+                            tagsHtml = '<div style="margin-bottom: 16px;">' + tags.map(t => `<span style="display:inline-block; padding:2px 10px; border-radius:20px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); font-size:12px; margin-right:4px; color:var(--text-muted);">${t}</span>`).join('') + '</div>';
+                        }
+                    } catch(e) {}
+
+                    let sampleHtml = '';
+                    try {
+                        const samples = JSON.parse(problem.sample_testcases);
+                        if (samples.length > 0) {
+                            samples.forEach((s, i) => {
+                                sampleHtml += `
+                                <div class="format-title">Sample Input ${i+1}</div>
+                                <div style="background:#060608; padding:10px; border:1px solid rgba(255,255,255,0.06); border-radius:4px; font-family:monospace; margin-bottom:8px; font-size:13px;">${s.input.replace(/\n/g, '<br>')}</div>
+                                <div class="format-title">Sample Output ${i+1}</div>
+                                <div style="background:#060608; padding:10px; border:1px solid rgba(255,255,255,0.06); border-radius:4px; font-family:monospace; margin-bottom:16px; font-size:13px;">${s.expected_output.replace(/\n/g, '<br>')}</div>
+                                `;
+                            });
+                        }
+                    } catch(e) {}
+
+                    document.getElementById('ideProblemContent').innerHTML = `
+                        ${tagsHtml}
+                        <div style="margin-bottom: 24px;">${problem.description}</div>
+                        ${problem.input_format ? `<div class="format-title">Input Format</div><div style="margin-bottom:16px;">${problem.input_format}</div>` : ''}
+                        ${problem.output_format ? `<div class="format-title">Output Format</div><div style="margin-bottom:16px;">${problem.output_format}</div>` : ''}
+                        ${problem.constraints ? `<div class="format-title">Constraints</div><div style="margin-bottom:24px;">${problem.constraints}</div>` : ''}
+                        ${sampleHtml}
+                    `;
+
+                    // Disable copy in contest mode
+                    if (isLiveContest) {
+                        const content = document.getElementById('ideProblemContent');
+                        content.addEventListener('copy', e => { e.preventDefault(); });
+                        content.style.userSelect = 'none';
+                    }
+                } else {
+                    document.getElementById('ideProblemContent').innerHTML = '<p style="color:#ef4444;">Failed to load problem.</p>';
                 }
             } catch(e) {
-                document.getElementById('arena-overlay').style.display = 'flex';
-                document.getElementById('overlay-desc').textContent = 'Failed to verify access.';
+                document.getElementById('ideProblemContent').innerHTML = '<p style="color:#ef4444;">Network error loading problem.</p>';
+            }
+
+            // Initialize Monaco Editor if not already done
+            if (!ideEditorReady) {
+                initIDEEditor();
+            } else if (ideEditor) {
+                ideEditor.layout();
+            }
+
+            // Reset terminal
+            document.getElementById('ideCustomInput').value = '';
+            document.getElementById('ideTerminalOutput').value = '';
+            hideStatusBanner();
+        }
+
+        function closeIDE() {
+            document.getElementById('problemsView').classList.remove('hidden');
+            document.getElementById('ideView').classList.remove('active');
+            document.getElementById('ideCurrentProblem').style.display = 'none';
+            currentProblemId = null;
+        }
+
+        // ── Monaco Editor Init ──
+        function initIDEEditor() {
+            if (!window.require) return;
+            require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+            require(['vs/editor/editor.main'], function() {
+                monaco.editor.defineTheme('contest-dark', {
+                    base: 'vs-dark',
+                    inherit: true,
+                    rules: [
+                        { background: '0a0a0c' },
+                        { token: 'keyword', foreground: '3B82F6' },
+                        { token: 'string', foreground: '10B981' },
+                        { token: 'comment', foreground: '6B7280', fontStyle: 'italic' },
+                        { token: 'number', foreground: 'F59E0B' }
+                    ],
+                    colors: {
+                        'editor.background': '#0a0a0c',
+                        'editor.foreground': '#F3F4F6',
+                        'editor.lineHighlightBackground': '#1a1a1f',
+                        'editorCursor.foreground': '#3B82F6',
+                        'editor.selectionBackground': '#264F78',
+                    }
+                });
+
+                ideEditor = monaco.editor.create(document.getElementById('ideEditorContainer'), {
+                    value: '#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}\n',
+                    language: 'cpp',
+                    theme: 'contest-dark',
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                    scrollBeyondLastLine: false,
+                    automaticLayout: true,
+                    padding: { top: 12 },
+                    lineNumbers: 'on',
+                    renderWhitespace: 'none',
+                    tabSize: 4,
+                });
+
+                ideEditorReady = true;
+
+                // Language switcher
+                document.getElementById('ideLanguage').addEventListener('change', (e) => {
+                    const lang = e.target.value;
+                    const langMap = { cpp: 'cpp', python: 'python', go: 'go' };
+                    const defaultCode = {
+                        cpp: '#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}\n',
+                        python: '# your code here\n',
+                        go: 'package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello")\n}\n'
+                    };
+                    monaco.editor.setModelLanguage(ideEditor.getModel(), langMap[lang] || 'cpp');
+                    ideEditor.setValue(defaultCode[lang] || '');
+                });
+            });
+        }
+
+        // ── Terminal Tab Switching ──
+        function switchTerminalTab(tab) {
+            document.querySelectorAll('.ide-terminal-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const pane = tab.getAttribute('data-pane');
+            document.getElementById('ideTestcasePane').style.display = pane === 'ideTestcasePane' ? 'block' : 'none';
+            document.getElementById('ideResultPane').style.display = pane === 'ideResultPane' ? 'block' : 'none';
+        }
+
+        // ── Status Banner ──
+        function showStatusBanner(msg, type) {
+            const banner = document.getElementById('ideStatusBanner');
+            banner.textContent = msg;
+            banner.className = `ide-status-banner show ${type}`;
+        }
+        function hideStatusBanner() {
+            document.getElementById('ideStatusBanner').className = 'ide-status-banner';
+        }
+
+        // ── Run Code ──
+        async function ideRunCode() {
+            if (!ideEditor) return;
+            const btn = document.getElementById('ideRunBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10"></circle></svg> Running...';
+            showStatusBanner('Running code...', 'pending');
+
+            // Switch to result tab
+            document.querySelectorAll('.ide-terminal-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('[data-pane="ideResultPane"]').classList.add('active');
+            document.getElementById('ideTestcasePane').style.display = 'none';
+            document.getElementById('ideResultPane').style.display = 'block';
+
+            try {
+                const res = await fetch(`${API_BASE}/api/run`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code: ideEditor.getValue(),
+                        language: document.getElementById('ideLanguage').value,
+                        input: document.getElementById('ideCustomInput').value
+                    })
+                });
+                const data = await res.json();
+                const output = data.output || '';
+                const stderr = data.stderr || '';
+                document.getElementById('ideTerminalOutput').value = stderr ? `STDERR:\n${stderr}\n\nSTDOUT:\n${output}` : output;
+                hideStatusBanner();
+            } catch (e) {
+                document.getElementById('ideTerminalOutput').value = 'Error: Failed to connect to execution server.';
+                showStatusBanner('Execution failed', 'rejected');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Run';
+        }
+
+        // ── Submit Code ──
+        async function ideSubmitCode() {
+            if (!ideEditor || !currentProblemId || !token) {
+                if (!token) alert('Please log in to submit code.');
                 return;
             }
 
-            // Check if contest is LIVE to enforce fullscreen
-            try {
-                const response = await fetch(`${API_BASE}/api/contests`);
-                if (response.ok) {
-                    const data = await response.json();
-                    const contests = Array.isArray(data) ? data : (data.contests || []);
-                    const contest = contests.find(c => c.id == contestId);
-                    if (contest && contest.status === 'RUNNING') {
-                        isLiveContest = true;
-                    }
-                }
-            } catch(e) {}
+            const btn = document.getElementById('ideSubmitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10"></circle></svg> Submitting...';
+            showStatusBanner('Submitting to judge...', 'pending');
 
-            if (isLiveContest) {
-                document.getElementById('fullscreen-overlay').style.display = 'flex';
-            } else {
-                document.getElementById('arena-main').style.display = 'block';
-                initArena(contestId);
+            try {
+                const payload = {
+                    problem_id: currentProblemId,
+                    code: ideEditor.getValue(),
+                    language: document.getElementById('ideLanguage').value,
+                };
+                if (globalContestId) payload.contest_id = parseInt(globalContestId);
+
+                const res = await fetch(`${API_BASE}/api/submit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.submission_id) {
+                    // Poll for result
+                    pollSubmissionResult(data.submission_id);
+                } else {
+                    showStatusBanner(data.error || 'Submission failed.', 'rejected');
+                    btn.disabled = false;
+                    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Submit';
+                }
+            } catch (e) {
+                showStatusBanner('Network error during submission.', 'rejected');
+                btn.disabled = false;
+                btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Submit';
             }
-        });
+        }
+
+        function pollSubmissionResult(subId) {
+            let attempts = 0;
+            const maxAttempts = 30;
+            const interval = setInterval(async () => {
+                attempts++;
+                try {
+                    const res = await fetch(`${API_BASE}/api/submissions/${subId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.status !== 'PENDING') {
+                            clearInterval(interval);
+                            const isAccepted = data.status === 'ACCEPTED';
+                            const execTime = data.execution_time_ms ? ` (${data.execution_time_ms}ms)` : '';
+                            showStatusBanner(`${verdictText(data.status)}${execTime}`, isAccepted ? 'accepted' : 'rejected');
+                            
+                            // Re-enable submit
+                            const btn = document.getElementById('ideSubmitBtn');
+                            btn.disabled = false;
+                            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Submit';
+                            
+                            // Refresh submissions
+                            if (globalContestId) {
+                                loadMySubmissions(globalContestId);
+                                loadSubmissionsFeed(globalContestId);
+                                loadLeaderboard(globalContestId);
+                            }
+                        }
+                    }
+                } catch(e) {}
+                if (attempts >= maxAttempts) {
+                    clearInterval(interval);
+                    showStatusBanner('Judging timed out. Check your submissions.', 'rejected');
+                    const btn = document.getElementById('ideSubmitBtn');
+                    btn.disabled = false;
+                    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Submit';
+                }
+            }, 2000);
+        }
+
+        // ── IDE Resizer ──
+        (function() {
+            const divider = document.getElementById('ideDivider');
+            const leftPane = document.getElementById('ideProblemPane');
+            let isDragging = false;
+            
+            divider.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                divider.classList.add('dragging');
+                document.body.style.cursor = 'col-resize';
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const ideView = document.getElementById('ideView');
+                const rect = ideView.getBoundingClientRect();
+                let pct = ((e.clientX - rect.left) / rect.offsetWidth) * 100;
+                if (pct < 20) pct = 20;
+                if (pct > 70) pct = 70;
+                leftPane.style.width = pct + '%';
+                if (ideEditor) ideEditor.layout();
+            });
+            
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    divider.classList.remove('dragging');
+                    document.body.style.cursor = 'default';
+                }
+            });
+        })();
+
+        // ═══════════════════════════════════════════════════════════════
+        // FULLSCREEN & VIOLATION MONITORING
+        // ═══════════════════════════════════════════════════════════════
 
         function enterFullscreen() {
             if (document.documentElement.requestFullscreen) {
@@ -501,6 +1042,57 @@
                 console.warn("Violation logged: " + type);
             } catch(e) {}
         }
+
+        // ── Main Init ──
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const contestId = urlParams.get('id');
+            globalContestId = contestId;
+
+            if (!contestId) {
+                document.getElementById('arena-main').style.display = 'block';
+                document.getElementById('contestName').textContent = 'Contest Preview';
+                document.getElementById('problemsList').innerHTML = '<div class="arena-empty-state">No contest selected.</div>';
+                return;
+            }
+
+            // Explicit backend validation for access
+            try {
+                const accessRes = await fetch(`${API_BASE}/api/contests/${contestId}/access`, {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
+                if (!accessRes.ok) {
+                    const errData = await accessRes.json();
+                    document.getElementById('arena-overlay').style.display = 'flex';
+                    document.getElementById('overlay-desc').textContent = errData.error || 'Access Denied';
+                    return;
+                }
+            } catch(e) {
+                document.getElementById('arena-overlay').style.display = 'flex';
+                document.getElementById('overlay-desc').textContent = 'Failed to verify access.';
+                return;
+            }
+
+            // Check if contest is LIVE
+            try {
+                const response = await fetch(`${API_BASE}/api/contests`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const contests = Array.isArray(data) ? data : (data.contests || []);
+                    const contest = contests.find(c => c.id == contestId);
+                    if (contest && contest.status === 'RUNNING') {
+                        isLiveContest = true;
+                    }
+                }
+            } catch(e) {}
+
+            if (isLiveContest) {
+                document.getElementById('fullscreen-overlay').style.display = 'flex';
+            } else {
+                document.getElementById('arena-main').style.display = 'block';
+                initArena(contestId);
+            }
+        });
     </script>
 <script src="js/components.js"></script>
 </body>

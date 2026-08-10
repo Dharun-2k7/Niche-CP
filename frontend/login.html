@@ -13,7 +13,8 @@
             background-color: #060606;
             font-family: 'Inter', sans-serif;
             color: #FAFAFA;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             display: flex;
         }
 
@@ -155,7 +156,8 @@
         .forgot-link {
             position: absolute;
             right: 0;
-            top: -24px;
+            top: 52px;
+            margin-right: 255;
             font-size: 12px;
             color: #3B82F6;
             text-decoration: none;
@@ -279,7 +281,7 @@
         <div class="split-brand">
             <div class="brand-bg"></div>
             <div class="brand-content">
-                <a href="index.html" style="text-decoration: none; display: inline-block; margin-bottom: 32px;">
+                <a href="/index.html" style="text-decoration: none; display: inline-block; margin-bottom: 32px;">
                     <h1 style="font-size: 32px; font-weight: 700; color: #FAFAFA; letter-spacing: -1px;">
                         <span style="color: #3B82F6;">Niche</span>CP
                     </h1>
@@ -306,9 +308,10 @@
                     </div>
 
                     <div id="passwordSection" class="input-group">
-                        <a href="reset.html" class="forgot-link">Forgot?</a>
+                        
                         <input type="password" id="password" placeholder=" " required>
                         <label for="password">Password</label>
+                        <a href="/reset.html" class="forgot-link">Forgot?</a>
                     </div>
 
                     <div id="otpSection" class="input-group" style="display: none;">
@@ -333,7 +336,7 @@
                 </a>
 
                 <div class="auth-footer">
-                    Don't have an account? <a href="register.html">Sign up</a>
+                    Don't have an account? <a href="/register.html">Sign up</a>
                 </div>
             </div>
         </div>
@@ -390,7 +393,7 @@
                     const data = await res.json();
                     if (res.ok) {
                         localStorage.setItem('jwt_token', data.token);
-                        window.location.href = 'index.html';
+                        window.location.href = '/index.html';
                     } else throw new Error(data.error);
                 } else {
                     // OTP Flow
@@ -423,7 +426,7 @@
                         const data = await res.json();
                         if (res.ok) {
                             localStorage.setItem('jwt_token', data.token);
-                            window.location.href = 'index.html';
+                            window.location.href = '/index.html';
                         } else throw new Error(data.error);
                     }
                 }

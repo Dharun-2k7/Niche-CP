@@ -31,9 +31,8 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-niche_cp}?sslmode=disable
       REDIS_URL: redis://redis:6379
-      BACKEND_URL: http://localhost
+      BACKEND_URL: https://api.nichecp.app
       # Add other ENVs via .env file or environment variables
     volumes:
       - uploads_data:/app/uploads
@@ -57,7 +56,6 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-niche_cp}?sslmode=disable
       REDIS_URL: redis://redis:6379
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -77,9 +75,15 @@ services:
     container_name: niche_cp_frontend_prod
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
     restart: unless-stopped
     networks:
       - nichecp_network
+
 
 volumes:
   postgres_data_prod:

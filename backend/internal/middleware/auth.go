@@ -67,15 +67,16 @@ func RequireAdmin() gin.HandlerFunc {
 		}
 
 		var role string
-		db.DB.QueryRow(`SELECT role FROM users WHERE id = $1`, userID).Scan(&role)
+		err = db.DB.QueryRow(`SELECT role FROM users WHERE id = $1`, userID).Scan(&role)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+			c.Abort()
+			return
+		}
 
-		isAdmin := false
-		if role == "admin" || role == "superadmin" {
-			isAdmin = true
-		}
-		if email == "dharunkaarthick07@gmail.com" {
-			isAdmin = true
-		}
+		normRole := strings.ToLower(strings.TrimSpace(role))
+		isSuperAdminEmail := strings.EqualFold(email, "dharunkaarthick07@gmail.com")
+		isAdmin := (normRole == "admin" || normRole == "superadmin" || isSuperAdminEmail)
 
 		if !isAdmin {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Admin access required"})
@@ -83,9 +84,71 @@ func RequireAdmin() gin.HandlerFunc {
 			return
 		}
 
+		if isSuperAdminEmail && normRole != "superadmin" {
+			_, _ = db.DB.Exec(`UPDATE users SET role = 'superadmin' WHERE id = $1`, userID)
+			role = "superadmin"
+		}
+
 		c.Set("user_id", userID)
 		c.Set("email", email)
 		c.Set("is_admin", true)
+		c.Set("role", role)
+
+		c.Next()
+	}
+}
+
+// RequireSuperAdmin ensures that the authenticated user is a superadmin
+func RequireSuperAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
+			c.Abort()
+			return
+		}
+
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header must be Bearer token"})
+			c.Abort()
+			return
+		}
+
+		userID, email, err := auth.ValidateToken(parts[1])
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			c.Abort()
+			return
+		}
+
+		var role string
+		err = db.DB.QueryRow(`SELECT role FROM users WHERE id = $1`, userID).Scan(&role)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+			c.Abort()
+			return
+		}
+
+		normRole := strings.ToLower(strings.TrimSpace(role))
+		isSuperAdminEmail := strings.EqualFold(email, "dharunkaarthick07@gmail.com")
+		isSuperAdmin := (normRole == "superadmin" || isSuperAdminEmail)
+
+		if !isSuperAdmin {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Super admin access required"})
+			c.Abort()
+			return
+		}
+
+		if isSuperAdminEmail && normRole != "superadmin" {
+			_, _ = db.DB.Exec(`UPDATE users SET role = 'superadmin' WHERE id = $1`, userID)
+			role = "superadmin"
+		}
+
+		c.Set("user_id", userID)
+		c.Set("email", email)
+		c.Set("is_admin", true)
+		c.Set("role", role)
 
 		c.Next()
 	}

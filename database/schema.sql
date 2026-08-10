@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS users (
     cf_verify_string VARCHAR(255),
     is_cf_verified BOOLEAN DEFAULT FALSE,
     profile_picture_url VARCHAR(255),
+    discord_id VARCHAR(255) UNIQUE,
+    discord_username VARCHAR(255),
     permissions JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_email_change TIMESTAMP

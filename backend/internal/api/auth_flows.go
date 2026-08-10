@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/Dharun-2k7/online-coding-platform/internal/auth"
@@ -60,8 +61,7 @@ func SendOTP(c *gin.Context) {
 	}
 
 	// Send Email
-	body := fmt.Sprintf("Your Login OTP is: %s\n\nThis code will expire in 5 minutes.", otp)
-	go mailer.SendEmail(req.Email, "Your NicheCP Login Code", body)
+	go mailer.SendEmailVerification(req.Email, otp, "5")
 
 	c.JSON(http.StatusOK, gin.H{"message": "OTP sent successfully to your email."})
 }
@@ -82,6 +82,17 @@ func SendRegisterOTP(c *gin.Context) {
 		return
 	}
 
+	// Rate limit: max 3 OTP sends per email in 10 minutes
+	rateLimitKey := fmt.Sprintf("otp_rate:%s", req.Email)
+	count, _ := db.RedisClient.Incr(context.Background(), rateLimitKey).Result()
+	if count == 1 {
+		db.RedisClient.Expire(context.Background(), rateLimitKey, 10*time.Minute)
+	}
+	if count > 3 {
+		c.JSON(http.StatusTooManyRequests, gin.H{"error": "Too many OTP requests. Please wait a few minutes before trying again."})
+		return
+	}
+
 	otp := generateOTP()
 	key := fmt.Sprintf("register_otp:%s", req.Email)
 
@@ -92,9 +103,8 @@ func SendRegisterOTP(c *gin.Context) {
 		return
 	}
 
-	// Send Email
-	body := fmt.Sprintf("Welcome to NicheCP!\n\nYour Registration OTP is: %s\n\nThis code will expire in 10 minutes.", otp)
-	go mailer.SendEmail(req.Email, "NicheCP Registration Code", body)
+	// Send branded HTML verification email
+	go mailer.SendEmailVerification(req.Email, otp, "10")
 
 	c.JSON(http.StatusOK, gin.H{"message": "OTP sent successfully to your email."})
 }
@@ -177,9 +187,12 @@ func ForgotPassword(c *gin.Context) {
 	}
 
 	// Send Email (link points to local frontend for now)
-	resetLink := fmt.Sprintf("http://localhost:3000/reset.html?token=%s", token)
-	body := fmt.Sprintf("Click the link below to reset your password:\n\n%s\n\nThis link expires in 15 minutes.", resetLink)
-	go mailer.SendEmail(req.Email, "Reset Your NicheCP Password", body)
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:3000"
+	}
+	resetLink := fmt.Sprintf("%s/reset?token=%s", frontendURL, token)
+	go mailer.SendPasswordReset(req.Email, resetLink, "15")
 
 	c.JSON(http.StatusOK, gin.H{"message": "If an account exists, a reset link has been sent."})
 }

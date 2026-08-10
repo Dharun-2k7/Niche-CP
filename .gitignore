@@ -3,6 +3,7 @@
 
 # Go
 backend/.env
+backend/.env.production
 backend/.env.example
 *.exe
 *.exe~

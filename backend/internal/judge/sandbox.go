@@ -250,14 +250,14 @@ func (s *DockerSandbox) StartSession(artifactDir, language string) (SandboxSessi
 		"--memory", "256m",
 		"--cpus", "1.0",
 		"--pids-limit", "50",
-		"--security-opt", "no-new-privileges",
 		"--read-only",
 		"--tmpfs", "/tmp",
 		"-v", fmt.Sprintf("%s:/workspace:ro", artifactDir),
 		"-u", "1000:1000",
 		image,
-		"tail", "-f", "/dev/null", // Keep container alive
+		"sleep", "3600", // Keep container alive cleanly
 	}
+
 
 	cmd := exec.Command("docker", dockerArgs...)
 	if err := cmd.Run(); err != nil {
@@ -300,8 +300,9 @@ func (s *DockerSandboxSession) RunTestcase(input string) (*SandboxResult, error)
 	err := cmd.Run()
 
 	// Clean up orphans and /tmp between test cases to prevent contamination
-	cleanupCmd := exec.Command("docker", "exec", s.containerName, "sh", "-c", "kill $(ps -o pid | tail -n +2 | grep -v '^ *1$') 2>/dev/null || true; rm -rf /tmp/*")
+	cleanupCmd := exec.Command("docker", "exec", "-u", "0", s.containerName, "sh", "-c", "pkill -9 -U 1000 2>/dev/null || true; rm -rf /tmp/* 2>/dev/null || true")
 	_ = cleanupCmd.Run()
+
 
 	if ctx.Err() == context.DeadlineExceeded || (err != nil && (strings.Contains(err.Error(), "exit status 124") || strings.Contains(err.Error(), "exit status 143"))) {
 		return &SandboxResult{

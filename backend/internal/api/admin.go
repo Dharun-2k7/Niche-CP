@@ -4,18 +4,43 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
-	"os"
+	"strings"
 	"time"
 
 	"github.com/Dharun-2k7/online-coding-platform/internal/db"
 	"github.com/gin-gonic/gin"
 )
 
+// GetAdminStats returns real-time counts for the admin dashboard
+func GetAdminStats(c *gin.Context) {
+	type Stats struct {
+		TotalUsers       int `json:"total_users"`
+		TotalProblems    int `json:"total_problems"`
+		TotalContests    int `json:"total_contests"`
+		TotalSubmissions int `json:"total_submissions"`
+		TotalAdmins      int `json:"total_admins"`
+		VerifiedUsers    int `json:"verified_users"`
+	}
+
+	var stats Stats
+	db.DB.QueryRow(`SELECT COUNT(*) FROM users`).Scan(&stats.TotalUsers)
+	db.DB.QueryRow(`SELECT COUNT(*) FROM problems`).Scan(&stats.TotalProblems)
+	db.DB.QueryRow(`SELECT COUNT(*) FROM contests`).Scan(&stats.TotalContests)
+	db.DB.QueryRow(`SELECT COUNT(*) FROM submissions`).Scan(&stats.TotalSubmissions)
+	db.DB.QueryRow(`SELECT COUNT(*) FROM users WHERE role IN ('admin', 'superadmin')`).Scan(&stats.TotalAdmins)
+	db.DB.QueryRow(`SELECT COUNT(*) FROM users WHERE is_college_verified = true`).Scan(&stats.VerifiedUsers)
+
+	c.JSON(http.StatusOK, stats)
+}
+
 func GetAllUsers(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
 	limitStr := c.DefaultQuery("limit", "50")
-	
+	search := c.DefaultQuery("search", "")
+	roleFilter := c.DefaultQuery("role", "")
+
 	page := 1
 	limit := 50
 	fmt.Sscanf(pageStr, "%d", &page)
@@ -24,27 +49,62 @@ func GetAllUsers(c *gin.Context) {
 	if limit < 1 || limit > 100 { limit = 50 }
 	offset := (page - 1) * limit
 
-	rows, err := db.DB.Query(`SELECT id, email, name, roll_no, batch, is_college_verified FROM users ORDER BY id DESC LIMIT $1 OFFSET $2`, limit, offset)
+	// Build dynamic WHERE clause
+	conditions := []string{}
+	args := []interface{}{}
+	argIdx := 1
+
+	if search != "" {
+		conditions = append(conditions, fmt.Sprintf("(LOWER(name) LIKE $%d OR LOWER(email) LIKE $%d OR LOWER(roll_no) LIKE $%d)", argIdx, argIdx, argIdx))
+		args = append(args, "%"+strings.ToLower(search)+"%")
+		argIdx++
+	}
+
+	if roleFilter != "" {
+		conditions = append(conditions, fmt.Sprintf("role = $%d", argIdx))
+		args = append(args, roleFilter)
+		argIdx++
+	}
+
+	whereClause := ""
+	if len(conditions) > 0 {
+		whereClause = "WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	// Get total count for pagination
+	var totalCount int
+	countQuery := fmt.Sprintf(`SELECT COUNT(*) FROM users %s`, whereClause)
+	db.DB.QueryRow(countQuery, args...).Scan(&totalCount)
+
+	// Fetch page of users
+	queryArgs := append(args, limit, offset)
+	query := fmt.Sprintf(`SELECT id, email, name, role, roll_no, batch, is_college_verified, permissions FROM users %s ORDER BY id DESC LIMIT $%d OFFSET $%d`, whereClause, argIdx, argIdx+1)
+
+	rows, err := db.DB.Query(query, queryArgs...)
 	if err != nil {
+		log.Printf("[Admin Error] Failed to fetch users: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
 		return
 	}
 	defer rows.Close()
 
 	type UserData struct {
-		ID                int    `json:"id"`
-		Email             string `json:"email"`
-		Name              string `json:"name"`
-		RollNo            string `json:"roll_no"`
-		Batch             string `json:"batch"`
-		IsCollegeVerified bool   `json:"is_college_verified"`
+		ID                int      `json:"id"`
+		Email             string   `json:"email"`
+		Name              string   `json:"name"`
+		Role              string   `json:"role"`
+		RollNo            string   `json:"roll_no"`
+		Batch             string   `json:"batch"`
+		IsCollegeVerified bool     `json:"is_college_verified"`
+		Permissions       []string `json:"permissions"`
 	}
 
-	var users []UserData
+	users := make([]UserData, 0)
 	for rows.Next() {
 		var u UserData
 		var rollNo, batch *string
-		if err := rows.Scan(&u.ID, &u.Email, &u.Name, &rollNo, &batch, &u.IsCollegeVerified); err != nil {
+		var permJSON *string
+		if err := rows.Scan(&u.ID, &u.Email, &u.Name, &u.Role, &rollNo, &batch, &u.IsCollegeVerified, &permJSON); err != nil {
 			continue
 		}
 		if rollNo != nil {
@@ -53,10 +113,78 @@ func GetAllUsers(c *gin.Context) {
 		if batch != nil {
 			u.Batch = *batch
 		}
+		u.Permissions = make([]string, 0)
+		if permJSON != nil {
+			json.Unmarshal([]byte(*permJSON), &u.Permissions)
+		}
 		users = append(users, u)
 	}
 
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, gin.H{
+		"users":       users,
+		"total_count": totalCount,
+		"page":        page,
+		"limit":       limit,
+	})
+}
+
+// DemoteFromAdmin removes admin role from a user (superadmin only)
+func DemoteFromAdmin(c *gin.Context) {
+	var req PromoteAdminRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// Verify caller is superadmin
+	var callerRole, callerEmail string
+	err := db.DB.QueryRow(`SELECT role, email FROM users WHERE id = $1`, userID).Scan(&callerRole, &callerEmail)
+	normCallerRole := strings.ToLower(strings.TrimSpace(callerRole))
+	isSuperAdminCaller := normCallerRole == "superadmin" || strings.EqualFold(callerEmail, "dharunkaarthick07@gmail.com")
+	if err != nil || !isSuperAdminCaller {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only the Super Admin can demote admins."})
+		return
+	}
+
+	// Cannot demote yourself or the hardcoded superadmin
+	if strings.EqualFold(req.Email, "dharunkaarthick07@gmail.com") {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot demote the Super Admin."})
+		return
+	}
+
+	// Check target is actually an admin
+	var targetRole string
+	err = db.DB.QueryRow(`SELECT role FROM users WHERE email = $1`, req.Email).Scan(&targetRole)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+	normTargetRole := strings.ToLower(strings.TrimSpace(targetRole))
+	if normTargetRole != "admin" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User is not an admin."})
+		return
+	}
+
+	res, err := db.DB.Exec(`UPDATE users SET role = 'student', permissions = '[]'::jsonb WHERE email = $1`, req.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to demote user"})
+		return
+	}
+
+	rowsAffected, _ := res.RowsAffected()
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	log.Printf("[Admin] User %s demoted from admin by %s", req.Email, callerEmail)
+	c.JSON(http.StatusOK, gin.H{"message": "User successfully demoted from Admin"})
 }
 
 type CreateProblemRequest struct {
@@ -107,8 +235,8 @@ func CreateProblem(c *gin.Context) {
 }
 
 type CreateContestRequest struct {
-	Title           string `json:"title" binding:"required"`
-	Type            string `json:"type" binding:"required"`
+	Title                string `json:"title" binding:"required"`
+	Type                 string `json:"type" binding:"required"`
 	StartTime            string `json:"start_time" binding:"required"`
 	DurationMinutes      int    `json:"duration_minutes" binding:"required"`
 	RegistrationOpenTime string `json:"registration_open_time"`
@@ -236,11 +364,10 @@ func UpdateUserPermissions(c *gin.Context) {
 		return
 	}
 
-	superAdmin := os.Getenv("SUPER_ADMIN_EMAIL")
-	if superAdmin == "" {
-		superAdmin = "dharunkaarthick07@gmail.com"
-	}
-	if req.Email == superAdmin {
+	// Check if target user is superadmin in DB
+	var targetRole string
+	err := db.DB.QueryRow(`SELECT role FROM users WHERE email = $1`, req.Email).Scan(&targetRole)
+	if err == nil && targetRole == "superadmin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot modify permissions of the super admin."})
 		return
 	}
@@ -289,14 +416,17 @@ func PromoteToAdmin(c *gin.Context) {
 		return
 	}
 
-	callerEmail := c.GetString("email")
-	superAdmin := os.Getenv("SUPER_ADMIN_EMAIL")
-	if superAdmin == "" {
-		superAdmin = "dharunkaarthick07@gmail.com"
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
 	}
-	
-	// Only super admin can promote
-	if callerEmail != superAdmin {
+
+	var callerRole, callerEmail string
+	err := db.DB.QueryRow(`SELECT role, email FROM users WHERE id = $1`, userID).Scan(&callerRole, &callerEmail)
+	normCallerRole := strings.ToLower(strings.TrimSpace(callerRole))
+	isSuperAdminCaller := normCallerRole == "superadmin" || strings.EqualFold(callerEmail, "dharunkaarthick07@gmail.com")
+	if err != nil || !isSuperAdminCaller {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Only the Super Admin can promote users to admin."})
 		return
 	}

@@ -7,79 +7,634 @@
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
+        /* Admin Dashboard Specific Styles */
+        .admin-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .admin-stat-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .admin-stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--stat-accent, var(--primary-accent));
+            opacity: 0.6;
+        }
+        .admin-stat-card:hover {
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+        .admin-stat-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -1px;
+        }
+        .admin-stat-label {
+            color: var(--text-muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 500;
+        }
+        .admin-stat-icon {
+            width: 32px;
+            height: 32px;
+            margin: 0 auto 12px;
+            opacity: 0.4;
+        }
+
+        /* Admin Tab Navigation */
+        .admin-tabs {
+            display: flex;
+            gap: 2px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+        }
+        .admin-tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .admin-tab:hover {
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.04);
+        }
+        .admin-tab.active {
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .admin-tab svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Search & Filter Bar */
+        .admin-toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .admin-search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 16px 10px 40px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .admin-search-input:focus {
+            border-color: var(--primary-accent);
+            background: rgba(255,255,255,0.05);
+        }
+        .admin-search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+        .admin-search-wrapper svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+        .admin-filter-select {
+            padding: 10px 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            padding-right: 32px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 14px;
+        }
+        .admin-filter-select option {
+            background: #0d0f17;
+            color: #e0e0e0;
+        }
+
+        /* User Table */
+        .admin-user-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .admin-user-table thead th {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+            background: var(--card-bg);
+            z-index: 1;
+        }
+        .admin-user-table tbody tr {
+            transition: background 0.15s;
+        }
+        .admin-user-table tbody tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+        .admin-user-table td {
+            padding: 14px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            vertical-align: middle;
+        }
+
+        /* Role Badges */
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .role-badge.superadmin {
+            background: rgba(245, 158, 11, 0.1);
+            color: #F59E0B;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        .role-badge.admin {
+            background: rgba(168, 85, 247, 0.1);
+            color: #A855F7;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+        .role-badge.student {
+            background: rgba(255,255,255,0.04);
+            color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .role-badge.verified {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .role-badge.unverified {
+            background: rgba(239, 68, 68, 0.08);
+            color: #EF4444;
+            border: 1px solid rgba(239, 68, 68, 0.15);
+        }
+
+        /* Action Buttons */
+        .admin-action-btn {
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-primary);
+        }
+        .admin-action-btn:hover {
+            background: rgba(255,255,255,0.06);
+        }
+        .admin-action-btn.promote {
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+        .admin-action-btn.promote:hover {
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .admin-action-btn.demote {
+            color: #EF4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+        .admin-action-btn.demote:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .admin-action-btn.permissions {
+            color: #3B82F6;
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+        .admin-action-btn.permissions:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* Admin Management Section */
+        .admin-management-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        @media (max-width: 768px) {
+            .admin-management-grid { grid-template-columns: 1fr; }
+        }
+        .admin-promote-input {
+            display: flex;
+            gap: 10px;
+        }
+        .admin-promote-input input {
+            flex: 1;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+        }
+        .admin-promote-input input:focus {
+            border-color: var(--primary-accent);
+        }
+        .admin-promote-btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .admin-promote-btn.promote {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .admin-promote-btn.promote:hover {
+            background: rgba(16, 185, 129, 0.2);
+        }
+
+        /* Admin List */
+        .admin-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .admin-list-item:last-child { border-bottom: none; }
+        .admin-list-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .admin-list-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .admin-list-email {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        /* Pagination */
+        .admin-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            margin-top: 8px;
+        }
+        .admin-pagination-info {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .admin-pagination-btns {
+            display: flex;
+            gap: 8px;
+        }
+        .admin-page-btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: var(--text-primary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .admin-page-btn:hover { background: rgba(255,255,255,0.08); }
+        .admin-page-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Confirm Modal */
+        .confirm-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(6px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        .confirm-modal-overlay.active { display: flex; }
+        .confirm-modal {
+            background: #101015;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 440px;
+            width: 90%;
+            text-align: center;
+        }
+        .confirm-modal h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .confirm-modal p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        .confirm-modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .confirm-modal-btn {
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .confirm-modal-btn.cancel {
+            background: rgba(255,255,255,0.04);
+            color: var(--text-primary);
+        }
+        .confirm-modal-btn.confirm-promote {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        .confirm-modal-btn.confirm-demote {
+            background: rgba(239, 68, 68, 0.15);
+            color: #EF4444;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        /* Toast Notification */
+        .admin-toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 10001;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 400px;
+        }
+        .admin-toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .admin-toast.success {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+        .admin-toast.error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #EF4444;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        /* Tab Panel visibility */
+        .admin-tab-panel { display: none; }
+        .admin-tab-panel.active { display: block; }
+
+        .admin-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .admin-section-subtitle {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body data-theme="quantum">
     <div class="noise-bg" style="opacity: 0.4;"></div>
-
-    <!-- Unified Navigation -->
-    <!-- Floating Glass Navigation (Injected via JS) -->
     <div id="global-nav-container"></div>
 
-    <main class="app-container niche-layout" style="margin-top: 40px; grid-template-columns: 1fr;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 40px;">
-            <div class="glass-card stat-card" style="text-align: center;">
-                <h3 style="font-size: 32px; color: var(--primary-accent); margin-bottom: 8px;">24</h3>
-                <p style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Total Users</p>
+    <main class="app-container" style="margin-top: 40px; max-width: 1200px;">
+
+        <!-- Stats Grid -->
+        <div class="admin-stats-grid" id="adminStatsGrid">
+            <div class="admin-stat-card" style="--stat-accent: #3B82F6;">
+                <svg class="admin-stat-icon" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <div class="admin-stat-value" id="statUsers">--</div>
+                <div class="admin-stat-label">Total Users</div>
             </div>
-            <div class="glass-card stat-card" style="text-align: center;">
-                <h3 style="font-size: 32px; color: var(--primary-accent); margin-bottom: 8px;">156</h3>
-                <p style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Problems</p>
+            <div class="admin-stat-card" style="--stat-accent: #10b981;">
+                <svg class="admin-stat-icon" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                <div class="admin-stat-value" id="statProblems">--</div>
+                <div class="admin-stat-label">Problems</div>
             </div>
-            <div class="glass-card stat-card" style="text-align: center;">
-                <h3 style="font-size: 32px; color: var(--primary-accent); margin-bottom: 8px;">12</h3>
-                <p style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Contests</p>
+            <div class="admin-stat-card" style="--stat-accent: #A855F7;">
+                <svg class="admin-stat-icon" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <div class="admin-stat-value" id="statContests">--</div>
+                <div class="admin-stat-label">Contests</div>
             </div>
-            <div class="glass-card stat-card" style="text-align: center;">
-                <h3 style="font-size: 32px; color: var(--primary-accent); margin-bottom: 8px;">8.4k</h3>
-                <p style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Submissions</p>
+            <div class="admin-stat-card" style="--stat-accent: #F59E0B;">
+                <svg class="admin-stat-icon" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                <div class="admin-stat-value" id="statSubmissions">--</div>
+                <div class="admin-stat-label">Submissions</div>
+            </div>
+            <div class="admin-stat-card" style="--stat-accent: #EF4444;">
+                <svg class="admin-stat-icon" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <div class="admin-stat-value" id="statAdmins">--</div>
+                <div class="admin-stat-label">Admins</div>
+            </div>
+            <div class="admin-stat-card" style="--stat-accent: #00f0ff;">
+                <svg class="admin-stat-icon" viewBox="0 0 24 24" fill="none" stroke="#00f0ff" stroke-width="1.5"><path d="M22 11.08V12a10.08 10.08 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <div class="admin-stat-value" id="statVerified">--</div>
+                <div class="admin-stat-label">Verified</div>
             </div>
         </div>
 
-        <div class="admin-grid">
-            <aside>
-                <div class="glass-card" style="position: sticky; top: 120px;">
-                    <h3 style="margin-bottom: 20px; font-size: 18px;">Quick Actions</h3>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <a href="admin_problems.html" class="btn-magnetic" style="padding: 12px; text-align: center; text-decoration: none; border-radius: 8px; background: rgba(255,255,255,0.05); color: white; display: block; border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;">Create Problem</a>
-                        <a href="admin_contests.html" class="btn-magnetic" style="padding: 12px; text-align: center; text-decoration: none; border-radius: 8px; background: rgba(255,255,255,0.05); color: white; display: block; border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;">Create Contest</a>
-                        <a href="admin_violations.html" class="btn-magnetic" style="padding: 12px; text-align: center; text-decoration: none; border-radius: 8px; background: rgba(255,255,255,0.05); color: white; display: block; border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s; border-color: #ef4444;">Monitor Violations</a>
-                        <button onclick="document.querySelector('.admin-data-table').scrollIntoView({behavior: 'smooth'})" class="btn-ghost" style="width: 100%; padding: 12px;">Manage Users</button>
-                    </div>
-                </div>
-            </aside>
-            
+        <!-- Tab Navigation -->
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="users">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                Users
+            </button>
+            <button class="admin-tab" data-tab="admins">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                Admin Management
+            </button>
+            <button class="admin-tab" data-tab="quick">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                Quick Actions
+            </button>
+        </div>
+
+        <!-- Tab Panel: Users -->
+        <div class="admin-tab-panel active" id="panel-users">
             <div class="glass-card">
-                <h2 style="margin-bottom: 8px;">User Management</h2>
-                <p style="color: var(--text-muted); margin-bottom: 20px;">Manage users and permissions</p>
-                
+                <div class="admin-section-title">User Management</div>
+                <div class="admin-section-subtitle">Search, filter, and manage all platform users</div>
+
+                <div class="admin-toolbar">
+                    <div class="admin-search-wrapper">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" class="admin-search-input" id="userSearchInput" placeholder="Search by name, email, or roll number...">
+                    </div>
+                    <select class="admin-filter-select" id="roleFilterSelect">
+                        <option value="">All Roles</option>
+                        <option value="student">Students</option>
+                        <option value="admin">Admins</option>
+                        <option value="superadmin">Super Admins</option>
+                    </select>
+                </div>
+
                 <div style="overflow-x: auto;">
-                    <table class="admin-data-table">
+                    <table class="admin-user-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Roll No</th>
+                                <th>Role</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="usersTableBody">
-                            <tr><td colspan="6" style="text-align:center;">Loading users...</td></tr>
+                            <tr><td colspan="7" style="text-align:center; padding: 40px; color: var(--text-muted);">Loading users...</td></tr>
                         </tbody>
                     </table>
                 </div>
-            </div>
-            
-            <div class="glass-card" style="margin-top: 24px;">
-                <h2 style="margin-bottom: 8px;">Super Admin Actions</h2>
-                <p style="color: var(--text-muted); margin-bottom: 20px;">Promote users to Administrator</p>
-                <div style="display: flex; gap: 12px; align-items: center; max-width: 400px;">
-                    <input type="email" id="promoteEmail" class="form-input" placeholder="User Email" style="flex: 1;">
-                    <button class="btn-magnetic" onclick="promoteToAdmin()" style="padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer;">Promote</button>
+
+                <!-- Pagination -->
+                <div class="admin-pagination" id="paginationContainer">
+                    <div class="admin-pagination-info" id="paginationInfo">--</div>
+                    <div class="admin-pagination-btns">
+                        <button class="admin-page-btn" id="prevPageBtn" disabled onclick="changePage(-1)">← Prev</button>
+                        <button class="admin-page-btn" id="nextPageBtn" disabled onclick="changePage(1)">Next →</button>
+                    </div>
                 </div>
-                <div id="promoteMsg" style="margin-top: 12px; font-size: 13px; display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Tab Panel: Admin Management -->
+        <div class="admin-tab-panel" id="panel-admins">
+            <div class="admin-management-grid">
+                <!-- Promote Section -->
+                <div class="glass-card">
+                    <div class="admin-section-title" style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                        Promote to Admin
+                    </div>
+                    <div class="admin-section-subtitle">Grant admin privileges to a user by entering their email address</div>
+                    <div class="admin-promote-input">
+                        <input type="email" id="promoteEmail" placeholder="user@amrita.edu">
+                        <button class="admin-promote-btn promote" onclick="confirmPromote()">Promote</button>
+                    </div>
+                    <div id="promoteMsg" style="margin-top: 12px; font-size: 13px; display: none;"></div>
+                </div>
+
+                <!-- Current Admins List -->
+                <div class="glass-card">
+                    <div class="admin-section-title" style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        Current Administrators
+                    </div>
+                    <div class="admin-section-subtitle">Active admins who can manage the platform</div>
+                    <div id="adminsList" style="max-height: 400px; overflow-y: auto;">
+                        <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px;">Loading admins...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Panel: Quick Actions -->
+        <div class="admin-tab-panel" id="panel-quick">
+            <div class="glass-card">
+                <div class="admin-section-title">Quick Actions</div>
+                <div class="admin-section-subtitle">Jump to frequently used admin features</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
+                    <a href="admin_problems.html" class="admin-action-btn" style="padding: 20px; text-align: center; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 8px; border-radius: 12px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                        Create Problem
+                    </a>
+                    <a href="admin_contests.html" class="admin-action-btn" style="padding: 20px; text-align: center; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 8px; border-radius: 12px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        Create Contest
+                    </a>
+                    <a href="admin_violations.html" class="admin-action-btn" style="padding: 20px; text-align: center; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 8px; border-radius: 12px; border-color: rgba(239,68,68,0.15);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        Monitor Violations
+                    </a>
+                    <a href="rankings.html" class="admin-action-btn" style="padding: 20px; text-align: center; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 8px; border-radius: 12px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                        Rankings
+                    </a>
+                </div>
             </div>
         </div>
     </main>
@@ -88,10 +643,8 @@
     <div id="permissionsModal" class="premium-modal-overlay">
         <div class="premium-modal">
             <button onclick="closePermissionsModal()" style="position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); cursor:pointer; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:background 0.2s;">✕</button>
-            
             <h3 style="font-size: 20px; margin-bottom: 8px; font-weight: 600;">Edit Permissions</h3>
             <p id="permUserEmail" style="color:var(--text-muted); font-size:14px; margin-bottom: 24px;"></p>
-            
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 <label class="custom-toggle">
                     <span style="font-size: 14px; font-weight: 500;">Create Problem</span>
@@ -114,10 +667,24 @@
                     <div class="toggle-track"><div class="toggle-thumb"></div></div>
                 </label>
             </div>
-            
             <button class="btn-magnetic" style="width:100%; margin-top:32px; padding: 14px; font-size: 15px; border-radius: 12px; border: none; cursor: pointer;" onclick="savePermissions()">Save Permissions</button>
         </div>
     </div>
+
+    <!-- Confirm Modal -->
+    <div class="confirm-modal-overlay" id="confirmModal">
+        <div class="confirm-modal">
+            <h3 id="confirmTitle">Confirm Action</h3>
+            <p id="confirmDesc">Are you sure?</p>
+            <div class="confirm-modal-actions">
+                <button class="confirm-modal-btn cancel" onclick="closeConfirmModal()">Cancel</button>
+                <button class="confirm-modal-btn" id="confirmActionBtn" onclick="executeConfirmedAction()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="admin-toast" id="adminToast"></div>
 
     <script src="js/app.js"></script>
     <script>
@@ -126,59 +693,199 @@
             window.location.href = 'login.html';
         }
 
-        function logout() {
-            localStorage.removeItem('jwt_token');
-            window.location.href = 'index.html';
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentSearch = '';
+        let currentRoleFilter = '';
+        let allUsersCache = [];
+        let pendingAction = null;
+
+        // ── Toast Notification ──
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('adminToast');
+            toast.textContent = message;
+            toast.className = `admin-toast ${type} show`;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3500);
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        // ── Tab Switching ──
+        document.querySelectorAll('.admin-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.admin-tab-panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+            });
+        });
+
+        // ── Animated Counter ──
+        function animateCounter(el, target) {
+            const duration = 600;
+            const start = performance.now();
+            const startVal = 0;
+            function step(now) {
+                const progress = Math.min((now - start) / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = Math.round(startVal + (target - startVal) * eased);
+                el.textContent = current.toLocaleString();
+                if (progress < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        }
+
+        // ── Load Stats ──
+        async function loadStats() {
             try {
-                const res = await fetch('/api/admin/users', {
+                const res = await fetch('/api/admin/stats', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                
-                if (res.status === 403) {
-                    document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:50px;">403 Forbidden - Admins Only</h1>';
+                if (res.ok) {
+                    const stats = await res.json();
+                    animateCounter(document.getElementById('statUsers'), stats.total_users);
+                    animateCounter(document.getElementById('statProblems'), stats.total_problems);
+                    animateCounter(document.getElementById('statContests'), stats.total_contests);
+                    animateCounter(document.getElementById('statSubmissions'), stats.total_submissions);
+                    animateCounter(document.getElementById('statAdmins'), stats.total_admins);
+                    animateCounter(document.getElementById('statVerified'), stats.verified_users);
+                }
+            } catch (e) {
+                console.error('Failed to load admin stats:', e);
+            }
+        }
+
+        // ── Role Badge HTML ──
+        function roleBadgeHTML(role) {
+            const normRole = (role || 'student').trim().toLowerCase();
+            if (normRole === 'superadmin') return '<span class="role-badge superadmin">Super Admin</span>';
+            if (normRole === 'admin') return '<span class="role-badge admin">Admin</span>';
+            return '<span class="role-badge student">Student</span>';
+        }
+
+        function statusBadgeHTML(isVerified) {
+            if (isVerified) return '<span class="role-badge verified">Verified</span>';
+            return '<span class="role-badge unverified">Pending</span>';
+        }
+
+        // ── Load Users ──
+        async function loadUsers(page = 1) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: var(--text-muted);">Loading users...</td></tr>';
+
+            try {
+                let url = `/api/admin/users?page=${page}&limit=20`;
+                if (currentSearch) url += `&search=${encodeURIComponent(currentSearch)}`;
+                if (currentRoleFilter) url += `&role=${encodeURIComponent(currentRoleFilter)}`;
+
+                const res = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.status === 401) {
+                    window.location.href = 'login.html';
                     return;
                 }
-                
-                const users = await res.json();
-                const tbody = document.getElementById('usersTableBody');
-                tbody.innerHTML = '';
-                
-                users.forEach(u => {
-                    const status = u.is_college_verified ? '<span class="tag tag-primary">Verified</span>' : '<span class="tag">Pending</span>';
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${u.id}</td>
-                            <td>${u.name}</td>
-                            <td>${u.email}</td>
-                            <td>${u.roll_no || '--'}</td>
-                            <td>${status}</td>
-                            <td>
-                                <button class="btn-ghost" style="padding: 4px 8px; font-size: 12px;" onclick="openPermissionsModal('${u.email}')">Edit Role</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            } catch(e) {
-                console.error(e);
-            }
-        });
-        
-        let currentEditEmail = '';
+                if (res.status === 403) {
+                    document.querySelector('main').innerHTML = '<div style="max-width:500px; margin: 100px auto; text-align:center; padding: 40px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:16px;"><h1 style="color:#ef4444; margin-bottom: 12px; font-size:28px;">403 Forbidden</h1><p style="color:var(--text-muted); margin-bottom: 24px;">Admin access required.</p><a href="index.html" class="btn-primary" style="text-decoration:none; padding:10px 20px;">Return to Home</a></div>';
+                    return;
+                }
 
-        function openPermissionsModal(email) {
-            if (email === 'dharunkaarthick07@gmail.com') {
-                alert('Cannot modify permissions of the super admin.');
+                const data = await res.json();
+                const users = Array.isArray(data.users) ? data.users : [];
+                allUsersCache = users;
+                const totalCount = data.total_count || 0;
+                const limit = data.limit || 20;
+                totalPages = Math.ceil(totalCount / limit) || 1;
+                currentPage = data.page || 1;
+
+                tbody.innerHTML = '';
+
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: var(--text-muted);">No users found.</td></tr>';
+                } else {
+                    users.forEach(u => {
+                        const normRole = (u.role || '').trim().toLowerCase();
+                        const isSuperadmin = normRole === 'superadmin';
+                        let actionsHTML = '';
+
+                        if (!isSuperadmin) {
+                            actionsHTML += `<button class="admin-action-btn permissions" onclick="openPermissionsModal('${u.email}', '${u.role}', ${JSON.stringify(u.permissions || []).replace(/"/g, '&quot;')})">Permissions</button> `;
+                            if (normRole === 'admin') {
+                                actionsHTML += `<button class="admin-action-btn demote" onclick="confirmDemote('${u.email}', '${u.name}')">Demote</button>`;
+                            } else {
+                                actionsHTML += `<button class="admin-action-btn promote" onclick="confirmPromoteUser('${u.email}', '${u.name}')">Promote</button>`;
+                            }
+                        } else {
+                            actionsHTML = '<span style="color: var(--text-muted); font-size: 12px;">Protected</span>';
+                        }
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td style="color: var(--text-muted); font-size: 13px;">${u.id}</td>
+                                <td style="font-weight: 500;">${u.name}</td>
+                                <td style="font-size: 13px; color: var(--text-secondary);">${u.email}</td>
+                                <td style="font-size: 13px;">${u.roll_no || '<span style="color:var(--text-muted)">—</span>'}</td>
+                                <td>${roleBadgeHTML(u.role)}</td>
+                                <td>${statusBadgeHTML(u.is_college_verified)}</td>
+                                <td style="white-space: nowrap;">${actionsHTML}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                // Update pagination
+                const startIdx = (currentPage - 1) * limit + 1;
+                const endIdx = Math.min(currentPage * limit, totalCount);
+                document.getElementById('paginationInfo').textContent = `Showing ${startIdx}-${endIdx} of ${totalCount} users`;
+                document.getElementById('prevPageBtn').disabled = currentPage <= 1;
+                document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+
+            } catch (e) {
+                console.error('Failed to load users:', e);
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: #ef4444;">Failed to load users.</td></tr>';
+            }
+        }
+
+        function changePage(delta) {
+            const newPage = currentPage + delta;
+            if (newPage >= 1 && newPage <= totalPages) {
+                loadUsers(newPage);
+            }
+        }
+
+        // ── Search & Filter ──
+        let searchTimeout;
+        document.getElementById('userSearchInput').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentSearch = e.target.value;
+                loadUsers(1);
+            }, 300);
+        });
+        document.getElementById('roleFilterSelect').addEventListener('change', (e) => {
+            currentRoleFilter = e.target.value;
+            loadUsers(1);
+        });
+
+        // ── Permissions Modal ──
+        let currentEditEmail = '';
+        function openPermissionsModal(email, role, permissions) {
+            if ((role || '').trim().toLowerCase() === 'superadmin') {
+                showToast('Cannot modify permissions of the Super Admin.', 'error');
                 return;
             }
             currentEditEmail = email;
             document.getElementById('permUserEmail').innerText = email;
-            // Reset checkboxes
+
+            // Reset then pre-populate checkboxes
             document.querySelectorAll('#permissionsModal input[type="checkbox"]').forEach(cb => cb.checked = false);
-            // We don't have the user's current permissions in the API response yet, but the user requested an editor.
-            // In a full implementation we would fetch them first.
+            if (Array.isArray(permissions)) {
+                permissions.forEach(p => {
+                    const cb = document.getElementById('perm_' + p);
+                    if (cb) cb.checked = true;
+                });
+            }
             document.getElementById('permissionsModal').classList.add('active');
         }
 
@@ -191,55 +898,161 @@
             try {
                 const res = await fetch('/api/admin/users/permissions', {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` 
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ email: currentEditEmail, permissions })
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    alert('Permissions updated successfully!');
+                    showToast('Permissions updated successfully!');
                     closePermissionsModal();
+                    loadUsers(currentPage);
                 } else {
-                    alert(data.error || 'Failed to update permissions');
+                    showToast(data.error || 'Failed to update permissions', 'error');
                 }
             } catch (e) {
-                console.error(e);
-                alert('An error occurred.');
+                showToast('Network error', 'error');
             }
         }
 
-        async function promoteToAdmin() {
-            const email = document.getElementById('promoteEmail').value;
-            const msg = document.getElementById('promoteMsg');
-            if (!email) return;
+        // ── Confirm Modal System ──
+        function openConfirmModal(title, desc, btnClass, actionFn) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmDesc').textContent = desc;
+            const btn = document.getElementById('confirmActionBtn');
+            btn.className = `confirm-modal-btn ${btnClass}`;
+            btn.textContent = title.includes('Demote') ? 'Demote' : 'Promote';
+            pendingAction = actionFn;
+            document.getElementById('confirmModal').classList.add('active');
+        }
 
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+            pendingAction = null;
+        }
+
+        function executeConfirmedAction() {
+            if (pendingAction) pendingAction();
+            closeConfirmModal();
+        }
+
+        // ── Promote ──
+        function confirmPromote() {
+            const email = document.getElementById('promoteEmail').value;
+            if (!email) {
+                showToast('Please enter an email address', 'error');
+                return;
+            }
+            openConfirmModal('Promote to Admin', `Are you sure you want to grant admin privileges to ${email}?`, 'confirm-promote', () => executePromote(email));
+        }
+
+        function confirmPromoteUser(email, name) {
+            openConfirmModal('Promote to Admin', `Are you sure you want to grant admin privileges to ${name} (${email})?`, 'confirm-promote', () => executePromote(email));
+        }
+
+        async function executePromote(email) {
             try {
                 const res = await fetch('/api/admin/promote', {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` 
-                    },
-                    body: JSON.stringify({ email: email })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ email })
                 });
                 const data = await res.json();
-                msg.style.display = 'block';
                 if (res.ok) {
-                    msg.style.color = '#10b981';
-                    msg.textContent = data.message;
+                    showToast(data.message || 'User promoted to Admin!');
                     document.getElementById('promoteEmail').value = '';
+                    loadUsers(currentPage);
+                    loadAdminsList();
+                    loadStats();
                 } else {
-                    msg.style.color = '#ef4444';
-                    msg.textContent = data.error || 'Failed to promote user.';
+                    showToast(data.error || 'Failed to promote user.', 'error');
                 }
             } catch (e) {
-                msg.style.display = 'block';
-                msg.style.color = '#ef4444';
-                msg.textContent = 'Network error';
+                showToast('Network error', 'error');
             }
         }
+
+        // ── Demote ──
+        function confirmDemote(email, name) {
+            openConfirmModal('Demote from Admin', `Are you sure you want to revoke admin privileges from ${name} (${email})? They will be demoted to Student role.`, 'confirm-demote', () => executeDemote(email));
+        }
+
+        async function executeDemote(email) {
+            try {
+                const res = await fetch('/api/admin/demote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.message || 'User demoted from Admin.');
+                    loadUsers(currentPage);
+                    loadAdminsList();
+                    loadStats();
+                } else {
+                    showToast(data.error || 'Failed to demote user.', 'error');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            }
+        }
+
+        // ── Load Admins List ──
+        async function loadAdminsList() {
+            const container = document.getElementById('adminsList');
+            try {
+                const res = await fetch('/api/admin/users?role=admin&limit=100', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const admins = Array.isArray(data.users) ? data.users : [];
+                    // Also get superadmins
+                    const res2 = await fetch('/api/admin/users?role=superadmin&limit=100', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    let superadmins = [];
+                    if (res2.ok) {
+                        const data2 = await res2.json();
+                        superadmins = Array.isArray(data2.users) ? data2.users : [];
+                    }
+                    const allAdmins = [...superadmins, ...admins];
+
+                    if (allAdmins.length === 0) {
+                        container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px;">No admins found.</div>';
+                    } else {
+                        container.innerHTML = '';
+                        allAdmins.forEach(a => {
+                            const normRole = (a.role || '').trim().toLowerCase();
+                            const isSuperadmin = normRole === 'superadmin';
+                            container.innerHTML += `
+                                <div class="admin-list-item">
+                                    <div class="admin-list-info">
+                                        <div class="admin-list-name">${a.name} ${roleBadgeHTML(a.role)}</div>
+                                        <div class="admin-list-email">${a.email}</div>
+                                    </div>
+                                    ${!isSuperadmin ? `<button class="admin-action-btn demote" onclick="confirmDemote('${a.email}', '${a.name}')">Demote</button>` : '<span style="color: #F59E0B; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Protected</span>'}
+                                </div>
+                            `;
+                        });
+                    }
+                }
+            } catch (e) {
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444; font-size: 13px;">Failed to load admins.</div>';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('jwt_token');
+            window.location.href = 'index.html';
+        }
+
+        // ── Init ──
+        document.addEventListener('DOMContentLoaded', async () => {
+            loadStats();
+            loadUsers(1);
+            loadAdminsList();
+        });
     </script>
 <script src="js/components.js"></script>
 </body>

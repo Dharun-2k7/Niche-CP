@@ -47,7 +47,7 @@
         <div class="niche-arena-right" id="arenaRight" style="position: relative; display: flex; flex-direction: column;">
             <div class="editor-top" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px 16px; background: var(--card-bg);">
                 <div style="display: flex; gap: 16px; align-items: center;">
-                    <select id="language" class="cyber-select" style="padding: 4px 12px; font-size: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: white;">
+                    <select id="language" class="cyber-select sm">
                         <option value="cpp">C++ 23</option>
                         <option value="python">Python 3</option>
                         <option value="go">Go</option>
@@ -135,6 +135,29 @@
                 document.getElementById('problemRoundDisplay').textContent = 'Contest Mode Active';
                 document.getElementById('problemRoundDisplay').style.color = '#ff4081';
                 
+                // Hide global nav in contest mode
+                const navContainer = document.getElementById('global-nav-container');
+                if (navContainer) navContainer.style.display = 'none';
+                
+                // Add floating "Back to Arena" button
+                const backBtn = document.createElement('a');
+                backBtn.href = `contest_arena.html?id=${contestId}`;
+                backBtn.textContent = '← Back to Arena';
+                backBtn.style.cssText = 'position:fixed; top:12px; left:12px; z-index:1000; padding:8px 16px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:var(--text-primary); text-decoration:none; font-size:13px; font-weight:500; transition:all 0.2s;';
+                backBtn.onmouseover = () => backBtn.style.background = 'rgba(255,255,255,0.1)';
+                backBtn.onmouseout = () => backBtn.style.background = 'rgba(255,255,255,0.06)';
+                document.body.appendChild(backBtn);
+
+                // Auto-request fullscreen if not already in it
+                if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+                    // Small delay to ensure page is fully loaded before requesting
+                    setTimeout(() => {
+                        document.documentElement.requestFullscreen().catch(() => {
+                            console.warn('Could not auto-enter fullscreen from problem.html');
+                        });
+                    }, 300);
+                }
+                
                 // Copy/paste restrictions
                 const problemContent = document.getElementById('problemContentDisplay');
                 problemContent.addEventListener('copy', e => {
@@ -174,7 +197,6 @@
                 // Fullscreen enforcement
                 const enforceFullscreen = () => {
                     if (!document.fullscreenElement) {
-                        alert("WARNING: You must remain in fullscreen during the contest!");
                         logViolation('fullscreen_exit');
                     }
                 };
@@ -185,7 +207,6 @@
                 document.addEventListener('visibilitychange', () => {
                     if (document.hidden) {
                         logViolation('tab_switched');
-                        alert("WARNING: Tab switching is recorded as a contest violation.");
                     }
                 });
 

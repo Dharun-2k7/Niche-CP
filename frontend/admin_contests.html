@@ -20,8 +20,8 @@
                     <h2 class="title-massive" style="font-size: 36px; background: linear-gradient(90deg, #fff, #a1a1aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Manage Contests</h2>
                     <p style="color: var(--text-muted); font-size: 15px; margin-top: 8px;">Create a new contest or edit an existing one with advanced configurations.</p>
                 </div>
-                <div style="background: rgba(255,255,255,0.03); padding: 6px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-                    <select id="contestSelect" class="cyber-select" style="max-width: 300px; padding: 10px 16px; background: transparent; border: none; outline: none; color: #fff; font-size: 14px; cursor: pointer;">
+                <div>
+                    <select id="contestSelect" class="cyber-select" style="max-width: 320px;">
                         <option value="new">✦ Create New Contest ✦</option>
                     </select>
                 </div>
@@ -46,7 +46,7 @@
             <div class="form-group fade-in-up stagger-4" style="margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
                 <div>
                     <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; display: block;">Penalty Type</label>
-                    <select id="cType" class="cyber-select form-input" style="width: 100%; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px;">
+                    <select id="cType" class="cyber-select" style="width: 100%;">
                         <option value="ICPC">ICPC (Time + 20m penalty)</option>
                         <option value="IOI">IOI (Partial Scoring)</option>
                         <option value="CUSTOM">Custom (Base Scoring)</option>
@@ -54,7 +54,7 @@
                 </div>
                 <div>
                     <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; display: block;">Status</label>
-                    <select id="cStatus" class="cyber-select form-input" style="width: 100%; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px;">
+                    <select id="cStatus" class="cyber-select" style="width: 100%;">
                         <option value="CREATED">CREATED</option>
                         <option value="UPCOMING">UPCOMING</option>
                         <option value="RUNNING">RUNNING</option>

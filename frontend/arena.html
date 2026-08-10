@@ -53,18 +53,18 @@
     <div id="global-nav-container"></div>
 
     <main class="app-container" style="max-width: 1000px; padding: 40px 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div class="arena-header-controls" style="display: flex; justify-content: space-between; align-items: flex-end;">
             <div>
                 <h1 class="display-font" style="font-size: 32px; font-weight: 700; margin-bottom: 8px;">The Arena</h1>
                 <p style="color: var(--text-muted); font-size: 15px;">Discover practice problems from the independent Problem Bank.</p>
             </div>
-            <div style="display: flex; gap: 12px;">
-                <input type="text" class="cyber-select" placeholder="Search Tags..." style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; border-radius: 6px;">
-                <select class="cyber-select" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; border-radius: 6px;">
-                    <option>All Difficulties</option>
-                    <option>Easy</option>
-                    <option>Medium</option>
-                    <option>Hard</option>
+            <div class="arena-search-box" style="display: flex; gap: 12px;">
+                <input type="text" id="searchInput" class="cyber-input" placeholder="Search Title or Tags...">
+                <select id="diffSelect" class="cyber-select">
+                    <option value="ALL">All Difficulties</option>
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
                 </select>
             </div>
         </div>
@@ -77,42 +77,35 @@
     <script src="js/app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const res = await fetch('/api/problems');
-                if (!res.ok) throw new Error('Failed to fetch');
-                const problems = await res.json();
-                
-                const list = document.getElementById('problemList');
-                list.innerHTML = '';
-                
-                let solvedProblems = new Set();
-                const token = localStorage.getItem('jwt_token');
-                if (token) {
-                    try {
-                        const solvedRes = await fetch('/api/profile/solved', {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        if (solvedRes.ok) {
-                            const solvedData = await solvedRes.json();
-                            if (solvedData.solved_problems) {
-                                solvedData.solved_problems.forEach(id => solvedProblems.add(id));
-                            }
-                        }
-                    } catch(e){}
-                }
-                
-                if (!problems || !Array.isArray(problems) || problems.length === 0) {
-                    list.innerHTML = '<div style="text-align:center; color: var(--text-muted); margin-top: 40px;">No problems available.</div>';
+            let allProblems = [];
+            let solvedProblems = new Set();
+            const list = document.getElementById('problemList');
+            const searchInput = document.getElementById('searchInput');
+            const diffSelect = document.getElementById('diffSelect');
+
+            function renderProblems() {
+                const search = searchInput.value.toLowerCase().trim();
+                const diff = diffSelect.value;
+
+                const filtered = allProblems.filter(p => {
+                    const matchesSearch = !search || p.title.toLowerCase().includes(search) || (p.tags && p.tags.toLowerCase().includes(search));
+                    const matchesDiff = diff === 'ALL' || (p.difficulty && p.difficulty.toLowerCase() === diff.toLowerCase());
+                    return matchesSearch && matchesDiff;
+                });
+
+                if (filtered.length === 0) {
+                    list.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 40px;">No matching problems found.</div>';
                     return;
                 }
 
-                problems.forEach(p => {
+                let html = '';
+                filtered.forEach(p => {
                     const diffClass = p.difficulty ? `diff-${p.difficulty.toLowerCase()}` : 'diff-medium';
                     const diffText = p.difficulty || 'Medium';
                     
                     let tagsHtml = '';
                     try {
-                        const tags = JSON.parse(p.tags);
+                        const tags = typeof p.tags === 'string' ? JSON.parse(p.tags) : p.tags;
                         if (tags && tags.length > 0) {
                             tagsHtml = tags.map(t => `<span style="font-size:12px; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:4px; margin-right:6px;">${t}</span>`).join('');
                         }
@@ -129,11 +122,11 @@
                         `;
                     }
 
-                    list.innerHTML += `
+                    html += `
                         <a href="problem.html?problem_id=${p.id}" class="problem-row">
                             <div style="display:flex; align-items:center; gap:16px;">
                                 <div style="font-family:var(--font-mono); color:var(--text-muted); font-size:13px; width:50px;">NCP-${p.id}</div>
-                                <div style="display:flex; align-items:center; gap: 12px;">
+                                <div style="display:flex; align-items:center; gap: 12px; flex-wrap: wrap;">
                                     <div style="font-size:15px; font-weight:500;">${p.title}</div>
                                     <div style="display:flex; align-items:center;">
                                         ${tagsHtml}
@@ -149,8 +142,41 @@
                         </a>
                     `;
                 });
+                list.innerHTML = html;
+            }
+
+            try {
+                const res = await fetch('/api/problems');
+                if (!res.ok) throw new Error('Failed to fetch');
+                allProblems = await res.json();
+                
+                const token = localStorage.getItem('jwt_token');
+                if (token) {
+                    try {
+                        const solvedRes = await fetch('/api/profile/solved', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (solvedRes.ok) {
+                            const solvedData = await solvedRes.json();
+                            if (solvedData.solved_problems) {
+                                solvedData.solved_problems.forEach(id => solvedProblems.add(id));
+                            }
+                        }
+                    } catch(e){}
+                }
+                
+                if (!allProblems || !Array.isArray(allProblems) || allProblems.length === 0) {
+                    list.innerHTML = '<div style="text-align:center; color: var(--text-muted); margin-top: 40px;">No problems available.</div>';
+                    return;
+                }
+
+                renderProblems();
+
+                searchInput.addEventListener('input', renderProblems);
+                diffSelect.addEventListener('change', renderProblems);
+
             } catch(e) {
-                document.getElementById('problemList').innerHTML = '<div style="text-align:center; color: #ff4d4d; margin-top: 40px;">Failed to load problems from backend.</div>';
+                list.innerHTML = '<div style="text-align:center; color: #ff4d4d; margin-top: 40px;">Failed to load problems from backend.</div>';
             }
         });
     </script>

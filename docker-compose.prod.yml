@@ -45,7 +45,7 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-niche_cp}?sslmode=disable
       BACKEND_URL: ${BACKEND_URL:-https://api.nichecp.app}
       FRONTEND_URL: ${FRONTEND_URL:-https://nichecp.app}
-      SUPERADMIN_EMAILS: ${SUPERADMIN_EMAILS:-}
+      SUPERADMIN_EMAILS: ${SUPERADMIN_EMAILS}
     volumes:
       - uploads_data:/app/uploads
     ports:
@@ -93,6 +93,7 @@ services:
       - "443:443"
     volumes:
       - ./ssl:/etc/nginx/ssl:ro
+      - ./frontend:/usr/share/nginx/html:ro
     depends_on:
       - api
     restart: unless-stopped

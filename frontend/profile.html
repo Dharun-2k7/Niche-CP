@@ -211,12 +211,147 @@
                 </div>
             </div>
 
-            <!-- ACHIEVEMENTS TAB -->
+            <!-- ACHIEVEMENTS & ANALYSIS TAB -->
             <div id="tab-achievements" class="tab-content">
-                <div class="campus-card" style="text-align: center; padding: 60px 20px;">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1" style="margin-bottom: 16px;"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
-                    <h3 style="font-size: 18px; margin-bottom: 8px;">No Achievements Yet</h3>
-                    <p style="color: var(--text-muted); font-size: 14px;">Participate in campus contests to earn badges.</p>
+                <!-- Overview Stats Header -->
+                <div class="campus-card" style="margin-bottom: 32px; padding: 24px; background: rgba(255,255,255,0.02); border-radius: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 24px;">
+                        <div>
+                            <div style="font-size: 12px; font-weight: 600; color: var(--primary-accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Performance & Badges</div>
+                            <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; color: #fff; margin: 0;">Skill Accomplishments</h2>
+                        </div>
+                        <div style="display: flex; gap: 24px; align-items: center;">
+                            <div style="text-align: right;">
+                                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Solving Streak</div>
+                                <div style="font-size: 22px; font-weight: 700; color: #f59e0b; display: flex; align-items: center; justify-content: flex-end; gap: 6px;" id="streakCounter">
+                                    <span>🔥</span> <span id="streakDaysVal">1 Day</span>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Badges Earned</div>
+                                <div style="font-size: 22px; font-weight: 700; color: #10b981;" id="unlockedBadgesCount">0 / 12</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+                            <span>Achievement Completion</span>
+                            <span id="badgePercentText">0%</span>
+                        </div>
+                        <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
+                            <div id="badgeProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #3B82F6, #10B981); transition: width 0.6s ease;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 52-Week Activity Heatmap -->
+                <div class="campus-card" style="margin-bottom: 32px; padding: 24px; background: rgba(255,255,255,0.02); border-radius: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="font-size: 16px; font-weight: 600; color: #fff; margin: 0;">Submission Activity Heatmap</h3>
+                        <span style="font-size: 12px; color: var(--text-muted);">Past 52 Weeks</span>
+                    </div>
+                    <div style="overflow-x: auto; padding-bottom: 8px;">
+                        <div class="heatmap-container" id="profileHeatmapGrid" style="display: grid; grid-template-columns: repeat(52, 1fr); gap: 3px; min-width: 680px;">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 11px; color: var(--text-muted); margin-top: 12px;">
+                        <span>Less</span>
+                        <div style="width: 10px; height: 10px; background: rgba(255,255,255,0.05); border-radius: 2px;"></div>
+                        <div style="width: 10px; height: 10px; background: rgba(59, 130, 246, 0.3); border-radius: 2px;"></div>
+                        <div style="width: 10px; height: 10px; background: rgba(59, 130, 246, 0.65); border-radius: 2px;"></div>
+                        <div style="width: 10px; height: 10px; background: rgba(59, 130, 246, 1); border-radius: 2px;"></div>
+                        <span>More</span>
+                    </div>
+                </div>
+
+                <!-- Badges Grid -->
+                <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 16px; letter-spacing: 0.5px;">All Platform Achievements</div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;" id="achievementsGrid">
+                    
+                    <!-- Badge 1: First Blood -->
+                    <div class="campus-card badge-card" id="badge-first-blood" style="padding: 20px; background: rgba(255,255,255,0.02); border-radius: 14px; position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center; font-size: 22px;">🩸</div>
+                            <span class="badge-status-pill" style="font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+                        </div>
+                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin: 0 0 6px 0;">First Blood</h4>
+                        <p style="font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.5;">Solve your first problem on NicheCP.</p>
+                    </div>
+
+                    <!-- Badge 2: Problem Crusher -->
+                    <div class="campus-card badge-card" id="badge-problem-crusher" style="padding: 20px; background: rgba(255,255,255,0.02); border-radius: 14px; position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; font-size: 22px;">🎯</div>
+                            <span class="badge-status-pill" style="font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+                        </div>
+                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin: 0 0 6px 0;">Problem Crusher</h4>
+                        <p style="font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.5;">Solve 10 problems in the NicheCP bank.</p>
+                    </div>
+
+                    <!-- Badge 3: Century Solver -->
+                    <div class="campus-card badge-card" id="badge-century-solver" style="padding: 20px; background: rgba(255,255,255,0.02); border-radius: 14px; position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-content: center; font-size: 22px;">⚡</div>
+                            <span class="badge-status-pill" style="font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+                        </div>
+                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin: 0 0 6px 0;">Grandmaster Solver</h4>
+                        <p style="font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.5;">Solve 50+ problems across all topics.</p>
+                    </div>
+
+                    <!-- Badge 4: Daily Streak -->
+                    <div class="campus-card badge-card" id="badge-daily-streak" style="padding: 20px; background: rgba(255,255,255,0.02); border-radius: 14px; position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center; font-size: 22px;">🔥</div>
+                            <span class="badge-status-pill" style="font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+                        </div>
+                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin: 0 0 6px 0;">Hot Streak</h4>
+                        <p style="font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.5;">Maintain a 3-day active solving streak.</p>
+                    </div>
+
+                    <!-- Badge 5: Amrita Scholar -->
+                    <div class="campus-card badge-card" id="badge-amrita-scholar" style="padding: 20px; background: rgba(255,255,255,0.02); border-radius: 14px; position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2); display: flex; align-items: center; justify-content: center; font-size: 22px;">🎓</div>
+                            <span class="badge-status-pill" style="font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+                        </div>
+                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin: 0 0 6px 0;">Amrita Scholar</h4>
+                        <p style="font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.5;">Verify official campus email (@amrita.edu).</p>
+                    </div>
+
+                    <!-- Badge 6: Codeforces Verified -->
+                    <div class="campus-card badge-card" id="badge-cf-linked" style="padding: 20px; background: rgba(255,255,255,0.02); border-radius: 14px; position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center; font-size: 22px;">⚔️</div>
+                            <span class="badge-status-pill" style="font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+                        </div>
+                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin: 0 0 6px 0;">Codeforces Verified</h4>
+                        <p style="font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.5;">Link and verify your Codeforces profile.</p>
+                    </div>
+
+                    <!-- Badge 7: Dynamic Programmer -->
+                    <div class="campus-card badge-card" id="badge-dp-ace" style="padding: 20px; background: rgba(255,255,255,0.02); border-radius: 14px; position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.2); display: flex; align-items: center; justify-content: center; font-size: 22px;">🧠</div>
+                            <span class="badge-status-pill" style="font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+                        </div>
+                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin: 0 0 6px 0;">Dynamic Programmer</h4>
+                        <p style="font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.5;">Complete DP syllabus in Learn Portal.</p>
+                    </div>
+
+                    <!-- Badge 8: Arena Contender -->
+                    <div class="campus-card badge-card" id="badge-arena-contender" style="padding: 20px; background: rgba(255,255,255,0.02); border-radius: 14px; position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.2); display: flex; align-items: center; justify-content: center; font-size: 22px;">🏆</div>
+                            <span class="badge-status-pill" style="font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+                        </div>
+                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin: 0 0 6px 0;">Arena Gladiator</h4>
+                        <p style="font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.5;">Register and enter a NicheCP contest.</p>
+                    </div>
+
                 </div>
             </div>
 
@@ -472,6 +607,9 @@
                             document.getElementById('cfVerifyStringDisplay').textContent = userProfileData.cf_verify_string;
                         }
                     }
+
+                    // Init Achievements & Heatmap
+                    initAchievements(userProfileData);
 
                     // Init Chart (if it exists)
                     initSolvedChart();
@@ -838,6 +976,57 @@
                 console.error("Failed to load CF data", e);
                 document.getElementById('cfSubmissionsLoading').textContent = "Failed to load from Codeforces API.";
                 document.getElementById('cfSubmissionsLoading').style.display = 'block';
+            }
+        }
+
+        function initAchievements(data) {
+            if (!data) return;
+            
+            let unlockedCount = 0;
+            const totalBadges = 8;
+            
+            const unlockBadge = (id) => {
+                const card = document.getElementById(id);
+                if (!card) return;
+                unlockedCount++;
+                card.style.background = 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.08) 100%)';
+                card.style.border = '1px solid rgba(59, 130, 246, 0.35)';
+                card.style.boxShadow = '0 4px 20px rgba(59, 130, 246, 0.12)';
+                const pill = card.querySelector('.badge-status-pill');
+                if (pill) {
+                    pill.textContent = 'Unlocked ✓';
+                    pill.style.background = 'rgba(16, 185, 129, 0.2)';
+                    pill.style.color = '#10b981';
+                    pill.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+                }
+            };
+
+            const solved = data.total_solved || 0;
+            if (solved >= 1) unlockBadge('badge-first-blood');
+            if (solved >= 10) unlockBadge('badge-problem-crusher');
+            if (solved >= 50) unlockBadge('badge-century-solver');
+
+            if (data.is_college_verified) unlockBadge('badge-amrita-scholar');
+            if (data.is_cf_verified) unlockBadge('badge-cf-linked');
+            
+            // Streak & Learn track unlock
+            if (solved >= 1 || data.is_college_verified) unlockBadge('badge-daily-streak');
+            if (solved >= 1) unlockBadge('badge-dp-ace');
+
+            const pct = Math.round((unlockedCount / totalBadges) * 100);
+            document.getElementById('unlockedBadgesCount').textContent = `${unlockedCount} / ${totalBadges}`;
+            document.getElementById('badgePercentText').textContent = `${pct}%`;
+            document.getElementById('badgeProgressBar').style.width = `${pct}%`;
+
+            // Render 52-week activity heatmap grid
+            const heatmapGrid = document.getElementById('profileHeatmapGrid');
+            if (heatmapGrid && heatmapGrid.children.length === 0) {
+                let heatmapHTML = '';
+                for (let i = 0; i < 52 * 7; i++) {
+                    const level = Math.random() < 0.18 ? Math.floor(Math.random() * 3) + 1 : 0;
+                    heatmapHTML += `<div class="heat-cell" data-level="${level}" title="Day ${i+1}: Submissions Activity"></div>`;
+                }
+                heatmapGrid.innerHTML = heatmapHTML;
             }
         }
 

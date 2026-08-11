@@ -83,8 +83,8 @@ func workerLoop(ctx context.Context, workerID int) {
 		default:
 		}
 
-		// Blocking pop from Redis queue (timeout 1s to allow graceful shutdown check)
-		result, err := db.RedisClient.BRPop(ctx, 1*time.Second, "submissions_queue").Result()
+		// Blocking pop from Redis queues (submissions_queue, run_queue)
+		result, err := db.RedisClient.BRPop(ctx, 1*time.Second, "submissions_queue", "run_queue").Result()
 		if err != nil {
 			if err == context.Canceled {
 				return
@@ -96,10 +96,87 @@ func workerLoop(ctx context.Context, workerID int) {
 			continue
 		}
 
-		// result[0] is the queue name, result[1] is the JSON payload
+		queueName := result[0]
 		payload := result[1]
-		processSubmission(ctx, workerID, payload)
+
+		if queueName == "run_queue" {
+			processRunJob(ctx, workerID, payload)
+		} else {
+			processSubmission(ctx, workerID, payload)
+		}
 	}
+}
+
+func processRunJob(ctx context.Context, workerID int, payload string) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("[Worker %d] Recovered from panic processing run job: %v\nPayload: %s", workerID, r, payload)
+		}
+	}()
+
+	var job map[string]interface{}
+	if err := json.Unmarshal([]byte(payload), &job); err != nil {
+		log.Printf("[Worker %d] Failed to unmarshal run job payload: %v", workerID, err)
+		return
+	}
+
+	requestID, okReq := job["request_id"].(string)
+	code, okCode := job["code"].(string)
+	language, okLang := job["language"].(string)
+	input, _ := job["input"].(string)
+
+	if !okReq || !okCode || !okLang {
+		log.Printf("[Worker %d] Malformed run job payload: %s", workerID, payload)
+		return
+	}
+
+	acqCtx, cancelAcq := context.WithTimeout(ctx, 10*time.Second)
+	defer cancelAcq()
+
+	err := judge.AcquireExecutionToken(acqCtx)
+	if err != nil {
+		log.Printf("[Worker %d] Semaphore acquisition failed for run job %s: %v", workerID, requestID, err)
+		return
+	}
+	defer judge.ReleaseExecutionToken()
+
+	compRes, err := judge.CompileCode(code, language)
+	if err != nil || compRes.Error != "" {
+		errMsg := compRes.Error
+		if err != nil {
+			errMsg = fmt.Sprintf("Sandbox Error: %v", err)
+		}
+		resJSON, _ := json.Marshal(map[string]string{"output": "", "stderr": errMsg})
+		resKey := fmt.Sprintf("run_result:%s", requestID)
+		db.RedisClient.LPush(ctx, resKey, resJSON)
+		db.RedisClient.Expire(ctx, resKey, 10*time.Second)
+		return
+	}
+
+	provider := judge.GetSandboxProvider()
+	session, err := provider.StartSession(compRes.ArtifactDir, language)
+	if err != nil {
+		resJSON, _ := json.Marshal(map[string]string{"output": "", "stderr": fmt.Sprintf("Sandbox Session Error: %v", err)})
+		resKey := fmt.Sprintf("run_result:%s", requestID)
+		db.RedisClient.LPush(ctx, resKey, resJSON)
+		db.RedisClient.Expire(ctx, resKey, 10*time.Second)
+		return
+	}
+	defer session.Close()
+
+	res, err := session.RunTestcase(input)
+	stdout, stderr := "", ""
+	if err != nil {
+		stderr = fmt.Sprintf("Sandbox Error: %v", err)
+	} else {
+		stdout = res.Stdout
+		stderr = res.Stderr
+	}
+
+	resJSON, _ := json.Marshal(map[string]string{"output": stdout, "stderr": stderr})
+	resKey := fmt.Sprintf("run_result:%s", requestID)
+	db.RedisClient.LPush(ctx, resKey, resJSON)
+	db.RedisClient.Expire(ctx, resKey, 10*time.Second)
 }
 
 func processSubmission(ctx context.Context, workerID int, payload string) {

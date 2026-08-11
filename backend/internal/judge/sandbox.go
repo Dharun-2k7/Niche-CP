@@ -18,22 +18,36 @@ import (
 )
 
 var (
-	cacheDir     = "/tmp/nichecp-cache-v3"
-	goCacheDir   = "/tmp/nichecp-go-cache-v3"
+	cacheDir     string
+	goCacheDir   string
 	binaryCache  *lru.Cache[string, string]
 	compileGroup singleflight.Group
 )
 
 func init() {
+	if envCache := os.Getenv("NICHECP_CACHE_DIR"); envCache != "" {
+		cacheDir = envCache
+	} else {
+		// Use workspace path so Docker volume mounts work seamlessly in Docker-in-Docker environments
+		cwd, _ := os.Getwd()
+		if strings.Contains(cwd, "/Website") {
+			idx := strings.Index(cwd, "/Website")
+			cacheDir = filepath.Join(cwd[:idx+8], ".cache")
+		} else {
+			cacheDir = filepath.Join(cwd, ".cache")
+		}
+	}
+	goCacheDir = filepath.Join(cacheDir, "go-build")
+
 	// 1. Clean up any orphaned binaries from previous crashes
 	_ = os.RemoveAll(cacheDir)
 
-	// 2. Ensure cache directory exists in RAM disk
+	// 2. Ensure cache directory exists
 	if err := os.MkdirAll(cacheDir, 0777); err != nil {
-		log.Fatalf("Failed to initialize tmpfs cache: %v", err)
+		log.Fatalf("Failed to initialize cache directory: %v", err)
 	}
 	if err := os.MkdirAll(goCacheDir, 0777); err != nil {
-		log.Fatalf("Failed to initialize tmpfs go cache: %v", err)
+		log.Fatalf("Failed to initialize go cache directory: %v", err)
 	}
 
 	// 3. Initialize LRU Cache (Capacity: 500)

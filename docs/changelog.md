@@ -4,10 +4,23 @@ All notable changes to the NicheCP project will be documented in this file.
 
 ## [Unreleased]
 
+### Security & Architecture
+- **Docker Socket Isolation (ADR 005)**: Removed host Docker socket (`/var/run/docker.sock`) volume mount from Web API container. Refactored synchronous `RunCode` execution to push payloads to Redis `run_queue`, consumed asynchronously by the Go Worker process.
+- **Role-Based Privilege Enforcement**: Removed all hardcoded personal email addresses (`dharunkaarthick07@gmail.com`) from authentication middleware (`RequireAdmin`, `RequireSuperAdmin`), profile handlers, admin promote/demote handlers, and frontend navbar rendering. Privileges are now strictly derived from PostgreSQL database `role` values (`admin`, `superadmin`) or an optional `SUPERADMIN_EMAILS` environment variable.
+- **Contest Lifecycle & Access Control**: Enforced strict contest state machine (`CREATED` -> `UPCOMING` -> `RUNNING` -> `ENDED`) with dynamic server time calculation. Built `RequireContestLifecycle` middleware enforcing authentication, contest existence, running status, and registration before arena entry.
+- **Anti-Cheat & Fullscreen Enforcement**: Fullscreen activates exclusively upon explicit user entry into active contest arenas. Implemented violation tracking (fullscreen exit, tab switch, window blur) with a 3-warning limit leading to disqualification. Disabled copy, cut, context menu, and selection on problem statement panes while retaining standard copy/paste support inside the Monaco Code Editor.
+
+### Added
+- **Algorithmic Learning Portal (`learn.html`)**: Complete Dynamic Programming track (Memoization vs Tabulation, 1D DP, 2D Grid DP, Knapsack, LIS) with interactive code templates in C++, Python, and Go, plus module tracks for Graph Algorithms, Data Structures, and Number Theory.
+- **Practice Hub (`practice.html`)**: Interactive problem archive with topic filters (DP, Graphs, STL, Math, Greedy), difficulty filters (Easy, Medium, Hard), search input, and direct links to problem arenas.
+- **Blogs & Technical Editorials (`blogs.html`)**: Technical knowledge base featuring contest strategy, DP state transition guides, and execution sandbox architecture articles.
+- **About & Infrastructure Page (`about.html`)**: Detailed architecture breakdown of NicheCP's Nginx, Go Gin API, Redis, PostgreSQL, and Docker Sandbox worker pipeline.
+
 ### Fixed
-- **Admin Panel Access & Role Normalization**: Fixed issue where users with the admin role or superadmin email were blocked from the admin panel (`admin.html`). Replaced strict string comparison with case-insensitive, whitespace-trimmed role checking (`strings.ToLower(strings.TrimSpace(role))`) across `RequireAdmin`, `RequireSuperAdmin`, `GetProfile`, `PromoteToAdmin`, and frontend `renderGlobalNav()`. Added automatic DB role bootstrapping to `'superadmin'` for `dharunkaarthick07@gmail.com`.
-- **Mobile Responsiveness & Alignment Overhaul**: Fixed severe mobile layout breakage and horizontal overflow across mobile viewports (<768px and <480px). Standardized `.site-footer` max-width to 1200px (matching `.app-container`), overhauled `#global-nav-container` to maintain 100% viewport width with 16px side padding, transformed 6-column table rows into responsive mobile cards (`.mobile-table-row`), converted wide inline 5-column footers into 1-2 column stacked sections, and added horizontal scroll wrappers for 52-week activity heatmaps.
-- **OAuth State Cookie Bug**: Fixed `"Missing oauth state cookie"` error during Google OAuth login in production. Added Redis-backed state verification as a fallback when cookies fail due to cross-domain/SameSite browser restrictions. Both cookie and Redis paths provide genuine CSRF protection with single-use state tokens.
+- **Contest Leaderboard Propagation**: Fixed bug where contest ranking buttons redirected to global standings; ranking buttons now open contest-specific standings (`rankings.html?contest_id=<id>`).
+- **Profile Image Relative Pathing**: Uploaded profile pictures are stored as relative URLs (`/uploads/filename`) in PostgreSQL, allowing Nginx to proxy `/uploads/` seamlessly without CORS or mixed-content domain issues.
+- **Virtual Contest Removal**: Purged all Virtual Contest UI elements, cards, buttons, and references from the frontend.
+- **Dead Link Elimination**: Updated all footer and navigation links across `index.html` and component templates to point to functional pages.
 
 ### Added
 - **Contest System Lifecycle**: Introduced formal state transitions (`CREATED`, `UPCOMING`, `RUNNING`, `ENDED`) via a background ticker. Added `description`, `status`, and `end_time` to contest configurations.

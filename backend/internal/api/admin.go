@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -146,23 +147,32 @@ func DemoteFromAdmin(c *gin.Context) {
 	var callerRole, callerEmail string
 	err := db.DB.QueryRow(`SELECT role, email FROM users WHERE id = $1`, userID).Scan(&callerRole, &callerEmail)
 	normCallerRole := strings.ToLower(strings.TrimSpace(callerRole))
-	isSuperAdminCaller := normCallerRole == "superadmin" || strings.EqualFold(callerEmail, "dharunkaarthick07@gmail.com")
+	
+	superadminEmailsEnv := os.Getenv("SUPERADMIN_EMAILS")
+	isSuperAdminCaller := normCallerRole == "superadmin"
+	if !isSuperAdminCaller && superadminEmailsEnv != "" {
+		for _, e := range strings.Split(superadminEmailsEnv, ",") {
+			if strings.EqualFold(strings.TrimSpace(e), callerEmail) {
+				isSuperAdminCaller = true
+				break
+			}
+		}
+	}
+
 	if err != nil || !isSuperAdminCaller {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Only the Super Admin can demote admins."})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only a Super Admin can demote admins."})
 		return
 	}
 
-	// Cannot demote yourself or the hardcoded superadmin
-	if strings.EqualFold(req.Email, "dharunkaarthick07@gmail.com") {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot demote the Super Admin."})
-		return
-	}
-
-	// Check target is actually an admin
+	// Check target is actually an admin and not a superadmin
 	var targetRole string
 	err = db.DB.QueryRow(`SELECT role FROM users WHERE email = $1`, req.Email).Scan(&targetRole)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+	if strings.ToLower(strings.TrimSpace(targetRole)) == "superadmin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot demote a Super Admin."})
 		return
 	}
 	normTargetRole := strings.ToLower(strings.TrimSpace(targetRole))
@@ -425,9 +435,20 @@ func PromoteToAdmin(c *gin.Context) {
 	var callerRole, callerEmail string
 	err := db.DB.QueryRow(`SELECT role, email FROM users WHERE id = $1`, userID).Scan(&callerRole, &callerEmail)
 	normCallerRole := strings.ToLower(strings.TrimSpace(callerRole))
-	isSuperAdminCaller := normCallerRole == "superadmin" || strings.EqualFold(callerEmail, "dharunkaarthick07@gmail.com")
+	
+	superadminEmailsEnv := os.Getenv("SUPERADMIN_EMAILS")
+	isSuperAdminCaller := normCallerRole == "superadmin"
+	if !isSuperAdminCaller && superadminEmailsEnv != "" {
+		for _, e := range strings.Split(superadminEmailsEnv, ",") {
+			if strings.EqualFold(strings.TrimSpace(e), callerEmail) {
+				isSuperAdminCaller = true
+				break
+			}
+		}
+	}
+
 	if err != nil || !isSuperAdminCaller {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Only the Super Admin can promote users to admin."})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only a Super Admin can promote users to admin."})
 		return
 	}
 

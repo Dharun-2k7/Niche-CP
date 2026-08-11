@@ -55,3 +55,18 @@ This document logs significant technical choices made during the development of 
   3. Replaced 5-column inline footers with `.site-footer`, `.footer-grid`, and `.footer-bottom` classes that automatically break down into 2-column or 1-column vertically centered stacked sections on mobile.
   4. Transformed multi-column table rows (`.mobile-table-row`, `.contest-row`) into mobile flex cards (`display: flex; flex-direction: column`) with key-value pairings per row item.
   5. Enforced `overflow-x: hidden !important` on `html, body` and added `overflow-x: auto` wrappers for data tables and activity heatmaps.
+
+## 10. Admin UI Problem/Contest Overhaul (2026-08-10)
+- **Decision**: Shifted the Problem Setter (`admin_problems.html`) to a Split-Pane Workspace (Monaco Editor for JSON testcases + Markdown Live Preview) and transitioned the Contest Manager (`admin_contests.html`) to a high-density 2-column layout.
+- **Why**: The previous single-column wizard layouts lacked the professional workflow expected on platforms like CodeChef and Polygon.
+- **How**:
+  1. Replaced raw testcase textareas with embedded `monaco-editor` instances for full JSON syntax highlighting.
+  2. Implemented a resizable split-pane layout for side-by-side editing and real-time Markdown rendering using `marked.js`.
+  3. Reorganized the Contest setup into a logical 2-column flow (Core Config vs Status/Deletion) with premium glassmorphic styling.
+
+## 11. Docker Socket Security Isolation & Database-Backed RBAC (2026-08-11)
+- **Decision**: Removed host Docker socket (`/var/run/docker.sock`) volume mount from the Go API container. Enforced queue-based code execution delegation via Redis (`run_queue`) where only the Go Worker process mounts the Docker socket. Removed all hardcoded personal email addresses (`dharunkaarthick07@gmail.com`) from authentication and authorization middleware; privileges are now strictly derived from database `role` values (`admin`, `superadmin`) or an optional `SUPERADMIN_EMAILS` environment variable.
+- **Why**:
+  1. Prevents potential host-level compromise through the Web API container.
+  2. Adheres to least privilege and zero trust principles.
+  3. Guarantees clean multi-environment deployment capability without baked-in personal identities.

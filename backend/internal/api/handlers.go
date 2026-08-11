@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/Dharun-2k7/online-coding-platform/internal/db"
-	"github.com/Dharun-2k7/online-coding-platform/internal/judge"
 	"github.com/gin-gonic/gin"
 )
 
@@ -143,7 +142,7 @@ type RunRequest struct {
 	Input    string `json:"input"`
 }
 
-// RunCode handles executing code against custom input without saving it to the database
+// RunCode handles executing code against custom input via the worker queue without requiring Docker socket access in the API container
 func RunCode(c *gin.Context) {
 	var req RunRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -151,56 +150,40 @@ func RunCode(c *gin.Context) {
 		return
 	}
 
-	// Acquire global execution capacity
-	acqCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	requestID := fmt.Sprintf("run_%d_%d", time.Now().UnixNano(), c.GetInt("user_id"))
+
+	jobData, _ := json.Marshal(map[string]interface{}{
+		"request_id": requestID,
+		"code":       req.Code,
+		"language":   req.Language,
+		"input":      req.Input,
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
 
-	err := judge.AcquireExecutionToken(acqCtx)
+	err := db.RedisClient.LPush(ctx, "run_queue", jobData).Err()
 	if err != nil {
-		c.JSON(http.StatusTooManyRequests, gin.H{
-			"error": "Server is currently busy executing code. Please try again.",
-		})
-		return
-	}
-	defer judge.ReleaseExecutionToken()
-
-	// Use our newly created Docker Sandbox
-	// Note: This blocks the HTTP request until execution finishes.
-
-	compRes, err := judge.CompileCode(req.Code, req.Language)
-	if err != nil || compRes.Error != "" {
-		errMsg := compRes.Error
-		if err != nil {
-			errMsg = fmt.Sprintf("Sandbox Error: %v", err)
-		}
-		c.JSON(http.StatusOK, gin.H{
-			"output": "",
-			"stderr": errMsg,
-		})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to enqueue code execution request"})
 		return
 	}
 
-	provider := judge.GetSandboxProvider()
-	session, err := provider.StartSession(compRes.ArtifactDir, req.Language)
+	resKey := fmt.Sprintf("run_result:%s", requestID)
+	popResult, err := db.RedisClient.BRPop(ctx, 7*time.Second, resKey).Result()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to start sandbox session: %v", err)})
+		c.JSON(http.StatusGatewayTimeout, gin.H{"output": "", "stderr": "Execution request timed out or server is busy."})
 		return
 	}
-	defer session.Close()
 
-	res, err := session.RunTestcase(req.Input)
-
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"output": "",
-			"stderr": fmt.Sprintf("Sandbox Error: %v", err),
-		})
+	var runOutput map[string]string
+	if err := json.Unmarshal([]byte(popResult[1]), &runOutput); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"output": "", "stderr": "Failed to parse execution result"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"output": res.Stdout,
-		"stderr": res.Stderr,
+		"output": runOutput["output"],
+		"stderr": runOutput["stderr"],
 	})
 }
 

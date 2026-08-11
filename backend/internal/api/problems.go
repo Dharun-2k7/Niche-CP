@@ -230,19 +230,33 @@ func GetAllContests(c *gin.Context) {
 			if description.Valid {
 				desc = description.String
 			}
+			computedStatus := status
+			if now.Before(startTime) {
+				if status != "CREATED" {
+					computedStatus = "UPCOMING"
+				}
+			} else if !now.Before(startTime) && now.Before(endTime) {
+				computedStatus = "RUNNING"
+			} else if !now.Before(endTime) {
+				computedStatus = "ENDED"
+			}
+
 			regOpen := false
 			if regOpenTime.Valid {
-				regOpen = !now.Before(regOpenTime.Time) && now.Before(startTime) && status == "UPCOMING"
+				regOpen = !now.Before(regOpenTime.Time) && now.Before(startTime) && (computedStatus == "UPCOMING" || computedStatus == "CREATED")
+			} else {
+				regOpen = now.Before(startTime) && (computedStatus == "UPCOMING" || computedStatus == "CREATED")
 			}
+
 			contests = append(contests, map[string]interface{}{
-				"id":               id,
-				"title":            title,
-				"type":             typeStr,
-				"description":      desc,
-				"start_time":       startTime.Format(time.RFC3339),
-				"end_time":         endTime.Format(time.RFC3339),
-				"duration_minutes": duration,
-				"status":           status,
+				"id":                id,
+				"title":             title,
+				"type":              typeStr,
+				"description":       desc,
+				"start_time":        startTime.Format(time.RFC3339),
+				"end_time":          endTime.Format(time.RFC3339),
+				"duration_minutes":  duration,
+				"status":            computedStatus,
 				"registration_open": regOpen,
 			})
 		}

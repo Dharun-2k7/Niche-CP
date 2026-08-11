@@ -41,3 +41,4 @@ backend/uploads/
 .ai/session.md
 backend/server
 backend/worker
+.cache/

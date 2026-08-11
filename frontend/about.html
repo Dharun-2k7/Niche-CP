@@ -3,31 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NicheCP | Feature in Development</title>
-    
-    <!-- CSS -->
+    <title>NicheCP | About & Architecture</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        .about-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        .arch-step {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            padding: 16px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+    </style>
 </head>
 <body data-theme="quantum">
     <div class="noise-bg" style="opacity: 0.4;"></div>
-
-    <!-- Unified Navigation -->
     <div id="global-nav-container"></div>
 
-    <main class="app-container" style="display: flex; align-items: center; justify-content: center; min-height: 80vh; flex-direction: column; text-align: center;">
-        <svg class="outline-icon" viewBox="0 0 24 24" style="width: 80px; height: 80px; margin-bottom: 24px; color: var(--primary-accent); opacity: 0.8;">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-        </svg>
-        <h1 style="font-size: 32px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">Feature in Development</h1>
-        <p style="font-size: 16px; color: var(--text-muted); max-width: 400px; line-height: 1.6; margin-bottom: 32px;">
-            We are currently building this section to meet our high-performance standards. Check back soon for updates.
-        </p>
-        <a href="index.html" class="btn-ghost" style="padding: 12px 24px; font-size: 14px; border-radius: 8px; text-decoration: none;">Return Home</a>
+    <main class="app-container" style="padding-top: 100px; max-width: 1000px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
+        <div style="margin-bottom: 32px;">
+            <div style="font-size: 13px; font-weight: 600; color: var(--primary-accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Platform Infrastructure</div>
+            <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; color: #fff; margin-bottom: 12px;">About NicheCP</h1>
+            <p style="color: var(--text-muted); font-size: 16px; line-height: 1.6;">NicheCP is a production-grade competitive programming platform developed and maintained by the Amrita Nagercoil ICPC Club.</p>
+        </div>
+
+        <div class="about-card">
+            <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 24px; color: #fff; margin-bottom: 16px;">Mission & Purpose</h2>
+            <p style="color: var(--text-muted); font-size: 15px; line-height: 1.7;">
+                Engineered to host campus-wide algorithmic contests, manage problem archives, execute untrusted user submissions safely in isolated Docker containers, and deliver real-time leaderboard analytics with millisecond precision.
+            </p>
+        </div>
+
+        <div class="about-card">
+            <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 24px; color: #fff; margin-bottom: 24px;">System Architecture</h2>
+            
+            <div class="arch-step">
+                <div style="background: rgba(59,130,246,0.1); color: #3B82F6; border: 1px solid rgba(59,130,246,0.2); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700;">1</div>
+                <div>
+                    <h3 style="font-size: 16px; color: #fff; margin-bottom: 4px;">Nginx & Frontend Client</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Static HTML5/ES6 client served behind Nginx reverse proxy with SSL termination and dynamic API routing.</p>
+                </div>
+            </div>
+
+            <div class="arch-step">
+                <div style="background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700;">2</div>
+                <div>
+                    <h3 style="font-size: 16px; color: #fff; margin-bottom: 4px;">Go (Gin) API Server</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">High-concurrency Go API handling authentication, RBAC, profile image uploads, and enqueuing jobs to Redis queues without host Docker socket exposure.</p>
+                </div>
+            </div>
+
+            <div class="arch-step">
+                <div style="background: rgba(168,85,247,0.1); color: #A855F7; border: 1px solid rgba(168,85,247,0.2); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700;">3</div>
+                <div>
+                    <h3 style="font-size: 16px; color: #fff; margin-bottom: 4px;">Redis & PostgreSQL Persistence</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">PostgreSQL 15 for users, problems, submissions, and contest state; Redis 7 for rate-limiting, OAuth tokens, and background worker queues.</p>
+                </div>
+            </div>
+
+            <div class="arch-step">
+                <div style="background: rgba(245,158,11,0.1); color: #F59E0B; border: 1px solid rgba(245,158,11,0.2); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700;">4</div>
+                <div>
+                    <h3 style="font-size: 16px; color: #fff; margin-bottom: 4px;">Docker Execution Worker</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Isolated Go Worker consuming Redis queues and running code sandboxes inside Alpine containers under strict memory, CPU, and PID cgroup constraints.</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; margin-bottom: 40px;">
+            <a href="index.html" class="btn-magnetic" style="padding: 12px 32px; font-size: 15px; border-radius: 12px; text-decoration: none;">Return to Home</a>
+        </div>
     </main>
 
-    <!-- Scripts -->
     <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
 </body>
 </html>

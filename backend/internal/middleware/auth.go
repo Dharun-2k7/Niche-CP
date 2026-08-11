@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/Dharun-2k7/online-coding-platform/internal/auth"
@@ -75,7 +76,17 @@ func RequireAdmin() gin.HandlerFunc {
 		}
 
 		normRole := strings.ToLower(strings.TrimSpace(role))
-		isSuperAdminEmail := strings.EqualFold(email, "dharunkaarthick07@gmail.com")
+		superadminEmailsEnv := os.Getenv("SUPERADMIN_EMAILS")
+		isSuperAdminEmail := false
+		if superadminEmailsEnv != "" {
+			for _, e := range strings.Split(superadminEmailsEnv, ",") {
+				if strings.EqualFold(strings.TrimSpace(e), email) {
+					isSuperAdminEmail = true
+					break
+				}
+			}
+		}
+
 		isAdmin := (normRole == "admin" || normRole == "superadmin" || isSuperAdminEmail)
 
 		if !isAdmin {
@@ -131,7 +142,17 @@ func RequireSuperAdmin() gin.HandlerFunc {
 		}
 
 		normRole := strings.ToLower(strings.TrimSpace(role))
-		isSuperAdminEmail := strings.EqualFold(email, "dharunkaarthick07@gmail.com")
+		superadminEmailsEnv := os.Getenv("SUPERADMIN_EMAILS")
+		isSuperAdminEmail := false
+		if superadminEmailsEnv != "" {
+			for _, e := range strings.Split(superadminEmailsEnv, ",") {
+				if strings.EqualFold(strings.TrimSpace(e), email) {
+					isSuperAdminEmail = true
+					break
+				}
+			}
+		}
+
 		isSuperAdmin := (normRole == "superadmin" || isSuperAdminEmail)
 
 		if !isSuperAdmin {

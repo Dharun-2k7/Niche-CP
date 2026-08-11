@@ -97,24 +97,42 @@
             </div>
             
             <!-- Floating Verdict Panel Overlay -->
-            <div id="verdictPanel" style="display: none; position: absolute; bottom: 20px; right: 20px; width: 320px; background: #0f1115; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-                <button onclick="document.getElementById('verdictPanel').style.display='none'" style="position:absolute; top:12px; right:12px; background:transparent; border:none; color:var(--text-muted); cursor:pointer;">
+            <div id="verdictPanel" class="verdict-modal-card" style="display: none;">
+                <button type="button" onclick="document.getElementById('verdictPanel').style.display='none'" class="verdict-close-btn" aria-label="Close verdict overlay">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
-                <div style="font-family: monospace; font-size: 20px; font-weight: 800; color: white; margin-bottom: 16px;">
-                    <span style="color: #10b981;">[</span>R<span style="color: #10b981;">]</span>
+                
+                <!-- NicheCP Brand Header (Replaced [R] reference) -->
+                <div class="verdict-brand-header">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary-accent, #3b82f6)" stroke-width="2.2" style="filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.6));">
+                        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+                        <line x1="12" y1="22" x2="12" y2="15.5"></line>
+                        <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+                        <polyline points="2 15.5 12 8.5 22 15.5"></polyline>
+                        <line x1="12" y1="2" x2="12" y2="8.5"></line>
+                    </svg>
+                    <span class="verdict-brand-title">Niche<span style="color: var(--primary-accent, #3b82f6);">CP</span></span>
                 </div>
-                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px;">
+
+                <div class="verdict-status-body">
                     <div id="verdictIcon"></div>
-                    <div id="verdictText" style="font-size: 16px; font-weight: 600;"></div>
+                    <div id="verdictText" class="verdict-main-text"></div>
                 </div>
-                <div id="verdictSubtext" style="font-size: 12px; color: var(--text-muted); margin-bottom: 24px;"></div>
-                <div style="font-size: 14px; color: #e5e7eb; margin-bottom: 16px;">
-                    Did you enjoy this problem?
-                </div>
-                <div style="display: flex; gap: 12px; width: 100%;">
-                    <button style="flex:1; padding: 8px; background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); border-radius: 6px; cursor: pointer; font-weight: 600;">Yes</button>
-                    <button style="flex:1; padding: 8px; background: rgba(255,255,255,0.05); color: #e5e7eb; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; cursor: pointer; font-weight: 600;">No</button>
+
+                <div id="verdictSubtext" class="verdict-subtext"></div>
+
+                <div class="verdict-feedback-section">
+                    <div class="verdict-feedback-title">Did you enjoy this problem?</div>
+                    <div class="verdict-feedback-actions">
+                        <button type="button" class="btn-verdict-vote yes" onclick="this.classList.add('voted');">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                            Yes
+                        </button>
+                        <button type="button" class="btn-verdict-vote no" onclick="this.classList.add('voted');">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg>
+                            No
+                        </button>
+                    </div>
                 </div>
             </div>
             

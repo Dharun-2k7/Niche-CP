@@ -9,7 +9,7 @@ import (
 
 // StartContestStateTicker starts a background goroutine to periodically update contest statuses.
 func StartContestStateTicker() {
-	ticker := time.NewTicker(1 * time.Minute)
+	ticker := time.NewTicker(10 * time.Second)
 	go func() {
 		for {
 			<-ticker.C
@@ -23,10 +23,7 @@ func StartContestStateTicker() {
 func updateContestStates() {
 	now := time.Now().UTC()
 
-	// Update to UPCOMING (e.g. if we want to distinguish CREATED and UPCOMING, say UPCOMING is < 24h away)
-	// For now, let's just do CREATED -> RUNNING -> ENDED. 
-	// Wait, UPCOMING could mean registration is open.
-	// We'll update RUNNING
+	// Update to RUNNING when start_time <= now < end_time
 	_, err := db.DB.Exec(`
 		UPDATE contests 
 		SET status = 'RUNNING' 
@@ -38,11 +35,11 @@ func updateContestStates() {
 		log.Printf("Error updating contests to RUNNING: %v", err)
 	}
 
-	// Update to ENDED
+	// Update to ENDED when end_time <= now
 	_, err = db.DB.Exec(`
 		UPDATE contests 
 		SET status = 'ENDED' 
-		WHERE status = 'RUNNING' 
+		WHERE status IN ('CREATED', 'UPCOMING', 'RUNNING') 
 		  AND end_time <= $1
 	`, now)
 	if err != nil {

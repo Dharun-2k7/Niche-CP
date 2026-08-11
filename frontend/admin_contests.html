@@ -3,94 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NicheCP | Admin - New Contest</title>
+    <title>NicheCP | Admin - Contest Setter</title>
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        .contest-setter-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 32px;
+        }
+
+        .section-header {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 16px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .form-input-clean {
+            width: 100%;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+        .form-input-clean:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .danger-zone {
+            margin-top: 24px;
+            padding: 24px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.05);
+            border-radius: 12px;
+        }
+    </style>
 </head>
 <body data-theme="quantum">
     <div class="noise-bg" style="opacity: 0.4;"></div>
 
-    <!-- Floating Glass Navigation (Injected via JS) -->
     <div id="global-nav-container"></div>
 
-    <main class="app-container niche-layout fade-in-up" style="margin-top: 40px; grid-template-columns: 1fr;">
-        <div class="module-card glow-hover" style="border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(10, 10, 15, 0.5); backdrop-filter: blur(20px); border-radius: 16px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;" class="fade-in-up stagger-1">
-                <div>
-                    <h2 class="title-massive" style="font-size: 36px; background: linear-gradient(90deg, #fff, #a1a1aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Manage Contests</h2>
-                    <p style="color: var(--text-muted); font-size: 15px; margin-top: 8px;">Create a new contest or edit an existing one with advanced configurations.</p>
-                </div>
-                <div>
-                    <select id="contestSelect" class="cyber-select" style="max-width: 320px;">
-                        <option value="new">✦ Create New Contest ✦</option>
-                    </select>
-                </div>
+    <main class="app-container" style="max-width: 1200px; padding: 120px 20px 40px;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px;">
+            <div>
+                <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; margin: 0; color: #fff;">Contest Manager</h1>
+                <p style="color: var(--text-muted); margin-top: 8px;">Schedule and configure competitive programming rounds.</p>
             </div>
+            <div>
+                <select id="contestSelect" class="cyber-select" style="min-width: 300px; padding: 12px 16px;">
+                    <option value="new">✦ Create New Contest ✦</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="contest-setter-grid">
             
-            <div class="form-group fade-in-up stagger-2" style="position: relative; margin-bottom: 24px;">
-                <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--primary-accent); margin-bottom: 8px; display: block;">Contest Title</label>
-                <input type="text" id="cTitle" class="form-input" placeholder="e.g. NicheCP Starter Round 6" style="width: 100%; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 16px; transition: border-color 0.3s, box-shadow 0.3s;">
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;" class="fade-in-up stagger-3">
-                <div class="form-group">
-                    <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; display: block;">Start Time</label>
-                    <input type="datetime-local" id="cStartTime" class="form-input" style="width: 100%; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px;">
+            <!-- Left Column: Core Configuration -->
+            <div class="glass-panel">
+                <div class="section-header">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-accent)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    Core Configuration
                 </div>
-                <div class="form-group">
-                    <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; display: block;">Duration (Minutes)</label>
-                    <input type="number" id="cDuration" class="form-input" placeholder="120" style="width: 100%; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px;">
-                </div>
-            </div>
 
-            <div class="form-group fade-in-up stagger-4" style="margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div style="margin-bottom: 24px;">
+                    <label class="form-label">Contest Title</label>
+                    <input type="text" id="cTitle" class="form-input-clean" placeholder="e.g. CodeSprint 2026 - Round 1">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                    <div>
+                        <label class="form-label">Start Time</label>
+                        <input type="datetime-local" id="cStartTime" class="form-input-clean">
+                    </div>
+                    <div>
+                        <label class="form-label">Duration (Minutes)</label>
+                        <input type="number" id="cDuration" class="form-input-clean" placeholder="120">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                    <div>
+                        <label class="form-label">Penalty Ruleset</label>
+                        <select id="cType" class="form-input-clean" style="appearance: none;">
+                            <option value="ICPC">ICPC (Time + 20m penalty)</option>
+                            <option value="IOI">IOI (Partial Scoring)</option>
+                            <option value="CUSTOM">Custom (Base Scoring)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Lifecycle Status</label>
+                        <select id="cStatus" class="form-input-clean" style="appearance: none;">
+                            <option value="CREATED">CREATED</option>
+                            <option value="UPCOMING">UPCOMING</option>
+                            <option value="RUNNING">RUNNING</option>
+                            <option value="ENDED">ENDED</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div>
-                    <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; display: block;">Penalty Type</label>
-                    <select id="cType" class="cyber-select" style="width: 100%;">
-                        <option value="ICPC">ICPC (Time + 20m penalty)</option>
-                        <option value="IOI">IOI (Partial Scoring)</option>
-                        <option value="CUSTOM">Custom (Base Scoring)</option>
-                    </select>
+                    <label class="form-label">Public Description (Markdown)</label>
+                    <textarea id="cDescription" class="form-input-clean" placeholder="Rules, prizes, sponsors..." rows="6" style="resize: vertical; font-family: monospace; font-size: 13px;"></textarea>
                 </div>
-                <div>
-                    <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; display: block;">Status</label>
-                    <select id="cStatus" class="cyber-select" style="width: 100%;">
-                        <option value="CREATED">CREATED</option>
-                        <option value="UPCOMING">UPCOMING</option>
-                        <option value="RUNNING">RUNNING</option>
-                        <option value="ENDED">ENDED</option>
-                    </select>
+
+                <div style="display: flex; justify-content: flex-end; align-items: center; gap: 16px; margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <span id="cMsg" style="font-size: 14px; font-weight: 500; display: none;"></span>
+                    <button id="saveContestBtn" class="btn-magnetic" style="padding: 12px 32px;">Create Contest</button>
                 </div>
             </div>
 
-            <div class="form-group fade-in-up stagger-4" style="margin-bottom: 32px;">
-                <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; display: block;">Description</label>
-                <textarea id="cDescription" class="form-input" placeholder="Rules, sponsors, or other details..." rows="4" style="width: 100%; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 15px; resize: vertical;"></textarea>
+            <!-- Right Column: Status & Danger Zone -->
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                
+                <div class="glass-panel" style="padding: 24px;">
+                    <div class="section-header" style="margin-bottom: 16px; padding-bottom: 12px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                        Linked Problems
+                    </div>
+                    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+                        To link problems to this contest, use the <strong>Problem Setter</strong>. 
+                        When creating or editing a problem, select this Contest in the "Destination" dropdown.
+                    </p>
+                    <a href="admin_problems.html" class="btn-ghost" style="display: inline-block; margin-top: 16px; text-decoration: none; padding: 8px 16px; font-size: 13px;">Go to Problem Setter &rarr;</a>
+                </div>
+
+                <div class="danger-zone" id="dangerZone" style="display: none;">
+                    <h3 style="color: #ef4444; margin-top: 0; margin-bottom: 8px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        Danger Zone
+                    </h3>
+                    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">
+                        Deleting a contest allows you to choose whether to keep its problems in the Practice Bank or delete them entirely.
+                    </p>
+                    <button class="btn-ghost" style="border-color: rgba(239, 68, 68, 0.4); color: #ef4444;" onclick="openDeleteModal()">Delete Contest</button>
+                </div>
+
             </div>
 
-            <div class="fade-in-up stagger-5" style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 24px;">
-                <p style="font-size: 13px; color: var(--text-muted); max-width: 400px; line-height: 1.5;">
-                    <span style="color: var(--primary-accent); font-weight: 600;">Note:</span> After creating the contest, note the Contest ID and use the "Problems" tab to link existing or new problems to it.
-                </p>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span id="cMsg" style="font-size: 14px; display: none; font-weight: 500;"></span>
-                    <button id="deleteContestBtn" class="btn-ghost" style="padding: 10px 20px; font-size: 14px; border-radius: 30px; border: 1px solid #ef4444; color: #ef4444; cursor: pointer; display: none;" onclick="openDeleteModal()">
-                        Delete Contest
-                    </button>
-                    <button id="saveContestBtn" class="btn-magnetic" style="padding: 12px 32px; font-size: 15px; border-radius: 30px; display: flex; align-items: center; gap: 8px; border: none; cursor: pointer;">
-                        <span>Create Contest</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                    </button>
-                </div>
-            </div>
         </div>
     </main>
 
-    <!-- Delete Contest Confirmation Modal -->
+    <!-- Delete Modal (Same as previous version) -->
     <div id="deleteContestModal" class="premium-modal-overlay">
         <div class="premium-modal" style="max-width: 520px;">
-            <button onclick="closeDeleteModal()" style="position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); cursor:pointer; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:background 0.2s;">✕</button>
-            
+            <button onclick="closeDeleteModal()" style="position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); cursor:pointer; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;">✕</button>
             <h3 style="font-size: 20px; margin-bottom: 4px; font-weight: 600; color: #ef4444;">Delete Contest</h3>
             <p style="color:var(--text-muted); font-size:13px; margin-bottom: 20px;">This action cannot be undone.</p>
 
@@ -102,20 +201,12 @@
                 </div>
             </div>
 
-            <!-- Delete Mode Selection -->
             <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
                 <label class="custom-toggle" style="cursor:pointer; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);">
                     <input type="radio" name="deleteMode" value="contest_only" checked style="margin-right: 10px;">
                     <div>
                         <div style="font-size: 14px; font-weight: 500;">Delete Contest Only</div>
                         <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Problems remain available in Practice.</div>
-                    </div>
-                </label>
-                <label class="custom-toggle" style="cursor:pointer; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);">
-                    <input type="radio" name="deleteMode" value="selected_problems" style="margin-right: 10px;">
-                    <div>
-                        <div style="font-size: 14px; font-weight: 500;">Delete Contest + Selected Problems</div>
-                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Choose which problems to permanently remove.</div>
                     </div>
                 </label>
                 <label class="custom-toggle" style="cursor:pointer; padding: 12px; border-radius: 8px; border: 1px solid rgba(239,68,68,0.15); background: rgba(239,68,68,0.04);">
@@ -127,12 +218,6 @@
                 </label>
             </div>
 
-            <!-- Problem Selection (shown only for selected_problems mode) -->
-            <div id="problemSelectionArea" style="display: none; margin-bottom: 20px; max-height: 200px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 8px;">
-                <div id="problemCheckboxes" style="display: flex; flex-direction: column; gap: 4px;"></div>
-            </div>
-
-            <!-- Extra confirmation for all_problems -->
             <div id="allProblemsWarning" style="display: none; margin-bottom: 20px; padding: 12px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px;">
                 <p style="font-size: 13px; color: #ef4444; margin-bottom: 8px; font-weight: 500;">This will permanently delete all problems and their test cases.</p>
                 <label style="font-size: 13px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 8px;">
@@ -145,12 +230,12 @@
                 <button class="btn-ghost" onclick="closeDeleteModal()" style="padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);">Cancel</button>
                 <button id="confirmDeleteBtn" class="btn-magnetic" onclick="executeDelete()" style="padding: 10px 24px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; background: #ef4444; color: #fff;">Delete</button>
             </div>
-
             <div id="deleteMsg" style="margin-top: 12px; font-size: 13px; display: none; text-align: center;"></div>
         </div>
     </div>
 
     <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
     <script>
         const token = localStorage.getItem('jwt_token');
         if (!token) window.location.href = 'login.html';
@@ -174,9 +259,7 @@
                         });
                     }
                 }
-            } catch (e) {
-                console.error("Failed to load contests", e);
-            }
+            } catch (e) {}
         }
         
         loadContests();
@@ -184,18 +267,17 @@
         document.getElementById('contestSelect').addEventListener('change', (e) => {
             const val = e.target.value;
             const btn = document.getElementById('saveContestBtn');
-            const msg = document.getElementById('cMsg');
-            msg.style.display = 'none';
-
+            const danger = document.getElementById('dangerZone');
+            
             if (val === 'new') {
                 selectedContestId = null;
                 btn.textContent = 'Create Contest';
-                document.getElementById('deleteContestBtn').style.display = 'none';
-                document.querySelectorAll('.form-input').forEach(el => el.value = '');
+                danger.style.display = 'none';
+                document.querySelectorAll('.form-input-clean').forEach(el => el.value = '');
             } else {
                 selectedContestId = val;
-                btn.textContent = 'Update Contest';
-                document.getElementById('deleteContestBtn').style.display = 'inline-block';
+                btn.textContent = 'Save Changes';
+                danger.style.display = 'block';
                 const c = currentContests.find(x => x.id == val);
                 if (c) {
                     document.getElementById('cTitle').value = c.title;
@@ -221,54 +303,39 @@
             const title = document.getElementById('cTitle').value;
             const startTimeStr = document.getElementById('cStartTime').value;
             const durationStr = document.getElementById('cDuration').value;
-            const type = document.getElementById('cType').value;
-            const status = document.getElementById('cStatus').value;
-            const description = document.getElementById('cDescription').value;
 
             if(!title || !startTimeStr || !durationStr) {
                 msg.style.color = '#ff4d4d';
-                msg.textContent = 'All fields are required.';
+                msg.textContent = 'Title, Start Time, and Duration are required.';
                 msg.style.display = 'inline-block';
                 return;
             }
 
-            const startTime = new Date(startTimeStr).toISOString();
-
-            btn.textContent = selectedContestId ? 'Updating...' : 'Creating...';
+            btn.textContent = selectedContestId ? 'Saving...' : 'Creating...';
             btn.disabled = true;
 
-            const url = selectedContestId 
-                ? `/api/admin/contests/${selectedContestId}`
-                : `/api/admin/contests`;
-            
-            const method = selectedContestId ? 'PUT' : 'POST';
-
             try {
-                const res = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
+                const res = await fetch(selectedContestId ? `/api/admin/contests/${selectedContestId}` : `/api/admin/contests`, {
+                    method: selectedContestId ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({
                         title: title,
-                        type: type,
-                        start_time: startTime,
+                        type: document.getElementById('cType').value,
+                        start_time: new Date(startTimeStr).toISOString(),
                         duration_minutes: parseInt(durationStr),
-                        status: status,
-                        description: description
+                        status: document.getElementById('cStatus').value,
+                        description: document.getElementById('cDescription').value
                     })
                 });
 
                 const data = await res.json();
                 if (res.ok) {
                     msg.style.color = '#10b981';
-                    msg.textContent = selectedContestId ? data.message : `${data.message} (Contest ID: ${data.contest_id})`;
+                    msg.textContent = data.message;
                     msg.style.display = 'inline-block';
-                    
                     if (!selectedContestId) {
-                        document.querySelectorAll('.form-input').forEach(el => el.value = '');
-                        document.getElementById('contestSelect').innerHTML = '<option value="new">-- Create New Contest --</option>';
+                        document.querySelectorAll('.form-input-clean').forEach(el => el.value = '');
+                        document.getElementById('contestSelect').innerHTML = '<option value="new">✦ Create New Contest ✦</option>';
                         loadContests();
                     }
                 } else {
@@ -281,23 +348,17 @@
                 msg.textContent = 'Network error';
                 msg.style.display = 'inline-block';
             } finally {
-                btn.textContent = selectedContestId ? 'Update Contest' : 'Create Contest';
+                btn.textContent = selectedContestId ? 'Save Changes' : 'Create Contest';
                 btn.disabled = false;
+                setTimeout(() => msg.style.display = 'none', 3000);
             }
         });
 
         // ── Delete Contest Logic ──
-        let deleteContestProblems = [];
-
         async function openDeleteModal() {
             if (!selectedContestId) return;
             const modal = document.getElementById('deleteContestModal');
-            const msg = document.getElementById('deleteMsg');
-            msg.style.display = 'none';
-
-            // Reset state
             document.querySelector('input[name="deleteMode"][value="contest_only"]').checked = true;
-            document.getElementById('problemSelectionArea').style.display = 'none';
             document.getElementById('allProblemsWarning').style.display = 'none';
             document.getElementById('confirmAllDelete').checked = false;
 
@@ -310,24 +371,8 @@
                     document.getElementById('deleteContestName').textContent = data.title;
                     document.getElementById('deleteProblemCount').textContent = data.problem_count;
                     document.getElementById('deleteSubmissionCount').textContent = data.submission_count;
-                    deleteContestProblems = data.problems || [];
-
-                    // Populate problem checkboxes
-                    const checkboxArea = document.getElementById('problemCheckboxes');
-                    checkboxArea.innerHTML = '';
-                    deleteContestProblems.forEach(p => {
-                        checkboxArea.innerHTML += `
-                            <label style="display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: background 0.2s;">
-                                <input type="checkbox" class="delete-problem-cb" value="${p.id}">
-                                ${p.title}
-                            </label>
-                        `;
-                    });
                 }
-            } catch (e) {
-                console.error('Failed to load contest details', e);
-            }
-
+            } catch (e) {}
             modal.classList.add('active');
         }
 
@@ -335,10 +380,8 @@
             document.getElementById('deleteContestModal').classList.remove('active');
         }
 
-        // Toggle problem selection and warning based on radio
         document.querySelectorAll('input[name="deleteMode"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
-                document.getElementById('problemSelectionArea').style.display = e.target.value === 'selected_problems' ? 'block' : 'none';
                 document.getElementById('allProblemsWarning').style.display = e.target.value === 'all_problems' ? 'block' : 'none';
             });
         });
@@ -348,24 +391,11 @@
             const mode = document.querySelector('input[name="deleteMode"]:checked').value;
             const msg = document.getElementById('deleteMsg');
 
-            // Extra guard for all_problems
             if (mode === 'all_problems' && !document.getElementById('confirmAllDelete').checked) {
                 msg.style.display = 'block';
                 msg.style.color = '#ef4444';
                 msg.textContent = 'Please confirm you understand this action is irreversible.';
                 return;
-            }
-
-            const body = { delete_mode: mode };
-            if (mode === 'selected_problems') {
-                const selected = Array.from(document.querySelectorAll('.delete-problem-cb:checked')).map(cb => parseInt(cb.value));
-                if (selected.length === 0) {
-                    msg.style.display = 'block';
-                    msg.style.color = '#ef4444';
-                    msg.textContent = 'Please select at least one problem to delete.';
-                    return;
-                }
-                body.problem_ids = selected;
             }
 
             const btn = document.getElementById('confirmDeleteBtn');
@@ -375,11 +405,8 @@
             try {
                 const res = await fetch(`/api/admin/contests/${selectedContestId}`, {
                     method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(body)
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ delete_mode: mode })
                 });
                 const data = await res.json();
                 if (res.ok) {
@@ -389,10 +416,10 @@
                     setTimeout(() => {
                         closeDeleteModal();
                         selectedContestId = null;
-                        document.getElementById('deleteContestBtn').style.display = 'none';
+                        document.getElementById('dangerZone').style.display = 'none';
                         document.getElementById('contestSelect').innerHTML = '<option value="new">✦ Create New Contest ✦</option>';
-                        document.querySelectorAll('.form-input').forEach(el => el.value = '');
-                        document.getElementById('saveContestBtn').querySelector('span').textContent = 'Create Contest';
+                        document.querySelectorAll('.form-input-clean').forEach(el => el.value = '');
+                        document.getElementById('saveContestBtn').textContent = 'Create Contest';
                         loadContests();
                     }, 1200);
                 } else {
@@ -400,16 +427,11 @@
                     msg.style.color = '#ef4444';
                     msg.textContent = data.error || 'Failed to delete contest.';
                 }
-            } catch (e) {
-                msg.style.display = 'block';
-                msg.style.color = '#ef4444';
-                msg.textContent = 'Network error.';
-            } finally {
+            } catch (e) {} finally {
                 btn.disabled = false;
                 btn.textContent = 'Delete';
             }
         }
     </script>
-<script src="js/components.js"></script>
 </body>
 </html>

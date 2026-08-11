@@ -3,31 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NicheCP | Feature in Development</title>
-    
-    <!-- CSS -->
+    <title>NicheCP | Practice Hub</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        .practice-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .practice-grid {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 32px;
+            margin-top: 32px;
+        }
+        @media (max-width: 900px) {
+            .practice-grid { grid-template-columns: 1fr; }
+        }
+        .filter-panel {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 20px;
+            height: fit-content;
+        }
+        .filter-group {
+            margin-bottom: 24px;
+        }
+        .filter-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+            text-align: left;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(255,255,255,0.04);
+            color: #fff;
+        }
+        .filter-btn.active {
+            border-color: rgba(59, 130, 246, 0.3);
+            color: #3B82F6;
+        }
+        .problem-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px 200px 100px;
+            gap: 16px;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+        .problem-row:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+    </style>
 </head>
 <body data-theme="quantum">
     <div class="noise-bg" style="opacity: 0.4;"></div>
-
-    <!-- Unified Navigation -->
     <div id="global-nav-container"></div>
 
-    <main class="app-container" style="display: flex; align-items: center; justify-content: center; min-height: 80vh; flex-direction: column; text-align: center;">
-        <svg class="outline-icon" viewBox="0 0 24 24" style="width: 80px; height: 80px; margin-bottom: 24px; color: var(--primary-accent); opacity: 0.8;">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-        </svg>
-        <h1 style="font-size: 32px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">Feature in Development</h1>
-        <p style="font-size: 16px; color: var(--text-muted); max-width: 400px; line-height: 1.6; margin-bottom: 32px;">
-            We are currently building this section to meet our high-performance standards. Check back soon for updates.
-        </p>
-        <a href="index.html" class="btn-ghost" style="padding: 12px 24px; font-size: 14px; border-radius: 8px; text-decoration: none;">Return Home</a>
+    <main class="app-container" style="padding-top: 100px;">
+        <div class="practice-container">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <div style="font-size: 13px; font-weight: 600; color: var(--primary-accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Practice Hub</div>
+                    <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; color: #fff; margin: 0;">Problem Archive</h1>
+                </div>
+                <div style="position: relative; width: 300px;">
+                    <input type="text" id="searchInput" placeholder="Search by title or tag..." style="width: 100%; padding: 12px 16px 12px 40px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; color: #fff; font-size: 14px; outline: none;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+            </div>
+
+            <div class="practice-grid">
+                <!-- Filters -->
+                <div class="filter-panel">
+                    <div class="filter-group">
+                        <div class="filter-title">Topic Category</div>
+                        <button class="filter-btn active" onclick="filterTopic('', this)">All Topics</button>
+                        <button class="filter-btn" onclick="filterTopic('dp', this)">Dynamic Programming</button>
+                        <button class="filter-btn" onclick="filterTopic('graphs', this)">Graphs & Trees</button>
+                        <button class="filter-btn" onclick="filterTopic('stl', this)">STL & Data Structures</button>
+                        <button class="filter-btn" onclick="filterTopic('math', this)">Math & Number Theory</button>
+                        <button class="filter-btn" onclick="filterTopic('greedy', this)">Greedy</button>
+                    </div>
+
+                    <div class="filter-group">
+                        <div class="filter-title">Difficulty</div>
+                        <button class="filter-btn active" onclick="filterDiff('', this)">All Difficulties</button>
+                        <button class="filter-btn" onclick="filterDiff('Easy', this)" style="color: #10b981;">Easy</button>
+                        <button class="filter-btn" onclick="filterDiff('Medium', this)" style="color: #f59e0b;">Medium</button>
+                        <button class="filter-btn" onclick="filterDiff('Hard', this)" style="color: #ef4444;">Hard</button>
+                    </div>
+                </div>
+
+                <!-- Problem List -->
+                <div>
+                    <div style="display: grid; grid-template-columns: 80px 1fr 120px 200px 100px; gap: 16px; padding: 0 20px 12px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                        <div>ID</div>
+                        <div>Title</div>
+                        <div>Difficulty</div>
+                        <div>Tags</div>
+                        <div style="text-align: right;">Action</div>
+                    </div>
+                    <div id="problemList">
+                        <div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading problems...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
-    <!-- Scripts -->
     <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    <script>
+        let allProblems = [];
+        let activeTopic = '';
+        let activeDiff = '';
+        let searchQuery = '';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/problems');
+                if (res.ok) {
+                    allProblems = await res.json();
+                    renderProblems();
+                } else {
+                    document.getElementById('problemList').innerHTML = '<div style="text-align:center; padding:40px; color:#ef4444;">Failed to load problems.</div>';
+                }
+            } catch (e) {
+                document.getElementById('problemList').innerHTML = '<div style="text-align:center; padding:40px; color:#ef4444;">Network error loading problems.</div>';
+            }
+
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase().trim();
+                renderProblems();
+            });
+        });
+
+        function filterTopic(topic, btn) {
+            btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeTopic = topic;
+            renderProblems();
+        }
+
+        function filterDiff(diff, btn) {
+            btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeDiff = diff;
+            renderProblems();
+        }
+
+        function renderProblems() {
+            const listEl = document.getElementById('problemList');
+            let filtered = allProblems.filter(p => {
+                if (activeDiff && p.difficulty !== activeDiff) return false;
+                if (activeTopic) {
+                    const tagsStr = (p.tags || '').toLowerCase();
+                    if (!tagsStr.includes(activeTopic)) return false;
+                }
+                if (searchQuery) {
+                    const titleMatch = p.title.toLowerCase().includes(searchQuery);
+                    const tagMatch = (p.tags || '').toLowerCase().includes(searchQuery);
+                    if (!titleMatch && !tagMatch) return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);">No problems found matching criteria.</div>';
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(p => {
+                let tagsHtml = '';
+                try {
+                    const tagsArr = JSON.parse(p.tags);
+                    if (Array.isArray(tagsArr) && tagsArr.length > 0) {
+                        tagsHtml = tagsArr.map(t => `<span class="tag" style="font-size:10px; padding:2px 6px; margin-right:4px;">${t}</span>`).join('');
+                    }
+                } catch(e) {}
+
+                let diffColor = '#f59e0b';
+                if (p.difficulty === 'Easy') diffColor = '#10b981';
+                else if (p.difficulty === 'Hard') diffColor = '#ef4444';
+
+                html += `
+                    <a href="problem.html?problem_id=${p.id}" class="problem-row">
+                        <div style="font-family:monospace; font-size:13px; color:var(--text-muted);">NCP-${p.id}</div>
+                        <div style="font-weight:600; font-size:15px; color:#fff;">${p.title}</div>
+                        <div style="font-size:13px; font-weight:600; color:${diffColor};">${p.difficulty || 'Medium'}</div>
+                        <div>${tagsHtml}</div>
+                        <div style="text-align:right;"><span class="btn-ghost" style="padding:6px 12px; font-size:12px;">Solve &rarr;</span></div>
+                    </a>
+                `;
+            });
+            listEl.innerHTML = html;
+        }
+    </script>
 </body>
 </html>

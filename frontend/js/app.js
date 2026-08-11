@@ -316,14 +316,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         function showStatus(message, type) {
-            statusMessage.textContent = message;
+            let iconHTML = '';
+            if (type === 'pending') {
+                iconHTML = `<span class="status-spinner"></span>`;
+            } else if (type === 'success') {
+                iconHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            } else if (type === 'warning') {
+                iconHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+            } else {
+                iconHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+            }
+
+            statusMessage.innerHTML = `${iconHTML}<span>${message}</span>`;
             statusMessage.className = `status-banner show ${type}`;
             
-            // Auto-hide the banner after 4 seconds if it's a final result
+            // Auto-hide the banner after 4.5 seconds if it's a final result
             if (type !== 'pending') {
                 setTimeout(() => {
                     statusMessage.classList.remove('show');
-                }, 4000);
+                }, 4500);
             }
         }
     }
@@ -461,8 +472,9 @@ async function renderGlobalNav(token) {
         ];
 
         const normRole = (role || '').trim().toLowerCase();
-        const isSuperAdminEmail = (userEmail || '').trim().toLowerCase() === 'dharunkaarthick07@gmail.com';
-        if (normRole === 'admin' || normRole === 'superadmin' || isSuperAdminEmail) {
+        const isAdmin = normRole === 'admin' || normRole === 'superadmin';
+
+        if (isAdmin) {
             authNavItems.push({ label: 'Admin', path: 'admin.html' });
         }
 
@@ -472,10 +484,6 @@ async function renderGlobalNav(token) {
         }).join('');
 
         // Closed Bar: Interactive Avatar Trigger & Smooth Dropdown Menu
-        const normRole = (role || '').trim().toLowerCase();
-        const isSuperAdminEmail = (userEmail || '').trim().toLowerCase() === 'dharunkaarthick07@gmail.com';
-        const isAdmin = normRole === 'admin' || normRole === 'superadmin' || isSuperAdminEmail;
-
         closedRightSideHTML = `
             <div class="nav-profile-dropdown-container" id="navProfileDropdownContainer">
                 <button type="button" class="nav-profile-trigger" id="navProfileTrigger" aria-label="User menu" aria-expanded="false" aria-haspopup="true">

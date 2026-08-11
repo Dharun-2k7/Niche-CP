@@ -188,13 +188,7 @@
                             } else if (el && !el.dataset.finished) {
                                 el.dataset.finished = "true";
                                 el.innerText = "00:00:00:00";
-                                if (isReg) {
-                                    const actionDiv = el.closest('.contest-actions');
-                                    if (actionDiv) {
-                                        const btn = actionDiv.querySelector('.btn-enter');
-                                        if (btn) btn.outerHTML = `<a href="contest_arena.html?id=${c.id}" class="btn-enter" style="background:var(--success-color); color:#000;">Enter Contest</a>`;
-                                    }
-                                }
+                                setTimeout(() => window.location.reload(), 1500);
                             }
                         }, 1000);
                     });

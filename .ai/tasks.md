@@ -1,6 +1,7 @@
 # NicheCP Task Tracking
 
 ## High Priority Tasks
+- [x] **Master System Recovery & Production Hardening**: 22-point audit completed. Removed Docker socket from API, enqueued RunCode jobs to Redis run_queue, eliminated hardcoded emails, enforced strict contest state machine, built Learn/Practice/Blogs/About portals, fixed profile uploads relative paths, documented ADR 005.
 - [x] **Docker Execution Integration Validation**: Verify end-to-end reliability of the Redis queue and custom Docker execution engine under load. (Phase 1 Latency/Robustness completed)
 - [ ] **Execution Engine Throughput (Phase 2)**: Add Redis queue sharding and worker connection pooling.
 - [x] **Problem Setter Wizard Implementation**: Transition from JSON-based problem inputs to a human-friendly UI wizard for problem setters, including ability to edit existing problems.
@@ -19,7 +20,7 @@
 - [x] **Contest Deletion Workflow**: Admin can delete contests with 3 modes (contest only, selected problems, all problems) using database transactions.
 
 ## Low Priority Tasks
-- [ ] **Blogs & Resources**: Implement the placeholder pages (`blogs.html`, `learn.html`) with actual content or database-driven resources.
+- [x] **Blogs & Resources**: Implemented full Algorithmic Learning Portal (`learn.html`), Practice Hub (`practice.html`), Blogs (`blogs.html`), and About page (`about.html`).
 - [ ] **Dark/Light Theme Persistence**: Currently defaulting to "quantum" dark theme, consider implementing a persistent toggle if requested.
 
 ## Technical Debt & Bugs

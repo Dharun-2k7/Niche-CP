@@ -8,6 +8,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       POSTGRES_DB: ${POSTGRES_DB:-niche_cp}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-niche_cp}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
@@ -18,6 +23,11 @@ services:
   redis:
     image: redis:7-alpine
     container_name: niche_cp_redis_prod
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - redis_data_prod:/data
     restart: unless-stopped
@@ -32,18 +42,19 @@ services:
       - ./backend/.env
     environment:
       REDIS_URL: redis://redis:6379
-      BACKEND_URL: https://api.nichecp.app
-      # Add other ENVs via .env file or environment variables
+      DATABASE_URL: postgres://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-niche_cp}?sslmode=disable
+      BACKEND_URL: ${BACKEND_URL:-https://api.nichecp.app}
+      FRONTEND_URL: ${FRONTEND_URL:-https://nichecp.app}
+      SUPERADMIN_EMAILS: ${SUPERADMIN_EMAILS:-}
     volumes:
       - uploads_data:/app/uploads
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp/nichecp-cache-v3:/tmp/nichecp-cache-v3
-      - /tmp/nichecp-go-cache-v3:/tmp/nichecp-go-cache-v3
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
     command: ["/app/server"]
     networks:
@@ -57,13 +68,17 @@ services:
       - ./backend/.env
     environment:
       REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgres://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-niche_cp}?sslmode=disable
+      NICHECP_CACHE_DIR: /tmp/nichecp-cache-v3
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/nichecp-cache-v3:/tmp/nichecp-cache-v3
       - /tmp/nichecp-go-cache-v3:/tmp/nichecp-go-cache-v3
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
     command: ["/app/worker"]
     networks:

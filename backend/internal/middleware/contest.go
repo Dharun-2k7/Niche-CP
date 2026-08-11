@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/Dharun-2k7/online-coding-platform/internal/auth"
 	"github.com/Dharun-2k7/online-coding-platform/internal/db"
@@ -32,7 +33,8 @@ func RequireContestLifecycle() gin.HandlerFunc {
 		}
 
 		var status string
-		err := db.DB.QueryRow("SELECT status FROM contests WHERE id = $1", contestID).Scan(&status)
+		var startTime, endTime time.Time
+		err := db.DB.QueryRow("SELECT status, start_time, end_time FROM contests WHERE id = $1", contestID).Scan(&status, &startTime, &endTime)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				c.JSON(http.StatusNotFound, gin.H{"error": "Contest not found"})
@@ -43,13 +45,14 @@ func RequireContestLifecycle() gin.HandlerFunc {
 			return
 		}
 
-		if status == "CREATED" || status == "UPCOMING" {
+		now := time.Now().UTC()
+		if now.Before(startTime) || status == "CREATED" || status == "UPCOMING" {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Contest has not started yet."})
 			c.Abort()
 			return
 		}
 
-		if status == "RUNNING" {
+		if (!now.Before(startTime) && now.Before(endTime)) || status == "RUNNING" {
 			userID, exists := c.Get("user_id")
 			if !exists {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "You must log in and register to enter the contest arena."})

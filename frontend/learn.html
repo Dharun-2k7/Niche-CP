@@ -3,31 +3,386 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NicheCP | Feature in Development</title>
-    
-    <!-- CSS -->
+    <title>NicheCP | Algorithmic Learning Portal</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        .learn-layout {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 32px;
+        }
+        @media (max-width: 900px) {
+            .learn-layout { grid-template-columns: 1fr; }
+        }
+        .learn-sidebar {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 20px;
+        }
+        .track-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            margin-bottom: 4px;
+        }
+        .track-nav-item:hover, .track-nav-item.active {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        .track-nav-item.active {
+            border-left: 3px solid var(--primary-accent);
+            background: rgba(59, 130, 246, 0.1);
+            color: #3B82F6;
+        }
+        .dp-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+        .dp-card h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .code-block {
+            background: #08080a;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #e0e0e0;
+            overflow-x: auto;
+            white-space: pre;
+            margin-top: 12px;
+            margin-bottom: 16px;
+        }
+        .lang-tab {
+            display: inline-block;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            margin-right: 6px;
+            border: 1px solid transparent;
+        }
+        .lang-tab.active {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3B82F6;
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+    </style>
 </head>
 <body data-theme="quantum">
     <div class="noise-bg" style="opacity: 0.4;"></div>
-
-    <!-- Unified Navigation -->
     <div id="global-nav-container"></div>
 
-    <main class="app-container" style="display: flex; align-items: center; justify-content: center; min-height: 80vh; flex-direction: column; text-align: center;">
-        <svg class="outline-icon" viewBox="0 0 24 24" style="width: 80px; height: 80px; margin-bottom: 24px; color: var(--primary-accent); opacity: 0.8;">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-        </svg>
-        <h1 style="font-size: 32px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">Feature in Development</h1>
-        <p style="font-size: 16px; color: var(--text-muted); max-width: 400px; line-height: 1.6; margin-bottom: 32px;">
-            We are currently building this section to meet our high-performance standards. Check back soon for updates.
-        </p>
-        <a href="index.html" class="btn-ghost" style="padding: 12px 24px; font-size: 14px; border-radius: 8px; text-decoration: none;">Return Home</a>
+    <main class="app-container" style="padding-top: 100px;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px 20px;">
+            <div style="font-size: 13px; font-weight: 600; color: var(--primary-accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Learning Syllabus</div>
+            <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; color: #fff; margin-bottom: 12px;">Algorithmic Mastery Hub</h1>
+            <p style="color: var(--text-muted); font-size: 16px; max-width: 700px; line-height: 1.6;">Comprehensive theoretical breakdowns, code templates, and problem sets engineered to strengthen your competitive programming foundation.</p>
+        </div>
+
+        <div class="learn-layout">
+            <!-- Sidebar Track List -->
+            <div class="learn-sidebar">
+                <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; padding-left: 8px;">Learning Tracks</div>
+                <a href="#dp" class="track-nav-item active" onclick="switchTrack('dp')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    Dynamic Programming
+                </a>
+                <a href="#graphs" class="track-nav-item" onclick="switchTrack('graphs')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    Graph Algorithms
+                </a>
+                <a href="#ds" class="track-nav-item" onclick="switchTrack('ds')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    Data Structures
+                </a>
+                <a href="#math" class="track-nav-item" onclick="switchTrack('math')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+                    Math & Number Theory
+                </a>
+            </div>
+
+            <!-- Content Area -->
+            <div id="track-content">
+                
+                <!-- DYNAMIC PROGRAMMING SECTION -->
+                <div id="section-dp">
+                    <div style="margin-bottom: 24px;">
+                        <span class="tag" style="background: rgba(59,130,246,0.1); color: #3B82F6; border: 1px solid rgba(59,130,246,0.2);">Track 01</span>
+                        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; color: #fff; margin-top: 8px;">Dynamic Programming (DP)</h2>
+                        <p style="color: var(--text-muted); font-size: 15px; line-height: 1.6;">Dynamic Programming optimizes recursive solutions by storing intermediate results of subproblems to avoid redundant recalculations.</p>
+                    </div>
+
+                    <!-- Module 1: Fundamentals -->
+                    <div class="dp-card">
+                        <h3>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                            1. Memoization (Top-Down) vs Tabulation (Bottom-Up)
+                        </h3>
+                        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6;">
+                            <strong>Memoization</strong> uses recursion with a cache array/hashmap to store computed state values. <strong>Tabulation</strong> builds states iteratively from base cases using loops.
+                        </p>
+                        
+                        <div style="margin-top: 16px;">
+                            <span class="lang-tab active" onclick="switchCode(this, 'fib-cpp')">C++</span>
+                            <span class="lang-tab" onclick="switchCode(this, 'fib-py')">Python</span>
+                            <span class="lang-tab" onclick="switchCode(this, 'fib-go')">Go</span>
+                        </div>
+
+                        <div id="fib-cpp" class="code-block">// Fibonacci - Tabulation O(N) Time, O(N) Space
+int fib(int n) {
+    if (n <= 1) return n;
+    vector<int> dp(n + 1, 0);
+    dp[1] = 1;
+    for (int i = 2; i <= n; i++) {
+        dp[i] = dp[i - 1] + dp[i - 2];
+    }
+    return dp[n];
+}</div>
+
+                        <div id="fib-py" class="code-block" style="display:none;"># Fibonacci - Memoization O(N) Time
+memo = {}
+def fib(n):
+    if n <= 1: return n
+    if n not in memo:
+        memo[n] = fib(n - 1) + fib(n - 2)
+    return memo[n]</div>
+
+                        <div id="fib-go" class="code-block" style="display:none;">// Fibonacci - Bottom-Up O(N) Time
+func fib(n int) int {
+    if n <= 1 { return n }
+    dp := make([]int, n+1)
+    dp[1] = 1
+    for i := 2; i <= n; i++ {
+        dp[i] = dp[i-1] + dp[i-2]
+    }
+    return dp[n]
+}</div>
+                        <a href="arena.html" class="btn-ghost" style="padding: 6px 14px; font-size: 13px; text-decoration: none;">Practice DP Basics &rarr;</a>
+                    </div>
+
+                    <!-- Module 2: 1D DP -->
+                    <div class="dp-card">
+                        <h3>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                            2. 1D DP & Subsequence Problems (LIS)
+                        </h3>
+                        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6;">
+                            In Longest Increasing Subsequence (LIS), state <code>dp[i]</code> represents the length of the longest strictly increasing subsequence ending at index <code>i</code>.
+                        </p>
+                        <div class="code-block">// LIS O(N^2) State Transition: dp[i] = max(dp[i], dp[j] + 1) for j < i and nums[j] < nums[i]
+int lengthOfLIS(vector<int>& nums) {
+    int n = nums.size();
+    if (n == 0) return 0;
+    vector<int> dp(n, 1);
+    int ans = 1;
+    for (int i = 1; i < n; i++) {
+        for (int j = 0; j < i; j++) {
+            if (nums[j] < nums[i]) {
+                dp[i] = max(dp[i], dp[j] + 1);
+            }
+        }
+        ans = max(ans, dp[i]);
+    }
+    return ans;
+}</div>
+                        <a href="arena.html" class="btn-ghost" style="padding: 6px 14px; font-size: 13px; text-decoration: none;">Solve LIS Problems &rarr;</a>
+                    </div>
+
+                    <!-- Module 3: 2D Grid DP -->
+                    <div class="dp-card">
+                        <h3>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="3"/></svg>
+                            3. 2D Grid DP & Matrix Paths
+                        </h3>
+                        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6;">
+                            Find minimum path sum or total unique paths in an <code>M x N</code> grid moving only down or right:
+                            <br><code>dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])</code>
+                        </p>
+                        <div class="code-block">int minPathSum(vector<vector<int>>& grid) {
+    int m = grid.size(), n = grid[0].size();
+    vector<vector<int>> dp(m, vector<int>(n, 0));
+    dp[0][0] = grid[0][0];
+    for (int i = 1; i < m; i++) dp[i][0] = dp[i-1][0] + grid[i][0];
+    for (int j = 1; j < n; j++) dp[0][j] = dp[0][j-1] + grid[0][j];
+    for (int i = 1; i < m; i++) {
+        for (int j = 1; j < n; j++) {
+            dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1]);
+        }
+    }
+    return dp[m-1][n-1];
+}</div>
+                    </div>
+
+                    <!-- Module 4: Knapsack -->
+                    <div class="dp-card">
+                        <h3>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                            4. 0/1 Knapsack & Unbounded Knapsack
+                        </h3>
+                        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6;">
+                            Maximize profit given item weights and values within capacity W. 
+                            Transition: <code>dp[i][w] = max(dp[i-1][w], val[i-1] + dp[i-1][w - wt[i-1]])</code>.
+                        </p>
+                        <div class="code-block">int knapsack(int W, vector<int>& wt, vector<int>& val, int n) {
+    vector<int> dp(W + 1, 0);
+    for (int i = 0; i < n; i++) {
+        for (int w = W; w >= wt[i]; w--) {
+            dp[w] = max(dp[w], val[i] + dp[w - wt[i]]);
+        }
+    }
+    return dp[W];
+}</div>
+                    </div>
+
+                </div>
+
+                <!-- GRAPH ALGORITHMS SECTION -->
+                <div id="section-graphs" style="display:none;">
+                    <div style="margin-bottom: 24px;">
+                        <span class="tag" style="background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2);">Track 02</span>
+                        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; color: #fff; margin-top: 8px;">Graph Algorithms</h2>
+                        <p style="color: var(--text-muted); font-size: 15px; line-height: 1.6;">Master BFS, DFS, Dijkstra, Union-Find, and Topological Sort for competitive programming challenges.</p>
+                    </div>
+
+                    <div class="dp-card">
+                        <h3>Breadth-First Search (BFS) & Shortest Path</h3>
+                        <p style="font-size: 14px; color: var(--text-muted);">BFS calculates unweighted shortest paths layer-by-layer using a FIFO queue.</p>
+                        <div class="code-block">void bfs(int start, vector<vector<int>>& adj, vector<bool>& visited) {
+    queue<int> q;
+    q.push(start);
+    visited[start] = true;
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        for (int v : adj[u]) {
+            if (!visited[v]) {
+                visited[v] = true;
+                q.push(v);
+            }
+        }
+    }
+}</div>
+                    </div>
+                </div>
+
+                <!-- DATA STRUCTURES SECTION -->
+                <div id="section-ds" style="display:none;">
+                    <div style="margin-bottom: 24px;">
+                        <span class="tag" style="background: rgba(168,85,247,0.1); color: #A855F7; border: 1px solid rgba(168,85,247,0.2);">Track 03</span>
+                        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; color: #fff; margin-top: 8px;">Advanced Data Structures</h2>
+                        <p style="color: var(--text-muted); font-size: 15px; line-height: 1.6;">Segment Trees, Fenwick Trees (BIT), Monotonic Stacks, and Disjoint Set Union (DSU).</p>
+                    </div>
+                    <div class="dp-card">
+                        <h3>Disjoint Set Union (DSU) with Path Compression</h3>
+                        <div class="code-block">struct DSU {
+    vector<int> parent, rank;
+    DSU(int n) {
+        parent.resize(n); iota(parent.begin(), parent.end(), 0);
+        rank.assign(n, 0);
+    }
+    int find(int i) {
+        if (parent[i] == i) return i;
+        return parent[i] = find(parent[i]);
+    }
+    void unite(int i, int j) {
+        int root_i = find(i), root_j = find(j);
+        if (root_i != root_j) {
+            if (rank[root_i] < rank[root_j]) swap(root_i, root_j);
+            parent[root_j] = root_i;
+            if (rank[root_i] == rank[root_j]) rank[root_i]++;
+        }
+    }
+};</div>
+                    </div>
+                </div>
+
+                <!-- MATH & NUMBER THEORY SECTION -->
+                <div id="section-math" style="display:none;">
+                    <div style="margin-bottom: 24px;">
+                        <span class="tag" style="background: rgba(245,158,11,0.1); color: #F59E0B; border: 1px solid rgba(245,158,11,0.2);">Track 04</span>
+                        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; color: #fff; margin-top: 8px;">Math & Number Theory</h2>
+                        <p style="color: var(--text-muted); font-size: 15px; line-height: 1.6;">Sieve of Eratosthenes, Binary Exponentiation, Modular Inverse, and Combinatorics.</p>
+                    </div>
+                    <div class="dp-card">
+                        <h3>Binary Exponentiation O(log N)</h3>
+                        <div class="code-block">long long binpow(long long a, long long b, long long m) {
+    a %= m;
+    long long res = 1;
+    while (b > 0) {
+        if (b & 1) res = res * a % m;
+        a = a * a % m;
+        b >>= 1;
+    }
+    return res;
+}</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </main>
 
-    <!-- Scripts -->
     <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    <script>
+        function switchTrack(trackId) {
+            document.querySelectorAll('.track-nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('#track-content > div').forEach(el => el.style.display = 'none');
+            
+            event.currentTarget.classList.add('active');
+            const target = document.getElementById('section-' + trackId);
+            if (target) target.style.display = 'block';
+        }
+
+        function switchCode(btn, codeId) {
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const card = parent.parentElement;
+            card.querySelectorAll('.code-block').forEach(b => b.style.display = 'none');
+            const target = document.getElementById(codeId);
+            if (target) target.style.display = 'block';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.location.hash) {
+                const track = window.location.hash.replace('#', '');
+                const navBtn = document.querySelector(`a[href="#${track}"]`);
+                if (navBtn) navBtn.click();
+            }
+        });
+    </script>
 </body>
 </html>

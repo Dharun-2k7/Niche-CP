@@ -1394,49 +1394,233 @@ select option:hover, select option:focus, select option:active, select option:ch
     margin-bottom: 5px;
 }
 
+/* =========================================================================
+   Modern Glassmorphic Toast Status Banner & Micro-Animations
+   ========================================================================= */
 .status-banner {
     position: fixed;
-    top: -100px;
+    top: 86px;
     left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    padding: 15px 40px;
+    transform: translate(-50%, -20px) scale(0.95);
+    opacity: 0;
+    visibility: hidden;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
     border-radius: 50px;
     font-family: 'Inter', sans-serif;
-    font-weight: bold;
-    font-size: 16px;
-    color: white;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    pointer-events: none;
+    font-weight: 600;
+    font-size: 14px;
+    color: #ffffff;
+    background: rgba(11, 14, 25, 0.88);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.7), 0 0 25px rgba(59, 130, 246, 0.25);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: auto;
 }
 
 .status-banner.show {
-    top: 30px;
-}
-
-.status-banner.success {
-    background: linear-gradient(135deg, #10b981, #059669);
-    border: 1px solid #34d399;
-    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
-}
-
-.status-banner.error {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    border: 1px solid #f87171;
-    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
-}
-
-.status-banner.warning {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    border: 1px solid #fbbf24;
-    box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+    top: 86px;
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
+    visibility: visible;
 }
 
 .status-banner.pending {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    border: 1px solid #60a5fa;
-    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.7), 0 0 30px rgba(59, 130, 246, 0.35);
+}
+
+.status-banner.success {
+    border-color: rgba(16, 185, 129, 0.4);
+    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.7), 0 0 30px rgba(16, 185, 129, 0.35);
+}
+
+.status-banner.warning {
+    border-color: rgba(245, 158, 11, 0.4);
+    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.7), 0 0 30px rgba(245, 158, 11, 0.35);
+}
+
+.status-banner.error {
+    border-color: rgba(239, 68, 68, 0.4);
+    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.7), 0 0 30px rgba(239, 68, 68, 0.35);
+}
+
+.status-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2.5px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #60a5fa;
+    border-radius: 50%;
+    animation: statusSpin 0.7s linear infinite;
+    display: inline-block;
+}
+
+@keyframes statusSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* =========================================================================
+   Floating Verdict Panel Modal (NicheCP Branding)
+   ========================================================================= */
+.verdict-modal-card {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 320px;
+    background: rgba(12, 15, 26, 0.94);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8), 0 0 30px rgba(16, 185, 129, 0.2);
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    animation: verdictSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes verdictSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.verdict-close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.verdict-close-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
+.verdict-brand-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+}
+
+.verdict-brand-title {
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+}
+
+.verdict-status-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.verdict-main-text {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.verdict-subtext {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.verdict-feedback-section {
+    width: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 16px;
+}
+
+.verdict-feedback-title {
+    font-size: 13px;
+    color: #d1d5db;
+    margin-bottom: 12px;
+}
+
+.verdict-feedback-actions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.btn-verdict-vote {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-verdict-vote.yes {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.btn-verdict-vote.yes:hover {
+    background: rgba(16, 185, 129, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-verdict-vote.no {
+    background: rgba(255, 255, 255, 0.05);
+    color: #9ca3af;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-verdict-vote.no:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+.btn-verdict-vote.voted {
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 @media screen and (max-width: 1024px) {

@@ -3,31 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NicheCP | Feature in Development</title>
-    
-    <!-- CSS -->
+    <title>NicheCP | Blogs & Technical Editorials</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+        .blog-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .blog-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+        .blog-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+    </style>
 </head>
 <body data-theme="quantum">
     <div class="noise-bg" style="opacity: 0.4;"></div>
-
-    <!-- Unified Navigation -->
     <div id="global-nav-container"></div>
 
-    <main class="app-container" style="display: flex; align-items: center; justify-content: center; min-height: 80vh; flex-direction: column; text-align: center;">
-        <svg class="outline-icon" viewBox="0 0 24 24" style="width: 80px; height: 80px; margin-bottom: 24px; color: var(--primary-accent); opacity: 0.8;">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-        </svg>
-        <h1 style="font-size: 32px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">Feature in Development</h1>
-        <p style="font-size: 16px; color: var(--text-muted); max-width: 400px; line-height: 1.6; margin-bottom: 32px;">
-            We are currently building this section to meet our high-performance standards. Check back soon for updates.
-        </p>
-        <a href="index.html" class="btn-ghost" style="padding: 12px 24px; font-size: 14px; border-radius: 8px; text-decoration: none;">Return Home</a>
+    <main class="app-container" style="padding-top: 100px; max-width: 1200px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
+        <div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--primary-accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Knowledge Base</div>
+            <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; color: #fff; margin-bottom: 12px;">Technical Editorials & Strategy</h1>
+            <p style="color: var(--text-muted); font-size: 16px; max-width: 700px; line-height: 1.6;">Insights into algorithmic problem solving, contest strategy, system architecture, and Codeforces rating growth strategies.</p>
+        </div>
+
+        <div class="blog-grid">
+            <article class="blog-card">
+                <div>
+                    <div class="blog-meta">
+                        <span class="tag" style="background: rgba(59,130,246,0.1); color: #3B82F6;">Strategy</span>
+                        <span>8 min read &middot; Aug 2026</span>
+                    </div>
+                    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 12px;">Mastering Dynamic Programming State Transitions</h2>
+                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">A systematic framework for breaking down complex recursive relations into 1D and 2D DP state arrays with memory space optimization.</p>
+                </div>
+                <a href="learn.html#dp" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; text-decoration: none; width: fit-content;">Read Article &rarr;</a>
+            </article>
+
+            <article class="blog-card">
+                <div>
+                    <div class="blog-meta">
+                        <span class="tag" style="background: rgba(16,185,129,0.1); color: #10b981;">Architecture</span>
+                        <span>12 min read &middot; Jul 2026</span>
+                    </div>
+                    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 12px;">Building a Sub-10ms Code Sandbox in Docker</h2>
+                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">Deep dive into how NicheCP compiles static binaries and manages container processes securely under strict cgroup limits.</p>
+                </div>
+                <a href="about.html" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; text-decoration: none; width: fit-content;">Read Article &rarr;</a>
+            </article>
+
+            <article class="blog-card">
+                <div>
+                    <div class="blog-meta">
+                        <span class="tag" style="background: rgba(245,158,11,0.1); color: #F59E0B;">CP Tips</span>
+                        <span>6 min read &middot; Jul 2026</span>
+                    </div>
+                    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 12px;">Time Complexity & Big O Bounds in Online Judges</h2>
+                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">How to estimate maximum operations within a 1.0s time limit (e.g. 10^8 operations in C++) for N = 10^5 and N = 20.</p>
+                </div>
+                <a href="practice.html" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; text-decoration: none; width: fit-content;">Read Article &rarr;</a>
+            </article>
+        </div>
     </main>
 
-    <!-- Scripts -->
     <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
 </body>
 </html>

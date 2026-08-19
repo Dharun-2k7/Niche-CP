@@ -11,6 +11,7 @@
 - [x] **Mobile Container & Navbar/Footer Responsive Alignment Overhaul**: Standardized container widths to 1200px, converted wide inline footers and table rows to adaptive mobile cards, aligned floating glass nav padding, and eliminated all horizontal overflow on small mobile screens.
 - [x] **Custom Dropdown & Select Control Engine**: Replaced default browser select inputs across the application with custom dark glassmorphic dropdowns (`appearance: none`, glowing blue chevron SVG indicator icon, styled dark option menus, and active hover/focus state transitions).
 - [x] **Profile Avatar Smooth Dropdown Menu**: Built an interactive hover/click glassmorphic dropdown menu for logged-in users with user header (avatar, name, email, role badge), Profile link, Admin Portal link (for admins), and Logout button.
+- [x] **Google Search Console Verification**: Added `<meta name="google-site-verification" content="..." />` tag to `index.html` head section for site verification.
 
 ## Medium Priority Tasks
 - [ ] **Profile Customization**: Finalize Codeforces handle integration and parsing metrics on the profile page.

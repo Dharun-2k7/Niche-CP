@@ -3,87 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NicheCP | Algorithmic Learning Portal</title>
+    <title>NicheCP | Resources & Algorithmic Roadmap</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        .learn-layout {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 32px;
-        }
-        @media (max-width: 900px) {
-            .learn-layout { grid-template-columns: 1fr; }
-        }
-        .learn-sidebar {
-            position: sticky;
-            top: 100px;
-            height: fit-content;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 16px;
-            padding: 20px;
-        }
-        .track-nav-item {
+        .resources-hero {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(168, 85, 247, 0.08) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 36px;
+            margin-bottom: 32px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+        .resource-tabs {
+            display: flex;
             gap: 12px;
-            padding: 12px 16px;
-            border-radius: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 36px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 16px;
+        }
+        .resource-tab {
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             color: var(--text-muted);
-            font-size: 14px;
-            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
-            text-decoration: none;
-            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .track-nav-item:hover, .track-nav-item.active {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-        }
-        .track-nav-item.active {
-            border-left: 3px solid var(--primary-accent);
-            background: rgba(59, 130, 246, 0.1);
+        .resource-tab.active, .resource-tab:hover {
+            background: rgba(59, 130, 246, 0.15);
             color: #3B82F6;
+            border-color: rgba(59, 130, 246, 0.3);
         }
-        .dp-card {
+        .progress-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 20px 24px;
+            min-width: 280px;
+        }
+        .roadmap-timeline {
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .roadmap-timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 20px;
+            bottom: 20px;
+            width: 3px;
+            background: linear-gradient(180deg, #3B82F6 0%, #10b981 40%, #f59e0b 70%, #A855F7 100%);
+            z-index: 1;
+        }
+        .roadmap-node-card {
+            position: relative;
+            z-index: 2;
+            margin-left: 68px;
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 16px;
-            padding: 28px;
-            margin-bottom: 24px;
+            padding: 24px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
         }
-        .dp-card h3 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 22px;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 12px;
+        .roadmap-node-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(59, 130, 246, 0.35);
+            transform: translateX(4px);
+        }
+        .roadmap-pin {
+            position: absolute;
+            left: -68px;
+            top: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #0d0f17;
+            border: 3px solid #3B82F6;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            box-shadow: 0 0 14px rgba(59, 130, 246, 0.35);
+        }
+        .badge-state {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .state-completed { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+        .state-in_progress { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+        .state-available { background: rgba(59,130,246,0.15); color: #3B82F6; border: 1px solid rgba(59,130,246,0.3); }
+        .state-locked { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.08); }
+
+        .diff-beginner { color: #60a5fa; }
+        .diff-easy { color: #10b981; }
+        .diff-medium { color: #f59e0b; }
+        .diff-hard { color: #ef4444; }
+        .diff-advanced { color: #a855f7; }
+
+        /* Lesson Viewer Modal */
+        .lesson-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(6, 6, 8, 0.88);
+            backdrop-filter: blur(12px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .lesson-modal-overlay.active { display: flex; }
+        .lesson-modal-content {
+            background: #0d0f17;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            max-width: 820px;
+            width: 100%;
+            max-height: 88vh;
+            overflow-y: auto;
+            padding: 36px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            position: relative;
         }
         .code-block {
             background: #08080a;
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 10px;
             padding: 16px;
-            font-family: monospace;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 13px;
             color: #e0e0e0;
             overflow-x: auto;
             white-space: pre;
-            margin-top: 12px;
-            margin-bottom: 16px;
+            margin: 16px 0;
         }
         .lang-tab {
             display: inline-block;
-            padding: 4px 12px;
+            padding: 6px 14px;
             font-size: 12px;
             font-weight: 600;
             border-radius: 6px;
@@ -91,12 +171,11 @@
             background: rgba(255,255,255,0.05);
             color: var(--text-muted);
             margin-right: 6px;
-            border: 1px solid transparent;
         }
         .lang-tab.active {
             background: rgba(59, 130, 246, 0.2);
             color: #3B82F6;
-            border-color: rgba(59, 130, 246, 0.3);
+            border: 1px solid rgba(59, 130, 246, 0.3);
         }
     </style>
 </head>
@@ -104,239 +183,91 @@
     <div class="noise-bg" style="opacity: 0.4;"></div>
     <div id="global-nav-container"></div>
 
-    <main class="app-container" style="padding-top: 100px;">
-        <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px 20px;">
-            <div style="font-size: 13px; font-weight: 600; color: var(--primary-accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Learning Syllabus</div>
-            <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; color: #fff; margin-bottom: 12px;">Algorithmic Mastery Hub</h1>
-            <p style="color: var(--text-muted); font-size: 16px; max-width: 700px; line-height: 1.6;">Comprehensive theoretical breakdowns, code templates, and problem sets engineered to strengthen your competitive programming foundation.</p>
+    <main class="app-container" style="padding-top: 100px; max-width: 1200px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
+        
+        <!-- Hero Header -->
+        <div class="resources-hero">
+            <div>
+                <div style="font-size: 13px; font-weight: 600; color: var(--primary-accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Knowledge Hub</div>
+                <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; color: #fff; margin: 0 0 10px 0;">NICHECP RESOURCES</h1>
+                <p style="color: var(--text-muted); font-size: 15px; max-width: 620px; line-height: 1.6; margin: 0;">A structured 16-step competitive programming progression roadmap from basic syntax to advanced algorithms, tree DP, and graph theory.</p>
+            </div>
+            <div class="progress-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 13px; font-weight: 600; color: #fff;">Curriculum Mastery</span>
+                    <span style="font-size: 14px; font-weight: 700; color: var(--primary-accent);">25%</span>
+                </div>
+                <div style="height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
+                    <div style="height: 100%; width: 25%; background: linear-gradient(90deg, #3B82F6, #10b981);"></div>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted); text-align: right;">4 of 16 Progression Nodes Completed</div>
+            </div>
         </div>
 
-        <div class="learn-layout">
-            <!-- Sidebar Track List -->
-            <div class="learn-sidebar">
-                <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; padding-left: 8px;">Learning Tracks</div>
-                <a href="#dp" class="track-nav-item active" onclick="switchTrack('dp')">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-                    Dynamic Programming
-                </a>
-                <a href="#graphs" class="track-nav-item" onclick="switchTrack('graphs')">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                    Graph Algorithms
-                </a>
-                <a href="#ds" class="track-nav-item" onclick="switchTrack('ds')">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                    Data Structures
-                </a>
-                <a href="#math" class="track-nav-item" onclick="switchTrack('math')">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
-                    Math & Number Theory
-                </a>
+        <!-- Resource Hub Category Tabs -->
+        <div class="resource-tabs">
+            <button class="resource-tab active" onclick="switchResourceTab('roadmap', this)">
+                <span>🗺️</span> Competitive Programming Roadmap
+            </button>
+            <button class="resource-tab" onclick="switchResourceTab('guides', this)">
+                <span>📘</span> Guides & Tutorials
+            </button>
+            <button class="resource-tab" onclick="switchResourceTab('cheatsheets', this)">
+                <span>📋</span> CP Syntax Cheatsheets
+            </button>
+            <button class="resource-tab" onclick="switchResourceTab('reference', this)">
+                <span>⚡</span> Algorithm Reference
+            </button>
+            <button class="resource-tab" onclick="switchResourceTab('strategy', this)">
+                <span>🏆</span> Contest Strategy
+            </button>
+            <button class="resource-tab" onclick="switchResourceTab('engineering', this)">
+                <span>🛠️</span> Engineering Resources
+            </button>
+        </div>
+
+        <!-- ROADMAP TIMELINE CONTAINER -->
+        <div id="tab-roadmap">
+            <div class="roadmap-timeline" id="roadmapList">
+                <!-- Injected via JavaScript -->
             </div>
+        </div>
 
-            <!-- Content Area -->
-            <div id="track-content">
-                
-                <!-- DYNAMIC PROGRAMMING SECTION -->
-                <div id="section-dp">
-                    <div style="margin-bottom: 24px;">
-                        <span class="tag" style="background: rgba(59,130,246,0.1); color: #3B82F6; border: 1px solid rgba(59,130,246,0.2);">Track 01</span>
-                        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; color: #fff; margin-top: 8px;">Dynamic Programming (DP)</h2>
-                        <p style="color: var(--text-muted); font-size: 15px; line-height: 1.6;">Dynamic Programming optimizes recursive solutions by storing intermediate results of subproblems to avoid redundant recalculations.</p>
-                    </div>
-
-                    <!-- Module 1: Fundamentals -->
-                    <div class="dp-card">
-                        <h3>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                            1. Memoization (Top-Down) vs Tabulation (Bottom-Up)
-                        </h3>
-                        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6;">
-                            <strong>Memoization</strong> uses recursion with a cache array/hashmap to store computed state values. <strong>Tabulation</strong> builds states iteratively from base cases using loops.
-                        </p>
-                        
-                        <div style="margin-top: 16px;">
-                            <span class="lang-tab active" onclick="switchCode(this, 'fib-cpp')">C++</span>
-                            <span class="lang-tab" onclick="switchCode(this, 'fib-py')">Python</span>
-                            <span class="lang-tab" onclick="switchCode(this, 'fib-go')">Go</span>
-                        </div>
-
-                        <div id="fib-cpp" class="code-block">// Fibonacci - Tabulation O(N) Time, O(N) Space
-int fib(int n) {
-    if (n <= 1) return n;
-    vector<int> dp(n + 1, 0);
-    dp[1] = 1;
-    for (int i = 2; i <= n; i++) {
-        dp[i] = dp[i - 1] + dp[i - 2];
-    }
-    return dp[n];
-}</div>
-
-                        <div id="fib-py" class="code-block" style="display:none;"># Fibonacci - Memoization O(N) Time
-memo = {}
-def fib(n):
-    if n <= 1: return n
-    if n not in memo:
-        memo[n] = fib(n - 1) + fib(n - 2)
-    return memo[n]</div>
-
-                        <div id="fib-go" class="code-block" style="display:none;">// Fibonacci - Bottom-Up O(N) Time
-func fib(n int) int {
-    if n <= 1 { return n }
-    dp := make([]int, n+1)
-    dp[1] = 1
-    for i := 2; i <= n; i++ {
-        dp[i] = dp[i-1] + dp[i-2]
-    }
-    return dp[n]
-}</div>
-                        <a href="arena.html" class="btn-ghost" style="padding: 6px 14px; font-size: 13px; text-decoration: none;">Practice DP Basics &rarr;</a>
-                    </div>
-
-                    <!-- Module 2: 1D DP -->
-                    <div class="dp-card">
-                        <h3>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                            2. 1D DP & Subsequence Problems (LIS)
-                        </h3>
-                        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6;">
-                            In Longest Increasing Subsequence (LIS), state <code>dp[i]</code> represents the length of the longest strictly increasing subsequence ending at index <code>i</code>.
-                        </p>
-                        <div class="code-block">// LIS O(N^2) State Transition: dp[i] = max(dp[i], dp[j] + 1) for j < i and nums[j] < nums[i]
-int lengthOfLIS(vector<int>& nums) {
-    int n = nums.size();
-    if (n == 0) return 0;
-    vector<int> dp(n, 1);
-    int ans = 1;
-    for (int i = 1; i < n; i++) {
-        for (int j = 0; j < i; j++) {
-            if (nums[j] < nums[i]) {
-                dp[i] = max(dp[i], dp[j] + 1);
-            }
-        }
-        ans = max(ans, dp[i]);
-    }
-    return ans;
-}</div>
-                        <a href="arena.html" class="btn-ghost" style="padding: 6px 14px; font-size: 13px; text-decoration: none;">Solve LIS Problems &rarr;</a>
-                    </div>
-
-                    <!-- Module 3: 2D Grid DP -->
-                    <div class="dp-card">
-                        <h3>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="3"/></svg>
-                            3. 2D Grid DP & Matrix Paths
-                        </h3>
-                        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6;">
-                            Find minimum path sum or total unique paths in an <code>M x N</code> grid moving only down or right:
-                            <br><code>dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])</code>
-                        </p>
-                        <div class="code-block">int minPathSum(vector<vector<int>>& grid) {
-    int m = grid.size(), n = grid[0].size();
-    vector<vector<int>> dp(m, vector<int>(n, 0));
-    dp[0][0] = grid[0][0];
-    for (int i = 1; i < m; i++) dp[i][0] = dp[i-1][0] + grid[i][0];
-    for (int j = 1; j < n; j++) dp[0][j] = dp[0][j-1] + grid[0][j];
-    for (int i = 1; i < m; i++) {
-        for (int j = 1; j < n; j++) {
-            dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1]);
-        }
-    }
-    return dp[m-1][n-1];
-}</div>
-                    </div>
-
-                    <!-- Module 4: Knapsack -->
-                    <div class="dp-card">
-                        <h3>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                            4. 0/1 Knapsack & Unbounded Knapsack
-                        </h3>
-                        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6;">
-                            Maximize profit given item weights and values within capacity W. 
-                            Transition: <code>dp[i][w] = max(dp[i-1][w], val[i-1] + dp[i-1][w - wt[i-1]])</code>.
-                        </p>
-                        <div class="code-block">int knapsack(int W, vector<int>& wt, vector<int>& val, int n) {
-    vector<int> dp(W + 1, 0);
-    for (int i = 0; i < n; i++) {
-        for (int w = W; w >= wt[i]; w--) {
-            dp[w] = max(dp[w], val[i] + dp[w - wt[i]]);
-        }
-    }
-    return dp[W];
-}</div>
-                    </div>
-
+        <!-- GUIDES TAB -->
+        <div id="tab-guides" style="display:none; padding: 40px 0; text-align: center;">
+            <h3 style="color:#fff; font-family:'Space Grotesk',sans-serif; font-size:22px; margin-bottom:8px;">Deep-Dive Learning Guides</h3>
+            <p style="color:var(--text-muted); font-size:14px; max-width:550px; margin: 0 auto 24px;">Structured written guides covering ICPC preparation, Codeforces contest execution, and fast I/O setup.</p>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px; text-align:left;">
+                <div class="roadmap-node-card" onclick="location.href='blogs.html'">
+                    <div style="font-size:12px; color:#3B82F6; font-weight:600; margin-bottom:6px;">GUIDE 01</div>
+                    <h4 style="color:#fff; margin-bottom:8px; font-family:'Space Grotesk',sans-serif;">Fast I/O & Template Optimization in C++</h4>
+                    <p style="font-size:13px; color:var(--text-muted); margin:0;">How to configure <code>ios_base::sync_with_stdio(false)</code> and custom I/O buffers for tight time limits.</p>
                 </div>
-
-                <!-- GRAPH ALGORITHMS SECTION -->
-                <div id="section-graphs" style="display:none;">
-                    <div style="margin-bottom: 24px;">
-                        <span class="tag" style="background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2);">Track 02</span>
-                        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; color: #fff; margin-top: 8px;">Graph Algorithms</h2>
-                        <p style="color: var(--text-muted); font-size: 15px; line-height: 1.6;">Master BFS, DFS, Dijkstra, Union-Find, and Topological Sort for competitive programming challenges.</p>
-                    </div>
-
-                    <div class="dp-card">
-                        <h3>Breadth-First Search (BFS) & Shortest Path</h3>
-                        <p style="font-size: 14px; color: var(--text-muted);">BFS calculates unweighted shortest paths layer-by-layer using a FIFO queue.</p>
-                        <div class="code-block">void bfs(int start, vector<vector<int>>& adj, vector<bool>& visited) {
-    queue<int> q;
-    q.push(start);
-    visited[start] = true;
-    while (!q.empty()) {
-        int u = q.front(); q.pop();
-        for (int v : adj[u]) {
-            if (!visited[v]) {
-                visited[v] = true;
-                q.push(v);
-            }
-        }
-    }
-}</div>
-                    </div>
+                <div class="roadmap-node-card" onclick="location.href='blogs.html'">
+                    <div style="font-size:12px; color:#10b981; font-weight:600; margin-bottom:6px;">GUIDE 02</div>
+                    <h4 style="color:#fff; margin-bottom:8px; font-family:'Space Grotesk',sans-serif;">ICPC Team Contest Strategy & Time Allocation</h4>
+                    <p style="font-size:13px; color:var(--text-muted); margin:0;">Maximizing problem selection efficiency during 5-hour competitive programming team rounds.</p>
                 </div>
+            </div>
+        </div>
 
-                <!-- DATA STRUCTURES SECTION -->
-                <div id="section-ds" style="display:none;">
-                    <div style="margin-bottom: 24px;">
-                        <span class="tag" style="background: rgba(168,85,247,0.1); color: #A855F7; border: 1px solid rgba(168,85,247,0.2);">Track 03</span>
-                        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; color: #fff; margin-top: 8px;">Advanced Data Structures</h2>
-                        <p style="color: var(--text-muted); font-size: 15px; line-height: 1.6;">Segment Trees, Fenwick Trees (BIT), Monotonic Stacks, and Disjoint Set Union (DSU).</p>
-                    </div>
-                    <div class="dp-card">
-                        <h3>Disjoint Set Union (DSU) with Path Compression</h3>
-                        <div class="code-block">struct DSU {
-    vector<int> parent, rank;
-    DSU(int n) {
-        parent.resize(n); iota(parent.begin(), parent.end(), 0);
-        rank.assign(n, 0);
-    }
-    int find(int i) {
-        if (parent[i] == i) return i;
-        return parent[i] = find(parent[i]);
-    }
-    void unite(int i, int j) {
-        int root_i = find(i), root_j = find(j);
-        if (root_i != root_j) {
-            if (rank[root_i] < rank[root_j]) swap(root_i, root_j);
-            parent[root_j] = root_i;
-            if (rank[root_i] == rank[root_j]) rank[root_i]++;
-        }
-    }
-};</div>
-                    </div>
-                </div>
+        <!-- CHEATSHEETS TAB -->
+        <div id="tab-cheatsheets" style="display:none; padding: 40px 0;">
+            <h3 style="color:#fff; font-family:'Space Grotesk',sans-serif; font-size:22px; margin-bottom:8px;">Language & Syntax Cheatsheets</h3>
+            <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px;">Quick reference snippets for standard library data structures and algorithms.</p>
+            <div class="code-block">// C++ STL Quick Reference
+vector<int> v = {3, 1, 4, 1, 5};
+sort(v.begin(), v.end()); // O(N log N)
+auto it = lower_bound(v.begin(), v.end(), 3); // Binary Search O(log N)
+priority_queue<int, vector<int>, greater<int>> minHeap; // Min-Heap</div>
+        </div>
 
-                <!-- MATH & NUMBER THEORY SECTION -->
-                <div id="section-math" style="display:none;">
-                    <div style="margin-bottom: 24px;">
-                        <span class="tag" style="background: rgba(245,158,11,0.1); color: #F59E0B; border: 1px solid rgba(245,158,11,0.2);">Track 04</span>
-                        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; color: #fff; margin-top: 8px;">Math & Number Theory</h2>
-                        <p style="color: var(--text-muted); font-size: 15px; line-height: 1.6;">Sieve of Eratosthenes, Binary Exponentiation, Modular Inverse, and Combinatorics.</p>
-                    </div>
-                    <div class="dp-card">
-                        <h3>Binary Exponentiation O(log N)</h3>
-                        <div class="code-block">long long binpow(long long a, long long b, long long m) {
+        <!-- ALGORITHM REFERENCE TAB -->
+        <div id="tab-reference" style="display:none; padding: 40px 0;">
+            <h3 style="color:#fff; font-family:'Space Grotesk',sans-serif; font-size:22px; margin-bottom:8px;">Core Algorithm Reference Library</h3>
+            <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px;">Verified templates for DSU, Segment Tree, Binary Exponentiation, and Dijkstra.</p>
+            <div class="code-block">// Binary Exponentiation (a^b % m) in O(log b)
+long long binpow(long long a, long long b, long long m) {
     a %= m;
     long long res = 1;
     while (b > 0) {
@@ -346,43 +277,422 @@ int lengthOfLIS(vector<int>& nums) {
     }
     return res;
 }</div>
-                    </div>
-                </div>
-
-            </div>
         </div>
+
+        <!-- STRATEGY TAB -->
+        <div id="tab-strategy" style="display:none; padding: 40px 0;">
+            <h3 style="color:#fff; font-family:'Space Grotesk',sans-serif; font-size:22px; margin-bottom:8px;">Contest Execution & Strategy</h3>
+            <p style="color:var(--text-muted); font-size:14px; max-width:600px;">Key guidelines: Always estimate Big-O bounds against $N \le 2\cdot 10^5$, avoid premature coding before sketching, and switch problems after 15 minutes of zero progress.</p>
+        </div>
+
+        <!-- ENGINEERING TAB -->
+        <div id="tab-engineering" style="display:none; padding: 40px 0;">
+            <h3 style="color:#fff; font-family:'Space Grotesk',sans-serif; font-size:22px; margin-bottom:8px;">NicheCP System Architecture</h3>
+            <p style="color:var(--text-muted); font-size:14px; max-width:600px;">Learn how NicheCP runs compiled code inside isolated Docker containers using Redis job queues and static Alpine execution binaries.</p>
+        </div>
+
     </main>
+
+    <!-- LESSON VIEWER MODAL -->
+    <div class="lesson-modal-overlay" id="lessonModal">
+        <div class="lesson-modal-content">
+            <button onclick="closeLesson()" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size:20px;">
+                ✕
+            </button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
 
     <script src="js/app.js"></script>
     <script src="js/components.js"></script>
     <script>
-        function switchTrack(trackId) {
-            document.querySelectorAll('.track-nav-item').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('#track-content > div').forEach(el => el.style.display = 'none');
-            
-            event.currentTarget.classList.add('active');
-            const target = document.getElementById('section-' + trackId);
-            if (target) target.style.display = 'block';
+        // 16 Sequential Roadmap Progression Nodes
+        const roadmapNodes = [
+            {
+                id: 'basics',
+                num: '01',
+                title: 'Programming Basics',
+                desc: 'Language setup, compiler directives, basic program structure, and standard execution flow.',
+                diff: 'Beginner',
+                diffClass: 'diff-beginner',
+                state: 'COMPLETED',
+                stateClass: 'state-completed',
+                prereq: 'None',
+                explanation: 'Understand the fundamental execution pipeline: source code compilation, main entry point execution, standard headers, and exit codes.',
+                codeCpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello NicheCP!" << endl;\n    return 0;\n}`,
+                codePy: `print("Hello NicheCP!")`,
+                codeGo: `package main\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello NicheCP!")\n}`,
+                complexity: 'Time: O(1) | Space: O(1)',
+                pitfalls: 'Missing return statements or incorrect main function signature.',
+                probId: 1
+            },
+            {
+                id: 'variables',
+                num: '02',
+                title: 'Variables & Data Types',
+                desc: 'Primitive data types, integer bounds (32-bit vs 64-bit), float precision, and type casting.',
+                diff: 'Beginner',
+                diffClass: 'diff-beginner',
+                state: 'COMPLETED',
+                stateClass: 'state-completed',
+                prereq: 'Programming Basics',
+                explanation: 'Choosing the correct primitive data type prevents integer overflow. In CP, values exceeding 2*10^9 require 64-bit integer types (long long).',
+                codeCpp: `int a = 1e9; // 32-bit int\nlong long b = 1e18; // 64-bit int required for large values\ncout << (a + b) << endl;`,
+                codePy: `a = 10**9\nb = 10**18\nprint(a + b)`,
+                codeGo: `var a int32 = 1000000000\nvar b int64 = 1000000000000000000\nfmt.Println(int64(a) + b)`,
+                complexity: 'Time: O(1) | Space: O(1)',
+                pitfalls: 'Using 32-bit int for products like a * b when a, b >= 10^5.',
+                probId: 1
+            },
+            {
+                id: 'ifelse',
+                num: '03',
+                title: 'If / Else Branching',
+                desc: 'Conditional logic, boolean operations, nested conditions, and ternary operators.',
+                diff: 'Easy',
+                diffClass: 'diff-easy',
+                state: 'COMPLETED',
+                stateClass: 'state-completed',
+                prereq: 'Variables & Data Types',
+                explanation: 'Evaluate boolean expressions and branch code execution paths efficiently.',
+                codeCpp: `if (n % 2 == 0) {\n    cout << "EVEN" << endl;\n} else {\n    cout << "ODD" << endl;\n}`,
+                codePy: `print("EVEN" if n % 2 == 0 else "ODD")`,
+                codeGo: `if n % 2 == 0 {\n    fmt.Println("EVEN")\n} else {\n    fmt.Println("ODD")\n}`,
+                complexity: 'Time: O(1) | Space: O(1)',
+                pitfalls: 'Confusing assignment (=) with equality comparison (==).',
+                probId: 1
+            },
+            {
+                id: 'loops',
+                num: '04',
+                title: 'Loops & Iteration',
+                desc: 'For loops, while loops, break/continue statements, and loop complexity bounds.',
+                diff: 'Easy',
+                diffClass: 'diff-easy',
+                state: 'COMPLETED',
+                stateClass: 'state-completed',
+                prereq: 'If / Else',
+                explanation: 'Iterate over datasets or repeat calculations. Standard 1.0s time limits allow ~10^8 operations.',
+                codeCpp: `for (int i = 0; i < n; i++) {\n    sum += i;\n}`,
+                codePy: `sum_val = sum(range(n))`,
+                codeGo: `sum := 0\nfor i := 0; i < n; i++ {\n    sum += i\n}`,
+                complexity: 'Time: O(N) | Space: O(1)',
+                pitfalls: 'Infinite loops or off-by-one boundary conditions.',
+                probId: 1
+            },
+            {
+                id: 'functions',
+                num: '05',
+                title: 'Functions & Scopes',
+                desc: 'Function signatures, pass-by-value vs pass-by-reference, and local/global variable scoping.',
+                diff: 'Easy',
+                diffClass: 'diff-easy',
+                state: 'IN PROGRESS',
+                stateClass: 'state-in_progress',
+                prereq: 'Loops',
+                explanation: 'Modularize reusable logic. Pass large arrays/vectors by reference to avoid O(N) copy overhead per call.',
+                codeCpp: `void solve(const vector<int>& nums) {\n    // Const reference avoids copying\n}`,
+                codePy: `def solve(nums):\n    pass`,
+                codeGo: `func solve(nums []int) {\n    // Slices are passed efficiently by reference\n}`,
+                complexity: 'Time: O(1) pass-by-ref | Space: O(1)',
+                pitfalls: 'Passing vectors by value in recursive loops, multiplying time complexity by N.',
+                probId: 1
+            },
+            {
+                id: 'arrays_strings',
+                num: '06',
+                title: 'Arrays & Strings',
+                desc: '1D/2D static arrays, string manipulation, substrings, and character encoding.',
+                diff: 'Easy',
+                diffClass: 'diff-easy',
+                state: 'AVAILABLE',
+                stateClass: 'state-available',
+                prereq: 'Functions & Scopes',
+                explanation: 'Store ordered sequences of elements and manipulate text characters in contiguous memory.',
+                codeCpp: `string s = "nichecp";\nreverse(s.begin(), s.end());`,
+                codePy: `s = "nichecp"[::-1]`,
+                codeGo: `// String reversal in Go\nrunes := []rune("nichecp")`,
+                complexity: 'Time: O(N) | Space: O(N)',
+                pitfalls: 'Out-of-bounds array access causing Segmentation Fault (SIGSEGV).',
+                probId: 1
+            },
+            {
+                id: 'complexity',
+                num: '07',
+                title: 'Time & Space Complexity',
+                desc: 'Big-O notation, time limits (1.0s ~ 10^8 ops), memory bounds (256MB), and bottleneck identification.',
+                diff: 'Medium',
+                diffClass: 'diff-medium',
+                state: 'AVAILABLE',
+                stateClass: 'state-available',
+                prereq: 'Arrays & Strings',
+                explanation: 'Estimate whether your algorithm will pass under the target time limit before writing code.',
+                codeCpp: `// N <= 2*10^5 requires O(N log N) or O(N)\n// N <= 5000 allows O(N^2)`,
+                codePy: `# Big-O estimation table`,
+                codeGo: `// Analyze operations count`,
+                complexity: 'Theoretical Analysis',
+                pitfalls: 'Writing O(N^2) nested loops when N = 10^5, resulting in TLE.',
+                probId: 1
+            },
+            {
+                id: 'sorting',
+                num: '08',
+                title: 'Sorting Algorithms',
+                desc: 'O(N log N) comparison sorts (std::sort, Merge Sort, Quick Sort) and custom comparators.',
+                diff: 'Medium',
+                diffClass: 'diff-medium',
+                state: 'AVAILABLE',
+                stateClass: 'state-available',
+                prereq: 'Time & Space Complexity',
+                explanation: 'Order elements efficiently to enable binary search, two-pointer techniques, and greedy choices.',
+                codeCpp: `sort(v.begin(), v.end(), [](const pair<int,int>& a, const pair<int,int>& b) {\n    return a.second < b.second;\n});`,
+                codePy: `v.sort(key=lambda x: x[1])`,
+                codeGo: `sort.Slice(v, func(i, j int) bool { return v[i].Second < v[j].Second })`,
+                complexity: 'Time: O(N log N) | Space: O(log N)',
+                pitfalls: 'Incorrect comparator functions breaking strict weak ordering rules.',
+                probId: 1
+            },
+            {
+                id: 'binary_search',
+                num: '09',
+                title: 'Binary Search',
+                desc: 'O(log N) search on sorted arrays, lower_bound / upper_bound, and Binary Search on Answer.',
+                diff: 'Medium',
+                diffClass: 'diff-medium',
+                state: 'AVAILABLE',
+                stateClass: 'state-available',
+                prereq: 'Sorting Algorithms',
+                explanation: 'Find items or optimize monotonic functions in logarithmic time.',
+                codeCpp: `int low = 0, high = n - 1, ans = -1;\nwhile (low <= high) {\n    int mid = low + (high - low) / 2;\n    if (check(mid)) { ans = mid; high = mid - 1; }\n    else { low = mid + 1; }\n}`,
+                codePy: `# Binary Search on Answer template`,
+                codeGo: `// sort.Search implementation`,
+                complexity: 'Time: O(log N) | Space: O(1)',
+                pitfalls: 'Integer overflow in `(low + high) / 2` or infinite loop condition.',
+                probId: 1
+            },
+            {
+                id: 'two_pointers',
+                num: '10',
+                title: 'Two Pointers & Sliding Window',
+                desc: 'Subarray sum optimization, window contraction, and dual array traversal in linear O(N) time.',
+                diff: 'Medium',
+                diffClass: 'diff-medium',
+                state: 'AVAILABLE',
+                stateClass: 'state-available',
+                prereq: 'Binary Search',
+                explanation: 'Convert O(N^2) brute-force subarray search into linear O(N) single-pass traversals.',
+                codeCpp: `int left = 0;\nfor (int right = 0; right < n; right++) {\n    sum += a[right];\n    while (sum > k) { sum -= a[left++]; }\n}`,
+                codePy: `# Sliding window O(N)`,
+                codeGo: `// Two pointers template`,
+                complexity: 'Time: O(N) | Space: O(1)',
+                pitfalls: 'Moving pointers out of array index boundaries.',
+                probId: 1
+            },
+            {
+                id: 'recursion',
+                num: '11',
+                title: 'Recursion & Backtracking',
+                desc: 'Base cases, call stack mechanics, subset generation, permutations, and search tree pruning.',
+                diff: 'Medium',
+                diffClass: 'diff-medium',
+                state: 'AVAILABLE',
+                stateClass: 'state-available',
+                prereq: 'Functions & Scopes',
+                explanation: 'Explore search spaces exhaustively with pruning to generate combinations and solve constraint problems.',
+                codeCpp: `void backtrack(int idx, vector<int>& curr) {\n    if (idx == n) { res.push_back(curr); return; }\n    // Include\n    curr.push_back(a[idx]); backtrack(idx + 1, curr); curr.pop_back();\n    // Exclude\n    backtrack(idx + 1, curr);\n}`,
+                codePy: `# Backtracking template`,
+                codeGo: `// Recursion base case`,
+                complexity: 'Time: O(2^N) or O(N!) | Space: O(N) Call Stack',
+                pitfalls: 'Missing base case causing stack overflow.',
+                probId: 1
+            },
+            {
+                id: 'stl',
+                num: '12',
+                title: 'STL / Advanced Data Structures',
+                desc: 'Vectors, stacks, queues, priority queues (heaps), maps, unordered_maps, and sets.',
+                diff: 'Medium',
+                diffClass: 'diff-medium',
+                state: 'AVAILABLE',
+                stateClass: 'state-available',
+                prereq: 'Sorting Algorithms',
+                explanation: 'Leverage standard library collections for O(1) hash lookups and O(log N) heap / tree operations.',
+                codeCpp: `priority_queue<int> maxHeap;\nunordered_map<string, int> freq;\nset<int> uniqueElems;`,
+                codePy: `import heapq\nfrom collections import defaultdict`,
+                codeGo: `// Go container/heap & map`,
+                complexity: 'Map/Set: O(log N) | Unordered Map: O(1) avg',
+                pitfalls: 'Worst-case O(N) collision attack on std::unordered_map in C++.',
+                probId: 1
+            },
+            {
+                id: 'greedy',
+                num: '13',
+                title: 'Greedy Choice Algorithms',
+                desc: 'Optimal sub-structure, interval scheduling, fractional knapsack, and greedy proof concepts.',
+                diff: 'Medium',
+                diffClass: 'diff-medium',
+                state: 'LOCKED',
+                stateClass: 'state-locked',
+                prereq: 'STL / Data Structures',
+                explanation: 'Make locally optimal choices at each step to arrive at a global optimal solution.',
+                codeCpp: `// Interval Scheduling Greedy Choice\nsort(intervals.begin(), intervals.end(), [](auto& a, auto& b) {\n    return a.end < b.end;\n});`,
+                codePy: `# Greedy interval sorting`,
+                codeGo: `// Greedy choice proof`,
+                complexity: 'Time: O(N log N) | Space: O(1)',
+                pitfalls: 'Applying greedy choices without verifying optimal sub-structure property.',
+                probId: 1
+            },
+            {
+                id: 'graphs',
+                num: '14',
+                title: 'Graph Algorithms & Trees',
+                desc: 'Adjacency lists, BFS, DFS, Connected Components, Dijkstra Shortest Path, and DSU.',
+                diff: 'Hard',
+                diffClass: 'diff-hard',
+                state: 'LOCKED',
+                stateClass: 'state-locked',
+                prereq: 'Greedy Choice Algorithms',
+                explanation: 'Represent networks as nodes and edges. Traverse trees and graphs to find paths and connectivity.',
+                codeCpp: `void dfs(int u, vector<vector<int>>& adj, vector<bool>& vis) {\n    vis[u] = true;\n    for (int v : adj[u]) if (!vis[v]) dfs(v, adj, vis);\n}`,
+                codePy: `# BFS / DFS implementation`,
+                codeGo: `// Graph traversal`,
+                complexity: 'Time: O(V + E) | Space: O(V + E)',
+                pitfalls: 'Forgetting to mark nodes as visited in cyclic graphs.',
+                probId: 1
+            },
+            {
+                id: 'dp',
+                num: '15',
+                title: 'Dynamic Programming (DP)',
+                desc: 'Memoization (top-down), Tabulation (bottom-up), 1D/2D DP, LIS, Knapsack, and Grid paths.',
+                diff: 'Hard',
+                diffClass: 'diff-hard',
+                state: 'LOCKED',
+                stateClass: 'state-locked',
+                prereq: 'Recursion & Backtracking',
+                explanation: 'Optimize recursive subproblems by caching state results to avoid exponential recalculation.',
+                codeCpp: `int fib(int n) {\n    vector<int> dp(n + 1, 0);\n    dp[1] = 1;\n    for (int i = 2; i <= n; i++) dp[i] = dp[i-1] + dp[i-2];\n    return dp[n];\n}`,
+                codePy: `# DP Tabulation O(N)`,
+                codeGo: `// 2D Grid DP`,
+                complexity: 'Time: O(States * Transitions) | Space: O(States)',
+                pitfalls: 'Incorrect state transition relation or off-by-one base case.',
+                probId: 1
+            },
+            {
+                id: 'advanced',
+                num: '16',
+                title: 'Advanced Competitive Programming',
+                desc: 'Segment Trees, Fenwick Trees (BIT), Monotonic Stack, Bitmask DP, and Tree DP.',
+                diff: 'Advanced',
+                diffClass: 'diff-advanced',
+                state: 'LOCKED',
+                stateClass: 'state-locked',
+                prereq: 'Dynamic Programming',
+                explanation: 'Master high-level competitive programming data structures for logarithmic range queries and tree optimization.',
+                codeCpp: `// Segment Tree Range Query O(log N)\nvoid update(int node, int start, int end, int idx, int val);`,
+                codePy: `# Fenwick Tree (BIT)`,
+                codeGo: `// Monotonic Stack`,
+                complexity: 'Time: O(log N) per query | Space: O(N)',
+                pitfalls: 'Tree node index arithmetic overflow on 1-indexed segment trees.',
+                probId: 1
+            }
+        ];
+
+        function renderRoadmap() {
+            const listEl = document.getElementById('roadmapList');
+            let html = '';
+            roadmapNodes.forEach(node => {
+                html += `
+                    <div class="roadmap-node-card" onclick="openLesson('${node.id}')">
+                        <div class="roadmap-pin">${node.num}</div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+                            <div>
+                                <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">STAGE ${node.num}</span>
+                                <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: #fff; margin: 4px 0 0 0;">${node.title}</h3>
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span style="font-size: 12px; font-weight: 600;" class="${node.diffClass}">${node.diff}</span>
+                                <span class="badge-state ${node.stateClass}">${node.state}</span>
+                            </div>
+                        </div>
+                        <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin: 0 0 14px 0;">${node.desc}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 12px;">
+                            <span style="color: var(--text-muted);">Prerequisite: <strong style="color: #e0e0e0;">${node.prereq}</strong></span>
+                            <span style="color: #3B82F6; font-weight: 600;">Explore Node & Resources &rarr;</span>
+                        </div>
+                    </div>
+                `;
+            });
+            listEl.innerHTML = html;
         }
 
-        function switchCode(btn, codeId) {
-            const parent = btn.parentElement;
-            parent.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+        function openLesson(id) {
+            const node = roadmapNodes.find(n => n.id === id) || roadmapNodes[0];
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                <div style="margin-bottom: 16px;">
+                    <span class="tag" style="background: rgba(59,130,246,0.15); color: #3B82F6; margin-bottom: 8px; display: inline-block;">STAGE ${node.num} &middot; ${node.diff}</span>
+                    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; color: #fff; margin: 0;">${node.title}</h2>
+                    <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Prerequisite: <strong>${node.prereq}</strong></div>
+                </div>
+
+                <div style="font-size: 14px; color: #d1d5db; line-height: 1.7; margin-bottom: 20px;">
+                    ${node.explanation}
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <div style="font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Implementation Snippet</div>
+                    <div>
+                        <span class="lang-tab active" onclick="switchCodeTab(this, 'cpp')">C++</span>
+                        <span class="lang-tab" onclick="switchCodeTab(this, 'py')">Python</span>
+                        <span class="lang-tab" onclick="switchCodeTab(this, 'go')">Go</span>
+                    </div>
+                    <div id="code-cpp" class="code-block">${node.codeCpp}</div>
+                    <div id="code-py" class="code-block" style="display:none;">${node.codePy}</div>
+                    <div id="code-go" class="code-block" style="display:none;">${node.codeGo}</div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.03); border-left: 4px solid var(--primary-accent); padding: 16px; border-radius: 6px; margin-bottom: 24px;">
+                    <div style="font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 4px;">Complexity Analysis & Common Pitfalls</div>
+                    <div style="font-size: 13px; color: var(--primary-accent); font-weight: 600; margin-bottom: 6px;">${node.complexity}</div>
+                    <div style="font-size: 13px; color: var(--text-muted);">${node.pitfalls}</div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                    <button class="btn-ghost" onclick="closeLesson()" style="padding: 10px 20px; font-size: 14px;">Close</button>
+                    <a href="problem.html?problem_id=${node.probId}" class="btn-primary" style="padding: 10px 24px; font-size: 14px; text-decoration: none;">Practice Problems &rarr;</a>
+                </div>
+            `;
+            document.getElementById('lessonModal').classList.add('active');
+        }
+
+        function closeLesson() {
+            document.getElementById('lessonModal').classList.remove('active');
+        }
+
+        function switchCodeTab(btn, lang) {
+            btn.parentElement.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
             btn.classList.add('active');
-            
-            const card = parent.parentElement;
-            card.querySelectorAll('.code-block').forEach(b => b.style.display = 'none');
-            const target = document.getElementById(codeId);
-            if (target) target.style.display = 'block';
+            document.getElementById('code-cpp').style.display = lang === 'cpp' ? 'block' : 'none';
+            document.getElementById('code-py').style.display = lang === 'py' ? 'block' : 'none';
+            document.getElementById('code-go').style.display = lang === 'go' ? 'block' : 'none';
+        }
+
+        function switchResourceTab(tabKey, btn) {
+            document.querySelectorAll('.resource-tab').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            const tabIds = ['roadmap', 'guides', 'cheatsheets', 'reference', 'strategy', 'engineering'];
+            tabIds.forEach(id => {
+                const el = document.getElementById('tab-' + id);
+                if (el) el.style.display = (id === tabKey) ? 'block' : 'none';
+            });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (window.location.hash) {
-                const track = window.location.hash.replace('#', '');
-                const navBtn = document.querySelector(`a[href="#${track}"]`);
-                if (navBtn) navBtn.click();
-            }
+            renderRoadmap();
         });
     </script>
 </body>
 </html>
+

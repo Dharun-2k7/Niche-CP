@@ -427,6 +427,16 @@ async function initHomepageData(token) {
 // ==========================================
 // Global Navigation Renderer
 // ==========================================
+// Global Logout Helper
+window.handleLogout = function() {
+    localStorage.removeItem('jwt_token');
+    window.location.href = 'index.html';
+};
+
+// ==========================================
+// ==========================================
+// Global Navigation Renderer
+// ==========================================
 async function renderGlobalNav(token) {
     const container = document.getElementById('global-nav-container');
     if (!container) return;
@@ -460,6 +470,9 @@ async function renderGlobalNav(token) {
     let closedRightSideHTML = '';
     let openedDrawerBottomHTML = '';
 
+    const defaultAvatar = `https://api.dicebear.com/10.x/critters/svg?seed=${encodeURIComponent(userName || 'Felix')}`;
+    const displayAvatar = (avatarUrl && avatarUrl.trim() !== '') ? avatarUrl : defaultAvatar;
+
     if (token) {
         // Authenticated Navbar
         const authNavItems = [
@@ -487,14 +500,14 @@ async function renderGlobalNav(token) {
         closedRightSideHTML = `
             <div class="nav-profile-dropdown-container" id="navProfileDropdownContainer">
                 <button type="button" class="nav-profile-trigger" id="navProfileTrigger" aria-label="User menu" aria-expanded="false" aria-haspopup="true">
-                    <img src="${avatarUrl || 'https://api.dicebear.com/10.x/critters/svg?seed=Felix'}" class="nav-avatar" alt="${userName || 'User'} Profile">
+                    <img src="${displayAvatar}" onerror="this.onerror=null;this.src='${defaultAvatar}';" class="nav-avatar" alt="${userName || 'User'} Profile">
                     <svg class="nav-avatar-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                 </button>
                 <div class="nav-profile-dropdown" id="navProfileDropdown">
                     <div class="nav-profile-header">
-                        <img src="${avatarUrl || 'https://api.dicebear.com/10.x/critters/svg?seed=Felix'}" class="nav-profile-header-avatar" alt="Avatar">
+                        <img src="${displayAvatar}" onerror="this.onerror=null;this.src='${defaultAvatar}';" class="nav-profile-header-avatar" alt="Avatar">
                         <div class="nav-profile-header-info">
                             <div class="nav-profile-name">${userName || 'User'}</div>
                             <div class="nav-profile-email">${userEmail || 'Member'}</div>
@@ -524,7 +537,7 @@ async function renderGlobalNav(token) {
         // Opened Drawer: User info & Logout button
         openedDrawerBottomHTML = `
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                <img src="${avatarUrl || 'https://api.dicebear.com/10.x/critters/svg?seed=Felix'}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" alt="Profile">
+                <img src="${displayAvatar}" onerror="this.onerror=null;this.src='${defaultAvatar}';" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" alt="Profile">
                 <div style="text-align: left;">
                     <div style="font-weight: 600; font-size: 14px; color: #fff;">${userName || 'User'}</div>
                     <div style="font-size: 12px; color: var(--text-muted);">${userEmail}</div>
@@ -612,3 +625,4 @@ async function renderGlobalNav(token) {
         });
     }
 }
+

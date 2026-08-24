@@ -3,18 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NicheCP | Blogs & Technical Editorials</title>
+    <title>NicheCP | Journal & Technical Publications</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        .blog-grid {
+        .journal-hero {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(59, 130, 246, 0.08) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 36px;
+            cursor: pointer;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+        .journal-hero:hover {
+            border-color: rgba(168, 85, 247, 0.35);
+            transform: translateY(-2px);
+        }
+        .category-pills {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding-bottom: 16px;
+        }
+        .category-pill {
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .category-pill.active, .category-pill:hover {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3B82F6;
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        .journal-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 24px;
-            margin-top: 32px;
         }
-        .blog-card {
+        .journal-card {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 16px;
@@ -23,19 +61,69 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            cursor: pointer;
         }
-        .blog-card:hover {
+        .journal-card:hover {
             background: rgba(255, 255, 255, 0.04);
-            border-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
             transform: translateY(-3px);
         }
-        .blog-meta {
+        .journal-meta {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 12px;
             color: var(--text-muted);
             margin-bottom: 12px;
+        }
+        /* Article Reader Modal */
+        .article-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(6, 6, 8, 0.88);
+            backdrop-filter: blur(12px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .article-modal-overlay.active { display: flex; }
+        .article-modal-content {
+            background: #0d0f17;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            max-width: 850px;
+            width: 100%;
+            max-height: 88vh;
+            overflow-y: auto;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            position: relative;
+        }
+        .article-body-text {
+            font-size: 15px;
+            color: #d1d5db;
+            line-height: 1.8;
+        }
+        .article-body-text h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            color: #fff;
+            font-size: 20px;
+            margin-top: 28px;
+            margin-bottom: 12px;
+        }
+        .article-code-block {
+            background: #08080a;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 18px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: #e0e0e0;
+            overflow-x: auto;
+            white-space: pre;
+            margin: 20px 0;
         }
     </style>
 </head>
@@ -44,52 +132,209 @@
     <div id="global-nav-container"></div>
 
     <main class="app-container" style="padding-top: 100px; max-width: 1200px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
-        <div>
-            <div style="font-size: 13px; font-weight: 600; color: var(--primary-accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Knowledge Base</div>
-            <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; color: #fff; margin-bottom: 12px;">Technical Editorials & Strategy</h1>
-            <p style="color: var(--text-muted); font-size: 16px; max-width: 700px; line-height: 1.6;">Insights into algorithmic problem solving, contest strategy, system architecture, and Codeforces rating growth strategies.</p>
+        
+            <div class="blog-meta" style="margin-bottom: 16px;">
+                <span class="tag" style="background: rgba(168,85,247,0.15); color: #A855F7; border: 1px solid rgba(168,85,247,0.3);">FEATURED ENGINEERING</span>
+                <span>12 min read &middot; Aug 2026 &middot; By Dharun Kaarthick</span>
+            </div>
+            <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 12px;">Building a Sub-10ms Code Sandbox Engine in Docker & Redis</h2>
+            <p style="color: var(--text-muted); font-size: 15px; line-height: 1.6; margin-bottom: 20px; max-width: 850px;">A deep architectural breakdown of how NicheCP compiles static binaries, offloads code execution jobs to a Redis queue, and runs untrusted code under millisecond cgroup limits without risking host security.</p>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #A855F7;">
+                Read Full Technical Deep Dive &rarr;
+            </div>
         </div>
 
-        <div class="blog-grid">
-            <article class="blog-card">
+        <!-- Category Filters -->
+        <div class="category-pills">
+            <button class="category-pill active" onclick="filterArticles('all', this)">All Topics</button>
+            <button class="category-pill" onclick="filterArticles('editorials', this)">Editorials</button>
+            <button class="category-pill" onclick="filterArticles('algorithms', this)">Algorithms</button>
+            <button class="category-pill" onclick="filterArticles('strategy', this)">Contest Strategy</button>
+            <button class="category-pill" onclick="filterArticles('engineering', this)">Engineering</button>
+        </div>
+
+        <!-- Articles Grid -->
+        <div class="blog-grid" id="articlesGrid">
+            
+            <article class="blog-card" data-category="algorithms" onclick="openArticle('dp')">
                 <div>
                     <div class="blog-meta">
-                        <span class="tag" style="background: rgba(59,130,246,0.1); color: #3B82F6;">Strategy</span>
+                        <span class="tag" style="background: rgba(59,130,246,0.1); color: #3B82F6;">Algorithms</span>
                         <span>8 min read &middot; Aug 2026</span>
                     </div>
-                    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 12px;">Mastering Dynamic Programming State Transitions</h2>
-                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">A systematic framework for breaking down complex recursive relations into 1D and 2D DP state arrays with memory space optimization.</p>
+                    <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 12px;">Mastering Dynamic Programming State Transitions</h3>
+                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">A systematic framework for breaking down complex recursive relations into 1D and 2D DP state arrays with space optimization.</p>
                 </div>
-                <a href="learn.html#dp" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; text-decoration: none; width: fit-content;">Read Article &rarr;</a>
+                <div style="color: #3B82F6; font-size: 13px; font-weight: 600;">Read Article &rarr;</div>
             </article>
 
-            <article class="blog-card">
+            <article class="blog-card" data-category="strategy" onclick="openArticle('strategy')">
                 <div>
                     <div class="blog-meta">
-                        <span class="tag" style="background: rgba(16,185,129,0.1); color: #10b981;">Architecture</span>
-                        <span>12 min read &middot; Jul 2026</span>
+                        <span class="tag" style="background: rgba(245,158,11,0.1); color: #F59E0B;">Contest Strategy</span>
+                        <span>6 min read &middot; Aug 2026</span>
                     </div>
-                    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 12px;">Building a Sub-10ms Code Sandbox in Docker</h2>
-                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">Deep dive into how NicheCP compiles static binaries and manages container processes securely under strict cgroup limits.</p>
+                    <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 12px;">Time Management & Problem Selection in Contests</h3>
+                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">How to avoid spending 90 minutes on problem B and maximize your solved score during ICPC and Codeforces style contests.</p>
                 </div>
-                <a href="about.html" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; text-decoration: none; width: fit-content;">Read Article &rarr;</a>
+                <div style="color: #F59E0B; font-size: 13px; font-weight: 600;">Read Article &rarr;</div>
             </article>
 
-            <article class="blog-card">
+            <article class="blog-card" data-category="editorials" onclick="openArticle('complexity')">
                 <div>
                     <div class="blog-meta">
-                        <span class="tag" style="background: rgba(245,158,11,0.1); color: #F59E0B;">CP Tips</span>
-                        <span>6 min read &middot; Jul 2026</span>
+                        <span class="tag" style="background: rgba(16,185,129,0.1); color: #10b981;">Editorials</span>
+                        <span>7 min read &middot; Jul 2026</span>
                     </div>
-                    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 12px;">Time Complexity & Big O Bounds in Online Judges</h2>
-                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">How to estimate maximum operations within a 1.0s time limit (e.g. 10^8 operations in C++) for N = 10^5 and N = 20.</p>
+                    <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 12px;">Estimating Big-O Bounds for 1.0s Time Limits</h3>
+                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">Rules of thumb for checking if N = 2*10^5 will pass with O(N log N) or require linear O(N) prefix computation.</p>
                 </div>
-                <a href="practice.html" class="btn-ghost" style="padding: 8px 16px; font-size: 13px; text-decoration: none; width: fit-content;">Read Article &rarr;</a>
+                <div style="color: #10b981; font-size: 13px; font-weight: 600;">Read Article &rarr;</div>
             </article>
+
         </div>
     </main>
 
+    <!-- ARTICLE READER MODAL -->
+    <div class="article-modal-overlay" id="articleModal">
+        <div class="article-modal-content">
+            <button onclick="closeArticle()" style="position: absolute; top: 24px; right: 24px; background: transparent; border: none; color: var(--text-muted); cursor: pointer;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <div id="articleContent"></div>
+        </div>
+    </div>
+
     <script src="js/app.js"></script>
     <script src="js/components.js"></script>
+    <script>
+        const articlesDB = {
+            'sandbox': {
+                category: 'ENGINEERING ARCHITECTURE',
+                title: 'Building a Sub-10ms Code Sandbox Engine in Docker & Redis',
+                author: 'Dharun Kaarthick',
+                date: 'August 2026',
+                readTime: '12 min read',
+                content: `
+                    <p>When executing user-submitted code on an online judge platform, safety and speed are in constant conflict. Running untrusted C++, Python, or Go code directly on the API server risks malicious code execution or host resource exhaustion.</p>
+                    
+                    <h3>1. Queue-Based Worker Architecture</h3>
+                    <p>To eliminate HTTP request hanging and isolate execution, NicheCP pushes submission metadata to a Redis <code>run_queue</code>. A standalone Go worker process continuously pulls jobs and spins up container sandboxes.</p>
+                    
+                    <div class="code-block">// Job Queue Producer in Gin API
+err := db.RedisClient.RPush(ctx, "run_queue", payloadJSON).Err()</div>
+
+                    <h3>2. Static Binaries & Alpine Containers</h3>
+                    <p>By pre-compiling C++ binaries with static linking on <code>alpine:latest</code> base images, container execution starts in sub-10ms speeds without dynamic library loading overhead.</p>
+
+                    <h3>3. Strict Resource Limits & Security</h3>
+                    <p>Containers are spawned with <code>--memory=256m --cpus=1.0 --network=none --read-only</code>, guaranteeing that code cannot access the network, exceed RAM limits, or tamper with the host file system.</p>
+                `
+            },
+            'dp': {
+                category: 'ALGORITHMIC STRATEGY',
+                title: 'Mastering Dynamic Programming State Transitions',
+                author: 'Amrita ICPC Team',
+                date: 'August 2026',
+                readTime: '8 min read',
+                content: `
+                    <p>Dynamic Programming (DP) is often perceived as one of the hardest topics in competitive programming. The key to mastering DP is recognizing subproblem independence and defining precise state definitions.</p>
+                    
+                    <h3>1. State Representation</h3>
+                    <p>Always ask: What information is strictly necessary to calculate the answer for the next step? For example, in Knapsack, state <code>dp[i][w]</code> represents maximum value considering the first <code>i</code> items with capacity <code>w</code>.</p>
+                    
+                    <h3>2. Space Optimization Trick</h3>
+                    <p>If state transition only depends on <code>i-1</code>, we can compress 2D arrays into 1D arrays by iterating backwards!</p>
+
+                    <div class="code-block">for (int i = 0; i < n; i++) {
+    for (int w = W; w >= wt[i]; w--) {
+        dp[w] = max(dp[w], val[i] + dp[w - wt[i]]);
+    }
+}</div>
+                `
+            },
+            'strategy': {
+                category: 'CONTEST STRATEGY',
+                title: 'Time Management & Problem Selection in Contests',
+                author: 'NicheCP Team',
+                date: 'August 2026',
+                readTime: '6 min read',
+                content: `
+                    <p>In competitive programming, time management is just as important as algorithmic knowledge. A common pitfall is getting stuck on a hard problem while easy problems remain unread.</p>
+                    
+                    <h3>1. The 15-Minute Rule</h3>
+                    <p>If you have spent 15 minutes on a problem without making progress toward a concrete solution, switch to reading other problem statements in the contest.</p>
+
+                    <h3>2. Avoid Premature Coding</h3>
+                    <p>Never start typing code before verifying complexity bounds against test constraints. Sketch your algorithm on paper first!</p>
+                `
+            },
+            'complexity': {
+                category: 'EDITORIAL',
+                title: 'Estimating Big-O Bounds for 1.0s Time Limits',
+                author: 'NicheCP Editorial',
+                date: 'July 2026',
+                readTime: '7 min read',
+                content: `
+                    <p>A standard 1.0-second time limit in C++ allows approximately 10^8 elementary CPU operations. Use this reference table during contests:</p>
+
+                    <div class="code-block">N <= 10  -> O(N!) or O(2^N)
+N <= 20  -> O(2^N * N)
+N <= 500 -> O(N^3)
+N <= 5000 -> O(N^2)
+N <= 2*10^5 -> O(N log N)
+N <= 10^8 -> O(N)</div>
+                `
+            }
+        };
+
+        function openArticle(id) {
+            const article = articlesDB[id] || articlesDB['sandbox'];
+            const content = document.getElementById('articleContent');
+
+            content.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <span class="tag" style="background: rgba(59,130,246,0.15); color: #3B82F6; margin-bottom: 10px; display: inline-block;">${article.category}</span>
+                    <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 700; color: #fff; margin: 0 0 12px 0;">${article.title}</h1>
+                    <div style="font-size: 13px; color: var(--text-muted); display: flex; gap: 16px;">
+                        <span>By ${article.author}</span>
+                        <span>&middot;</span>
+                        <span>${article.date}</span>
+                        <span>&middot;</span>
+                        <span>${article.readTime}</span>
+                    </div>
+                </div>
+
+                <div class="article-body-text">
+                    ${article.content}
+                </div>
+
+                <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: flex-end;">
+                    <button class="btn-primary" onclick="closeArticle()" style="padding: 10px 24px; font-size: 14px;">Done Reading</button>
+                </div>
+            `;
+
+            document.getElementById('articleModal').classList.add('active');
+        }
+
+        function closeArticle() {
+            document.getElementById('articleModal').classList.remove('active');
+        }
+
+        function filterArticles(cat, btn) {
+            btn.parentElement.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+
+            const cards = document.querySelectorAll('.blog-card');
+            cards.forEach(card => {
+                if (cat === 'all' || card.dataset.category === cat) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
 </body>
 </html>
+

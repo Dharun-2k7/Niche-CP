@@ -14,36 +14,66 @@
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 8px;
             background: rgba(10, 10, 12, 0.4);
-            backdrop-filter: blur(10px);
-            overflow: hidden;
+            background: transparent;
         }
         .problem-row {
-            padding: 12px 20px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            transition: background 0.15s ease;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            margin-bottom: 12px;
             text-decoration: none;
-            color: inherit;
-        }
-        .problem-row:last-child {
-            border-bottom: none;
+            color: var(--text-primary);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .problem-row:hover {
-            background: rgba(255,255,255,0.03);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: translateX(4px);
         }
         .diff-tag {
+            font-size: 12px;
+            font-weight: 600;
             padding: 4px 10px;
             border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .diff-easy { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
-        .diff-medium { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
-        .diff-hard { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .diff-easy { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .diff-medium { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .diff-hard { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        
+        .discovery-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .discovery-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .discovery-btn:hover, .discovery-btn.active {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3B82F6;
+            border-color: rgba(59, 130, 246, 0.35);
+        }
     </style>
 </head>
 <body data-theme="quantum">
@@ -52,14 +82,15 @@
     <!-- Floating Glass Navigation (Injected via JS) -->
     <div id="global-nav-container"></div>
 
-    <main class="app-container" style="max-width: 1000px; padding: 40px 20px;">
-        <div class="arena-header-controls" style="display: flex; justify-content: space-between; align-items: flex-end;">
+    <main class="app-container" style="max-width: 1000px; padding: 40px 20px; padding-top: 100px;">
+        <div class="arena-header-controls" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
             <div>
-                <h1 class="display-font" style="font-size: 32px; font-weight: 700; margin-bottom: 8px;">The Arena</h1>
-                <p style="color: var(--text-muted); font-size: 15px;">Discover practice problems from the independent Problem Bank.</p>
+                <div style="font-size: 13px; font-weight: 600; color: var(--primary-accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px;">Problem Bank</div>
+                <h1 class="display-font" style="font-size: 32px; font-weight: 700; margin: 0 0 6px 0; color: #fff;">Problem Discovery & Archive</h1>
+                <p style="color: var(--text-muted); font-size: 15px; margin: 0;">Explore problems by topic, difficulty, and algorithmic collections.</p>
             </div>
-            <div class="arena-search-box" style="display: flex; gap: 12px;">
-                <input type="text" id="searchInput" class="cyber-input" placeholder="Search Title or Tags...">
+            <div class="arena-search-box" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <input type="text" id="searchInput" class="cyber-input" placeholder="Search Title, Tag or ID (NCP-XXX)..." style="min-width: 260px;">
                 <select id="diffSelect" class="cyber-select">
                     <option value="ALL">All Difficulties</option>
                     <option value="Easy">Easy</option>
@@ -69,82 +100,134 @@
             </div>
         </div>
 
+        <!-- Discovery Shortcuts Bar -->
+        <div class="discovery-bar">
+            <button class="discovery-btn active" onclick="applyDiscovery('all', this)">
+                <span>🌐</span> All Problems
+            </button>
+            <button class="discovery-btn" onclick="applyDiscovery('beginner', this)">
+                <span>🌱</span> Beginner Collection
+            </button>
+            <button class="discovery-btn" onclick="applyDiscovery('dp', this)">
+                <span>🧩</span> DP Collection
+            </button>
+            <button class="discovery-btn" onclick="applyDiscovery('graph', this)">
+                <span>🌲</span> Graph Collection
+            </button>
+            <button class="discovery-btn" onclick="applyDiscovery('easy', this)">
+                <span>⚡</span> Easy Problems
+            </button>
+            <button class="discovery-btn" onclick="applyDiscovery('contest', this)">
+                <span>🏆</span> Contest Problems
+            </button>
+        </div>
+
         <div class="problem-grid" id="problemList">
-            <div style="text-align:center; color: var(--text-muted); margin-top: 40px;">Fetching problems...</div>
+            <div style="text-align:center; color: var(--text-muted); margin-top: 40px;">Fetching problem archive...</div>
         </div>
     </main>
 
     <script src="js/app.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            let allProblems = [];
-            let solvedProblems = new Set();
-            const list = document.getElementById('problemList');
-            const searchInput = document.getElementById('searchInput');
-            const diffSelect = document.getElementById('diffSelect');
+        let allProblems = [];
+        let solvedProblems = new Set();
+        const list = document.getElementById('problemList');
+        const searchInput = document.getElementById('searchInput');
+        const diffSelect = document.getElementById('diffSelect');
 
-            function renderProblems() {
-                const search = searchInput.value.toLowerCase().trim();
-                const diff = diffSelect.value;
+        function renderProblems() {
+            const search = searchInput.value.toLowerCase().trim();
+            const diff = diffSelect.value;
 
-                const filtered = allProblems.filter(p => {
-                    const matchesSearch = !search || p.title.toLowerCase().includes(search) || (p.tags && p.tags.toLowerCase().includes(search));
-                    const matchesDiff = diff === 'ALL' || (p.difficulty && p.difficulty.toLowerCase() === diff.toLowerCase());
-                    return matchesSearch && matchesDiff;
-                });
+            const filtered = allProblems.filter(p => {
+                const idStr = `ncp-${p.id}`;
+                const matchesSearch = !search || 
+                    p.title.toLowerCase().includes(search) || 
+                    idStr.includes(search) || 
+                    (p.tags && p.tags.toLowerCase().includes(search));
+                const matchesDiff = diff === 'ALL' || (p.difficulty && p.difficulty.toLowerCase() === diff.toLowerCase());
+                return matchesSearch && matchesDiff;
+            });
 
-                if (filtered.length === 0) {
-                    list.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 40px;">No matching problems found.</div>';
-                    return;
-                }
-
-                let html = '';
-                filtered.forEach(p => {
-                    const diffClass = p.difficulty ? `diff-${p.difficulty.toLowerCase()}` : 'diff-medium';
-                    const diffText = p.difficulty || 'Medium';
-                    
-                    let tagsHtml = '';
-                    try {
-                        const tags = typeof p.tags === 'string' ? JSON.parse(p.tags) : p.tags;
-                        if (tags && tags.length > 0) {
-                            tagsHtml = tags.map(t => `<span style="font-size:12px; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:4px; margin-right:6px;">${t}</span>`).join('');
-                        }
-                    } catch(e){}
-
-                    let solveStatusHtml = `
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10.08 10.08 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                        Solve
-                    `;
-                    if (solvedProblems.has(p.id)) {
-                        solveStatusHtml = `
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10.08 10.08 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                            <span style="color: #10b981; font-weight: 600;">Solved</span>
-                        `;
-                    }
-
-                    html += `
-                        <a href="problem.html?problem_id=${p.id}" class="problem-row">
-                            <div style="display:flex; align-items:center; gap:16px;">
-                                <div style="font-family:var(--font-mono); color:var(--text-muted); font-size:13px; width:50px;">NCP-${p.id}</div>
-                                <div style="display:flex; align-items:center; gap: 12px; flex-wrap: wrap;">
-                                    <div style="font-size:15px; font-weight:500;">${p.title}</div>
-                                    <div style="display:flex; align-items:center;">
-                                        ${tagsHtml}
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:20px;">
-                                <div class="diff-tag ${diffClass}" style="width: 70px; text-align: center;">${diffText}</div>
-                                <div style="color:var(--text-muted); font-size:13px; display:flex; align-items:center; gap:4px; width: 80px; justify-content: flex-end;">
-                                    ${solveStatusHtml}
-                                </div>
-                            </div>
-                        </a>
-                    `;
-                });
-                list.innerHTML = html;
+            if (filtered.length === 0) {
+                list.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 40px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">No matching problems found.</div>';
+                return;
             }
 
+            let html = '';
+            filtered.forEach(p => {
+                const diffClass = p.difficulty ? `diff-${p.difficulty.toLowerCase()}` : 'diff-medium';
+                const diffText = p.difficulty || 'Medium';
+                
+                let tagsHtml = '';
+                try {
+                    const tags = typeof p.tags === 'string' ? JSON.parse(p.tags) : p.tags;
+                    if (tags && tags.length > 0) {
+                        tagsHtml = tags.map(t => `<span style="font-size:12px; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:4px; margin-right:6px;">${t}</span>`).join('');
+                    }
+                } catch(e){}
+
+                let solveStatusHtml = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10.08 10.08 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    Solve
+                `;
+                if (solvedProblems.has(p.id)) {
+                    solveStatusHtml = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10.08 10.08 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        <span style="color: #10b981; font-weight: 600;">Solved</span>
+                    `;
+                }
+
+                html += `
+                    <a href="problem.html?problem_id=${p.id}" class="problem-row">
+                        <div style="display:flex; align-items:center; gap:16px;">
+                            <div style="font-family:var(--font-mono); color:var(--text-muted); font-size:13px; width:65px;">NCP-${p.id}</div>
+                            <div style="display:flex; align-items:center; gap: 12px; flex-wrap: wrap;">
+                                <div style="font-size:15px; font-weight:500;">${p.title}</div>
+                                <div style="display:flex; align-items:center;">
+                                    ${tagsHtml}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:20px;">
+                            <div class="diff-tag ${diffClass}" style="width: 70px; text-align: center;">${diffText}</div>
+                            <div style="color:var(--text-muted); font-size:13px; display:flex; align-items:center; gap:4px; width: 80px; justify-content: flex-end;">
+                                ${solveStatusHtml}
+                            </div>
+                        </div>
+                    </a>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        function applyDiscovery(key, btn) {
+            document.querySelectorAll('.discovery-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            if (key === 'all') {
+                searchInput.value = '';
+                diffSelect.value = 'ALL';
+            } else if (key === 'beginner') {
+                searchInput.value = '';
+                diffSelect.value = 'Easy';
+            } else if (key === 'dp') {
+                searchInput.value = 'dp';
+                diffSelect.value = 'ALL';
+            } else if (key === 'graph') {
+                searchInput.value = 'graph';
+                diffSelect.value = 'ALL';
+            } else if (key === 'easy') {
+                searchInput.value = '';
+                diffSelect.value = 'Easy';
+            } else if (key === 'contest') {
+                searchInput.value = 'contest';
+                diffSelect.value = 'ALL';
+            }
+            renderProblems();
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const res = await fetch('/api/problems');
                 if (!res.ok) throw new Error('Failed to fetch');
@@ -166,7 +249,7 @@
                 }
                 
                 if (!allProblems || !Array.isArray(allProblems) || allProblems.length === 0) {
-                    list.innerHTML = '<div style="text-align:center; color: var(--text-muted); margin-top: 40px;">No problems available.</div>';
+                    list.innerHTML = '<div style="text-align:center; color: var(--text-muted); margin-top: 40px;">No problems available in archive.</div>';
                     return;
                 }
 
@@ -180,6 +263,6 @@
             }
         });
     </script>
-<script src="js/components.js"></script>
+    <script src="js/components.js"></script>
 </body>
 </html>

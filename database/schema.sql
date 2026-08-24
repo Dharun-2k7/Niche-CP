@@ -31,9 +31,39 @@ CREATE TABLE IF NOT EXISTS problems (
     output_format TEXT,
     constraints TEXT,
     sample_testcases JSONB DEFAULT '[]'::jsonb,
-    hidden_testcases JSONB NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    hidden_testcases JSONB NOT NULL DEFAULT '[]'::jsonb,
+    -- Problem Setter Pipeline Extensions
+    status VARCHAR(50) DEFAULT 'DRAFT',             -- DRAFT | READY_FOR_REVIEW | PUBLISHED
+    time_limit_ms INTEGER DEFAULT 2000,             -- per-testcase time limit in ms
+    memory_limit_mb INTEGER DEFAULT 256,            -- per-testcase memory limit in MB
+    checker_type VARCHAR(50) DEFAULT 'STANDARD',    -- STANDARD | FLOATING_POINT | CUSTOM
+    checker_config JSONB DEFAULT '{}'::jsonb,        -- e.g. {"epsilon": 1e-6} or {"code": "...", "language": "cpp"}
+    generator_config JSONB DEFAULT '{}'::jsonb,      -- {"code": "...", "language": "cpp"}
+    validator_config JSONB DEFAULT '{}'::jsonb,      -- {"code": "...", "language": "cpp"}
+    solution_config JSONB DEFAULT '{}'::jsonb,       -- {"code": "...", "language": "cpp"}
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Individual testcase tracking (replaces monolithic hidden_testcases JSONB for new problems)
+CREATE TABLE IF NOT EXISTS testcases (
+    id SERIAL PRIMARY KEY,
+    problem_id INTEGER NOT NULL REFERENCES problems(id) ON DELETE CASCADE,
+    test_index INTEGER NOT NULL,                     -- ordering within the problem
+    source VARCHAR(50) NOT NULL DEFAULT 'manual',    -- 'manual' | 'generated'
+    generator_args TEXT,                              -- arguments used if generated
+    input TEXT NOT NULL,
+    expected_output TEXT,                             -- NULL until reference solution runs
+    is_sample BOOLEAN DEFAULT FALSE,                 -- sample testcase shown to participants
+    validation_status VARCHAR(50) DEFAULT 'pending', -- 'pending' | 'valid' | 'invalid'
+    validation_message TEXT,                          -- diagnostic from validator
+    generation_status VARCHAR(50) DEFAULT 'ready',   -- 'ready' | 'generating' | 'failed'
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(problem_id, test_index)
+);
+CREATE INDEX IF NOT EXISTS idx_testcases_problem_id ON testcases(problem_id);
+CREATE INDEX IF NOT EXISTS idx_problems_status ON problems(status);
 
 CREATE TABLE IF NOT EXISTS contests (
     id SERIAL PRIMARY KEY,

@@ -224,8 +224,8 @@ func CreateProblem(c *gin.Context) {
 	// Insert into DB
 	var problemID int
 	err := db.DB.QueryRow(`
-		INSERT INTO problems (title, difficulty, tags, description, input_format, output_format, constraints, sample_testcases, hidden_testcases)
-		VALUES ($1, $2, $3::jsonb, $4, $5, $6, $7, $8::jsonb, $9::jsonb)
+		INSERT INTO problems (title, difficulty, tags, description, input_format, output_format, constraints, sample_testcases, hidden_testcases, status)
+		VALUES ($1, $2, $3::jsonb, $4, $5, $6, $7, $8::jsonb, $9::jsonb, 'DRAFT')
 		RETURNING id
 	`, req.Title, req.Difficulty, req.Tags, req.Description, req.InputFormat, req.OutputFormat, req.Constraints, req.SampleTestcases, req.HiddenTestcases).Scan(&problemID)
 
@@ -656,12 +656,19 @@ func GetAdminProblem(c *gin.Context) {
 	id := c.Param("id")
 
 	var title, description, difficulty, inputFormat, outputFormat, constraints, sampleTestcases, hiddenTestcases string
-	var tags string
+	var tags, status, checkerType string
+	var timeLimitMs, memoryLimitMb int
+	var chkStr, genStr, valStr, solStr string
 
 	err := db.DB.QueryRow(`
-		SELECT title, difficulty, tags, description, input_format, output_format, constraints, sample_testcases, hidden_testcases 
+		SELECT title, difficulty, tags, description, input_format, output_format, constraints, sample_testcases, hidden_testcases,
+		       COALESCE(status, 'DRAFT'), COALESCE(time_limit_ms, 2000), COALESCE(memory_limit_mb, 256),
+		       COALESCE(checker_type, 'STANDARD'), COALESCE(checker_config::text, '{}'),
+		       COALESCE(generator_config::text, '{}'), COALESCE(validator_config::text, '{}'),
+		       COALESCE(solution_config::text, '{}')
 		FROM problems WHERE id = $1
-	`, id).Scan(&title, &difficulty, &tags, &description, &inputFormat, &outputFormat, &constraints, &sampleTestcases, &hiddenTestcases)
+	`, id).Scan(&title, &difficulty, &tags, &description, &inputFormat, &outputFormat, &constraints, &sampleTestcases, &hiddenTestcases,
+		&status, &timeLimitMs, &memoryLimitMb, &checkerType, &chkStr, &genStr, &valStr, &solStr)
 
 	if err == sql.ErrNoRows {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Problem not found"})
@@ -670,6 +677,12 @@ func GetAdminProblem(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch problem"})
 		return
 	}
+
+	var chkConfig, genConfig, valConfig, solConfig CodeConfig
+	_ = json.Unmarshal([]byte(chkStr), &chkConfig)
+	_ = json.Unmarshal([]byte(genStr), &genConfig)
+	_ = json.Unmarshal([]byte(valStr), &valConfig)
+	_ = json.Unmarshal([]byte(solStr), &solConfig)
 
 	c.JSON(http.StatusOK, gin.H{
 		"id":               id,
@@ -682,6 +695,14 @@ func GetAdminProblem(c *gin.Context) {
 		"constraints":      constraints,
 		"sample_testcases": sampleTestcases,
 		"hidden_testcases": hiddenTestcases,
+		"status":           status,
+		"time_limit_ms":    timeLimitMs,
+		"memory_limit_mb":   memoryLimitMb,
+		"checker_type":     checkerType,
+		"checker_config":   chkConfig,
+		"generator_config": genConfig,
+		"validator_config": valConfig,
+		"solution_config":  solConfig,
 	})
 }
 
@@ -696,6 +717,7 @@ type UpdateProblemRequest struct {
 	SampleTestcases string      `json:"sample_testcases"` // JSON string array of objects
 	HiddenTestcases string      `json:"hidden_testcases"` // JSON string array of objects
 	ContestID       *int        `json:"contest_id"`
+	Status          string      `json:"status"`
 }
 
 func UpdateProblem(c *gin.Context) {
@@ -712,11 +734,21 @@ func UpdateProblem(c *gin.Context) {
 		return
 	}
 
-	res, err := tx.Exec(`
+	query := `
 		UPDATE problems 
 		SET title=$1, difficulty=$2, tags=$3, description=$4, input_format=$5, output_format=$6, constraints=$7, sample_testcases=$8, hidden_testcases=$9
-		WHERE id=$10
-	`, req.Title, req.Difficulty, req.Tags, req.Description, req.InputFormat, req.OutputFormat, req.Constraints, req.SampleTestcases, req.HiddenTestcases, id)
+	`
+	args := []interface{}{req.Title, req.Difficulty, req.Tags, req.Description, req.InputFormat, req.OutputFormat, req.Constraints, req.SampleTestcases, req.HiddenTestcases}
+	
+	if req.Status != "" {
+		query += `, status=$10 WHERE id=$11`
+		args = append(args, req.Status, id)
+	} else {
+		query += ` WHERE id=$10`
+		args = append(args, id)
+	}
+
+	res, err := tx.Exec(query, args...)
 	
 	if err != nil {
 		tx.Rollback()

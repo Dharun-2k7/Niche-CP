@@ -4,6 +4,18 @@ All notable changes to the NicheCP project will be documented in this file.
 
 ## [Unreleased]
 
+### Problem Setter & Judge Pipeline Architecture Upgrade (2026-08-24)
+- **Queue-Delegated Problem Setter Architecture**: Replaced all host `os/exec` code execution in API handlers with Redis queue delegation (`problem_setter_queue`) to the Docker worker process, strictly enforcing ADR 011 and closing all potential host arbitrary code execution vectors.
+- **Docker Sandbox API Extensions**: Extended `DockerSandboxSession` with `RunWithArgs()` for parameterizable generator/checker execution and `InjectFile()` for writing testcase input files into container tmpfs `/tmp`.
+- **Relational Testcase Tracking**: Added `testcases` table tracking per-test source (`manual` vs `generated`), generator arguments, input/expected output, public sample status, and validator status, replacing monolithic JSONB storage while maintaining fallback compatibility.
+- **Checker Engine Abstraction**: Implemented modular checker engine supporting `STANDARD` token matching (whitespace normalized), `FLOATING_POINT` (absolute/relative epsilon comparison), and `CUSTOM` (sandboxed C++/Python custom checker scripts).
+- **Polygon Problem Setter Workspace**: Restructured `admin_problems.html` with a 7-section workspace (**Overview**, **Statement**, **Solution**, **Validator**, **Checker**, **Tests**, **Review**) featuring an automated 10-point audit checklist (`/api/admin/problems/:id/review`) and `DRAFT` → `READY_FOR_REVIEW` → `PUBLISHED` problem lifecycle enforcement.
+
+- **Global Navbar & Profile Avatar Consistency**: Standardized relative profile picture URL resolution (`/uploads/...`) and global `onerror` fallback handling across all HTML page headers and mobile drawers.
+- **NicheCP Resources & 16-Step Visual Roadmap**: Transformed `learn.html` into **NicheCP Resources** featuring a 16-step sequential competitive programming visual roadmap (Programming Basics → Variables → ... → Advanced CP) with difficulty badges, state badges (`LOCKED`, `AVAILABLE`, `IN PROGRESS`, `COMPLETED`), interactive node modals, and resource category tabs.
+- **NicheCP Journal & Problem Discovery Shortcuts**: Redesigned `blogs.html` into **NicheCP Journal** editorial technical press with category filters and article reader modal. Added Discovery Shortcuts Bar (*Beginner Collection*, *DP Collection*, *Graph Collection*, *Explore by Topic/Difficulty*) to `arena.html` without altering the Practice Hub.
+- **Polygon-Inspired Admin Problem Setter Workspace**: Restructured `admin_problems.html` and backend Gin APIs (`/api/admin/problems/validate-input`, `/api/admin/problems/test-checker`, `/api/admin/problems/run-solution`) into a 7-section workspace (**Overview**, **Statement** + PDF Export, **Solution**, **Validator**, **Checker**, **Tests**, **Review**) backed by secure Docker sandbox execution.
+
 ### Security & Architecture
 - **Docker Socket Isolation (ADR 005)**: Removed host Docker socket (`/var/run/docker.sock`) volume mount from Web API container. Refactored synchronous `RunCode` execution to push payloads to Redis `run_queue`, consumed asynchronously by the Go Worker process.
 - **Role-Based Privilege Enforcement**: Removed all hardcoded personal email addresses (`dharunkaarthick07@gmail.com`) from authentication middleware (`RequireAdmin`, `RequireSuperAdmin`), profile handlers, admin promote/demote handlers, and frontend navbar rendering. Privileges are now strictly derived from PostgreSQL database `role` values (`admin`, `superadmin`) or an optional `SUPERADMIN_EMAILS` environment variable.

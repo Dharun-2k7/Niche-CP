@@ -582,10 +582,19 @@
                     updateField('nicheSolvedStat', userProfileData.total_solved || 0);
                     
                     if(userProfileData.profile_picture_url) {
-                        document.getElementById('sidebarAvatarImg').src = userProfileData.profile_picture_url;
+                        const sidebarImg = document.getElementById('sidebarAvatarImg');
+                        if (sidebarImg) {
+                            sidebarImg.src = userProfileData.profile_picture_url;
+                            sidebarImg.onerror = function() {
+                                this.onerror = null;
+                                this.src = `https://api.dicebear.com/10.x/critters/svg?seed=${encodeURIComponent(userProfileData.name || 'Felix')}`;
+                            };
+                        }
                     } else {
-                        const initial = userProfileData.name ? userProfileData.name.charAt(0).toUpperCase() : 'N';
-                        document.getElementById('sidebarAvatarImg').src = `https://via.placeholder.com/280x280/1a1a1c/ffffff?text=${initial}`;
+                        const sidebarImg = document.getElementById('sidebarAvatarImg');
+                        if (sidebarImg) {
+                            sidebarImg.src = `https://api.dicebear.com/10.x/critters/svg?seed=${encodeURIComponent(userProfileData.name || 'Felix')}`;
+                        }
                     }
                     
                     if (userProfileData.is_college_verified) {
@@ -618,6 +627,8 @@
                 console.error("Failed to load profile:", e);
             }
 
+            let emailOtpStep = 'verify_existing';
+
             // Save Profile Data (Modal)
             document.getElementById('saveProfileBtn').addEventListener('click', async () => {
                 const btn = document.getElementById('saveProfileBtn');
@@ -627,6 +638,7 @@
                 const dpFile = document.getElementById('dpInput').files[0];
 
                 btn.textContent = 'Saving...';
+                msg.style.display = 'none';
                 
                 try {
                     // Update Name and Email
@@ -639,11 +651,10 @@
                         body: JSON.stringify({ name, email })
                     });
                     
-                    if (!res.ok) {
-                        throw new Error('Failed to update profile details');
-                    }
-                    
                     const data = await res.json();
+                    if (!res.ok) {
+                        throw new Error(data.error || 'Failed to update profile details');
+                    }
 
                     // Update DP if selected
                     if (dpFile) {
@@ -656,12 +667,14 @@
                             body: formData
                         });
                         
+                        const dpData = await dpRes.json();
                         if (!dpRes.ok) {
-                            throw new Error('Failed to upload picture');
+                            throw new Error(dpData.error || 'Failed to upload picture');
                         }
                     }
 
                     if (data.require_otp) {
+                        emailOtpStep = data.step || 'verify_existing';
                         msg.style.color = '#10b981';
                         msg.textContent = data.message;
                         msg.style.display = 'block';
@@ -678,11 +691,11 @@
                 }
             });
 
-            // Email Update OTP Submission
+            // Email Update OTP Submission (Two-step verification)
             document.getElementById('submitEmailOtpBtn').addEventListener('click', async () => {
                 const btn = document.getElementById('submitEmailOtpBtn');
                 const msg = document.getElementById('editMsg');
-                const otp = document.getElementById('editEmailOtpInput').value;
+                const otp = document.getElementById('editEmailOtpInput').value.trim();
                 
                 if(!otp) {
                     msg.style.color = '#ff4d4d';
@@ -693,7 +706,11 @@
 
                 btn.textContent = 'Verifying...';
                 try {
-                    const res = await fetch('/api/profile/verify-email-update', {
+                    const endpoint = emailOtpStep === 'verify_new' 
+                        ? '/api/profile/email/verify-new' 
+                        : '/api/profile/email/verify-existing';
+
+                    const res = await fetch(endpoint, {
                         method: 'POST',
                         headers: { 
                             'Content-Type': 'application/json',
@@ -704,7 +721,16 @@
                     const data = await res.json();
                     
                     if (res.ok) {
-                        window.location.reload();
+                        if (data.step === 'verify_new') {
+                            emailOtpStep = 'verify_new';
+                            msg.style.color = '#10b981';
+                            msg.textContent = data.message;
+                            msg.style.display = 'block';
+                            document.getElementById('editEmailOtpInput').value = '';
+                            btn.textContent = 'Verify New Email';
+                        } else {
+                            window.location.reload();
+                        }
                     } else {
                         msg.style.color = '#ff4d4d';
                         msg.textContent = data.error || 'Invalid OTP';

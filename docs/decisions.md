@@ -70,3 +70,34 @@ This document logs significant technical choices made during the development of 
   1. Prevents potential host-level compromise through the Web API container.
   2. Adheres to least privilege and zero trust principles.
   3. Guarantees clean multi-environment deployment capability without baked-in personal identities.
+
+## 12. Automated Testcase Generator Pipeline & Dedicated Curriculum Structure (2026-08-20)
+- **Decision**:
+  1. Built a dedicated backend endpoint `POST /api/admin/problems/generate-testcases` that compiles and executes reference Main Solution (`mainsol`) and Generator (`gen`) scripts written in C++, Python, or Go.
+  2. The server executes `gen` to produce raw input streams, feeds the input to `mainsol` via stdin to produce expected output, and formats the output into structured testcase JSON pairs `[{"input": "...", "output": "..."}]`.
+  3. Separated Problem Bank (`arena.html`) and Training Hub (`practice.html`): `arena.html` acts as a dense, efficient problem bank, while `practice.html` provides curated problem collections (STL, DP, Graphs), difficulty progression metrics, and recommended next problem cards based on solved state.
+  4. Transformed `learn.html` into a visual 7-stage Competitive Programming Roadmap (Fundamentals to Advanced CP) with interactive connected nodes, status badges, and multi-language lesson modals.
+  5. Converted `blogs.html` into a technical editorial platform featuring category filters and an interactive full-article reader modal.
+- **Why**:
+  - Replaces manual, error-prone testcase creation with automated generation using reference AC solutions and random generator scripts.
+  - Establishes a clear separation between raw problem repository browsing (`arena.html`) and structured algorithmic skill building (`practice.html`).
+  - Provides a gamified, visual learning path for students moving from basic syntax to advanced competitive programming algorithms.
+
+## 13. Problem Setter & Judge Pipeline Architecture Upgrade
+
+* **Status**: Accepted
+* **Date**: 2026-08-24
+* **Context**: 
+  NicheCP previously executed problem-setter scripts (generators, validators, solutions, checkers) directly on the API server host via insecure `os/exec` calls. This violated ADR 011 (Docker Socket Security Isolation) and posed severe arbitrary code execution risks. Furthermore, testcases were stored as monolithic JSONB arrays, making individual testcase tracking, validation status, and custom checker integration impossible.
+
+* **Decision**:
+  1. **Security Isolation & Queue Delegation**: All problem-setter execution (generators, validators, reference solutions, custom checkers) is strictly delegated from the API container to the Docker worker process via a dedicated Redis queue (`problem_setter_queue`). Zero host `os/exec` calls exist in the API layer.
+  2. **Sandbox API Extensions**: Extended `DockerSandboxSession` with `RunWithArgs()` (passing command-line arguments and custom timeouts to generators/checkers) and `InjectFile()` (injecting `input.txt`, `expected.txt`, and `actual.txt` into writable `/tmp` inside read-only container rootfs).
+  3. **Individual Testcase Tracking**: Replaced monolithic JSONB arrays with a dedicated `testcases` table tracking source attribution (`manual` vs `generated`), generator arguments, input/expected output, public sample flag, and validation status (`valid`, `invalid`, `pending`). Retained legacy JSONB fallback for zero-downtime backward compatibility.
+  4. **Checker Abstraction**: Implemented modular checker engine supporting `STANDARD` (whitespace-normalized token matching), `FLOATING_POINT` (absolute and relative epsilon tolerance), and `CUSTOM` (sandboxed C++/Python custom checker scripts communicating via exit codes and stderr feedback).
+  5. **Problem Lifecycle Enforcement**: Enforced `DRAFT` → `READY_FOR_REVIEW` → `PUBLISHED` state transitions with an automated 10-point audit checklist (`/api/admin/problems/:id/review`). Non-published problems are hidden from participants.
+
+* **Consequences**:
+  * Complete security containment of user-submitted problem-setter code within isolated Docker containers.
+  * Full Polygon-grade problem authoring workflow with automated test generation and validation.
+  * Backward compatibility maintained for existing problems while providing scalable relational storage for new problem archives.

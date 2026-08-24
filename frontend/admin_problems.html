@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NicheCP | Admin - Problem Setter</title>
+    <title>NicheCP | Polygon Problem Setter</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <!-- Marked.js for Live Preview -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- jsPDF for Problem Statement PDF Download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
         body { margin: 0; overflow: hidden; background: #0d0d0f; font-family: 'Inter', sans-serif; }
@@ -18,6 +20,36 @@
             height: 100vh;
             width: 100vw;
             overflow: hidden;
+        }
+
+        /* ── Polygon Workspace Tabs ── */
+        .polygon-nav-tabs {
+            display: flex;
+            gap: 6px;
+            padding: 12px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            background: #08080a;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            overflow-x: auto;
+        }
+        .polygon-tab {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .polygon-tab.active, .polygon-tab:hover {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3B82F6;
+            border-color: rgba(59, 130, 246, 0.35);
         }
 
         /* ── Action Bar ── */
@@ -39,7 +71,7 @@
 
         /* ── Sidebar (Problem Selection) ── */
         .setter-sidebar {
-            width: 300px;
+            width: 280px;
             background: #0a0a0c;
             border-right: 1px solid rgba(255,255,255,0.05);
             display: flex;
@@ -91,22 +123,21 @@
             border-color: rgba(16, 185, 129, 0.5);
         }
 
-        /* ── Editor Pane (Left) ── */
+        /* ── Editor Pane ── */
         .setter-editor-pane {
             flex: 1;
             display: flex;
             flex-direction: column;
             background: #0d0d0f;
             overflow-y: auto;
-            padding: 0 40px 100px 40px; /* bottom padding for action bar */
         }
-        .setter-editor-pane::-webkit-scrollbar { width: 6px; }
-        .setter-editor-pane::-webkit-scrollbar-track { background: transparent; }
-        .setter-editor-pane::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-        
+        .setter-editor-content {
+            padding: 24px 36px 100px 36px;
+        }
+
         .editor-section {
-            margin-top: 40px;
-            padding-bottom: 40px;
+            margin-bottom: 32px;
+            padding-bottom: 32px;
             border-bottom: 1px dashed rgba(255,255,255,0.05);
         }
         .editor-section-title {
@@ -114,53 +145,63 @@
             font-size: 18px;
             font-weight: 600;
             color: var(--primary-accent);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 8px;
         }
-        
+
         .setter-input {
             width: 100%;
-            background: rgba(0,0,0,0.2);
+            background: #08080a;
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 8px;
-            padding: 12px 16px;
+            padding: 10px 14px;
             color: #fff;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            transition: border-color 0.2s;
+            font-size: 13px;
+            box-sizing: border-box;
+            outline: none;
         }
         .setter-input:focus {
-            outline: none;
-            border-color: var(--primary-accent);
+            border-color: #3B82F6;
         }
         .setter-textarea {
             width: 100%;
-            background: rgba(0,0,0,0.2);
+            min-height: 120px;
+            background: #08080a;
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 8px;
-            padding: 16px;
-            color: #e0e0e0;
-            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            padding: 12px 14px;
+            color: #fff;
+            font-family: monospace;
             font-size: 13px;
-            line-height: 1.6;
+            box-sizing: border-box;
+            outline: none;
             resize: vertical;
-            min-height: 150px;
         }
         .setter-textarea:focus {
-            outline: none;
-            border-color: var(--primary-accent);
+            border-color: #3B82F6;
         }
-        
-        /* ── Preview Pane (Right) ── */
+
+        .status-badge-draft { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-badge-review { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .status-badge-published { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        /* Resizer & Preview Pane */
+        .setter-resizer {
+            width: 4px;
+            background: rgba(255,255,255,0.05);
+            cursor: col-resize;
+            transition: background 0.2s;
+        }
+        .setter-resizer:hover { background: #3B82F6; }
+
         .setter-preview-pane {
-            width: 45%;
-            min-width: 400px;
-            background: #0a0a0c;
+            width: 420px;
+            background: #08080a;
             border-left: 1px solid rgba(255,255,255,0.05);
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
         .preview-header {
             padding: 16px 24px;
@@ -176,73 +217,42 @@
         }
         .preview-content {
             flex: 1;
-            padding: 32px 40px;
+            padding: 32px;
             overflow-y: auto;
             color: #d1d5db;
-            font-size: 15px;
+            font-size: 14px;
             line-height: 1.7;
         }
-        .preview-content::-webkit-scrollbar { width: 6px; }
-        .preview-content::-webkit-scrollbar-track { background: transparent; }
-        .preview-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-        
-        .preview-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 8px;
-            font-family: 'Space Grotesk', sans-serif;
-        }
-        .preview-meta {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 32px;
+
+        .tc-table {
+            width: 100%;
+            border-collapse: collapse;
             font-size: 13px;
+            margin-top: 12px;
         }
-        .preview-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .preview-section-title {
-            font-size: 16px;
+        .tc-table th {
+            text-align: left;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            color: var(--text-muted);
             font-weight: 600;
-            color: #fff;
-            margin-top: 32px;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        .preview-io-box {
-            background: #060608;
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 8px;
-            padding: 16px;
+        .tc-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: #e0e0e0;
             font-family: monospace;
-            font-size: 13px;
-            white-space: pre-wrap;
-            margin-bottom: 16px;
         }
-
-        /* ── Monaco Containers ── */
-        .monaco-container {
-            height: 300px;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 8px;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-
-        /* ── Resizer ── */
-        .setter-resizer {
-            width: 4px;
-            background: transparent;
-            cursor: col-resize;
-            transition: background 0.2s;
-        }
-        .setter-resizer:hover, .setter-resizer.dragging {
-            background: rgba(59, 130, 246, 0.3);
+        .review-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
     </style>
 </head>
@@ -250,95 +260,264 @@
 
     <div id="global-nav-container" style="position:fixed; top:0; left:0; width:100%; z-index:9999;"></div>
 
-    <div class="setter-layout" style="padding-top: 60px;"> <!-- padding for navbar -->
+    <div class="setter-layout" style="padding-top: 60px;">
         
         <!-- Sidebar -->
         <div class="setter-sidebar">
             <div class="setter-sidebar-header">
-                <div style="font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; color: #fff;">Problem Bank</div>
-                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Author & Manage Problems</div>
+                <div style="font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; color: #fff;">Polygon Problem Setter</div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">NicheCP Problem Workspace</div>
             </div>
             <div class="setter-problem-list" id="problemList">
                 <div class="problem-item problem-item-new" onclick="selectProblem('new')">
                     + Create New Problem
                 </div>
-                <!-- Problem items loaded here -->
             </div>
         </div>
 
-        <!-- Editor Pane -->
+        <!-- Main Editor Workspace Pane -->
         <div class="setter-editor-pane" id="editorPane">
             
-            <div class="editor-section">
-                <div class="editor-section-title">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                    Basic Configuration
-                </div>
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <div>
-                        <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Problem Title</label>
-                        <input type="text" id="pTitle" class="setter-input" placeholder="e.g. Traveling Salesman Problem" oninput="updatePreview()">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Difficulty</label>
-                        <select id="pDifficulty" class="setter-input" onchange="updatePreview()">
-                            <option value="Easy">Easy</option>
-                            <option value="Medium" selected>Medium</option>
-                            <option value="Hard">Hard</option>
-                        </select>
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div>
-                        <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Tags (Comma separated)</label>
-                        <input type="text" id="pTags" class="setter-input" placeholder="e.g. dp, bitmask, graphs" oninput="updatePreview()">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Link to Contest (Optional)</label>
-                        <select id="pContestId" class="setter-input">
-                            <option value="">No Contest (Practice Bank)</option>
-                        </select>
-                    </div>
-                </div>
+            <!-- Polygon 7-Section Navigation Tabs -->
+            <div class="polygon-nav-tabs">
+                <button class="polygon-tab active" onclick="switchPolygonTab('overview', this)">1. OVERVIEW</button>
+                <button class="polygon-tab" onclick="switchPolygonTab('statement', this)">2. STATEMENT</button>
+                <button class="polygon-tab" onclick="switchPolygonTab('solution', this)">3. SOLUTION</button>
+                <button class="polygon-tab" onclick="switchPolygonTab('validator', this)">4. VALIDATOR</button>
+                <button class="polygon-tab" onclick="switchPolygonTab('checker', this)">5. CHECKER</button>
+                <button class="polygon-tab" onclick="switchPolygonTab('tests', this)">6. TESTS</button>
+                <button class="polygon-tab" onclick="switchPolygonTab('review', this)">7. REVIEW</button>
             </div>
 
-            <div class="editor-section">
-                <div class="editor-section-title">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    Problem Statement
-                </div>
-                <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Description (Markdown supported)</label>
-                <textarea id="pDesc" class="setter-textarea" placeholder="Write the problem description here..." oninput="updatePreview()"></textarea>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
-                    <div>
-                        <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Input Format</label>
-                        <textarea id="pInputFormat" class="setter-textarea" style="min-height: 100px;" placeholder="The first line contains..." oninput="updatePreview()"></textarea>
+            <div class="setter-editor-content">
+
+                <!-- 1. OVERVIEW TAB -->
+                <div id="polygon-tab-overview">
+                    <div class="editor-section">
+                        <div class="editor-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>📌 Problem Summary & Metadata</span>
+                            <span id="pStatusBadge" class="status-badge-draft" style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">DRAFT</span>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
+                            <div>
+                                <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Problem Title</label>
+                                <input type="text" id="pTitle" class="setter-input" placeholder="e.g. Extreme Subtraction" oninput="updatePreview()">
+                            </div>
+                            <div>
+                                <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Difficulty</label>
+                                <select id="pDifficulty" class="setter-input" onchange="updatePreview()">
+                                    <option value="Easy">Easy</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="Hard">Hard</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                            <div>
+                                <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Tags (Comma separated)</label>
+                                <input type="text" id="pTags" class="setter-input" placeholder="e.g. dp, greedy, constructives" oninput="updatePreview()">
+                            </div>
+                            <div>
+                                <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Link to Contest (Optional)</label>
+                                <select id="pContestId" class="setter-input">
+                                    <option value="">No Contest (Practice Bank)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Time Limit (Milliseconds)</label>
+                                <input type="number" id="pTimeLimitMs" class="setter-input" value="2000" min="200" max="10000">
+                            </div>
+                            <div>
+                                <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Memory Limit (MB)</label>
+                                <input type="number" id="pMemoryLimitMb" class="setter-input" value="256" min="16" max="1024">
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Output Format</label>
-                        <textarea id="pOutputFormat" class="setter-textarea" style="min-height: 100px;" placeholder="Print a single integer..." oninput="updatePreview()"></textarea>
+                </div>
+
+                <!-- 2. STATEMENT TAB -->
+                <div id="polygon-tab-statement" style="display:none;">
+                    <div class="editor-section">
+                        <div class="editor-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>📝 Problem Statement Specification</span>
+                            <button type="button" class="btn-ghost" onclick="downloadProblemPDF()" style="font-size: 12px; color: #10b981; border-color: rgba(16, 185, 129, 0.3); padding: 6px 14px;">
+                                📄 DOWNLOAD PROBLEM AS PDF
+                            </button>
+                        </div>
+                        <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Description (Markdown supported)</label>
+                        <textarea id="pDesc" class="setter-textarea" placeholder="Write the problem description here..." oninput="updatePreview()"></textarea>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                            <div>
+                                <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Input Format</label>
+                                <textarea id="pInputFormat" class="setter-textarea" style="min-height: 100px;" placeholder="The first line contains t (1 ≤ t ≤ 30000)..." oninput="updatePreview()"></textarea>
+                            </div>
+                            <div>
+                                <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Output Format</label>
+                                <textarea id="pOutputFormat" class="setter-textarea" style="min-height: 100px;" placeholder="For each test case, print YES or NO..." oninput="updatePreview()"></textarea>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Constraints</label>
+                            <textarea id="pConstraints" class="setter-textarea" style="min-height: 80px;" placeholder="1 ≤ n ≤ 30000, 1 ≤ a_i ≤ 10^6" oninput="updatePreview()"></textarea>
+                        </div>
                     </div>
                 </div>
 
-                <div style="margin-top: 20px;">
-                    <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Constraints</label>
-                    <textarea id="pConstraints" class="setter-textarea" style="min-height: 80px;" placeholder="1 ≤ N ≤ 10^5" oninput="updatePreview()"></textarea>
+                <!-- 3. SOLUTION TAB -->
+                <div id="polygon-tab-solution" style="display:none;">
+                    <div class="editor-section">
+                        <div class="editor-section-title">
+                            <span>🔑 Reference / Official Solution (mainsol)</span>
+                        </div>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">This reference solution is executed in the sandboxed Docker worker to generate guaranteed expected outputs.</p>
+                        
+                        <div style="display: flex; gap: 16px; margin-bottom: 12px; align-items: center;">
+                            <label style="font-size: 13px; color: #fff;">Solution Language:</label>
+                            <select id="mainsolLang" style="background:#08080a; border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:13px; padding:6px 12px; border-radius:6px;">
+                                <option value="cpp">C++ (g++)</option>
+                                <option value="python">Python 3</option>
+                            </select>
+                        </div>
+                        <textarea id="mainsolCode" class="setter-textarea" style="min-height: 240px;" placeholder="// Official AC Reference Solution Code (C++ or Python)\n#include <iostream>\nusing namespace std;\nint main() {\n    // Solution implementation\n    return 0;\n}"></textarea>
+                        
+                        <div style="margin-top: 16px; display: flex; gap: 12px; align-items: center;">
+                            <button type="button" class="btn-ghost" onclick="runSolutionTest()" style="font-size: 13px; color: #3B82F6; border-color: rgba(59,130,246,0.3);">
+                                ▶ Run Solution in Docker Sandbox
+                            </button>
+                            <span id="solRunStatus" style="font-size: 13px; color: var(--text-muted);"></span>
+                        </div>
+                        <div id="solRunOutput" style="display:none; background:#060608; border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:12px; font-family:monospace; font-size:13px; color:#e0e0e0; margin-top:12px; white-space:pre-wrap;"></div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="editor-section">
-                <div class="editor-section-title" style="color: #10b981;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    Testcases (JSON Array)
+                <!-- 4. VALIDATOR TAB -->
+                <div id="polygon-tab-validator" style="display:none;">
+                    <div class="editor-section">
+                        <div class="editor-section-title">
+                            <span>🛡️ Input Validator Script</span>
+                        </div>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Write a validator to verify that generated input files strictly satisfy all constraints (Exit Code 0 = PASS, Non-zero = REJECT).</p>
+                        
+                        <div style="display: flex; gap: 16px; margin-bottom: 12px; align-items: center;">
+                            <label style="font-size: 13px; color: #fff;">Validator Language:</label>
+                            <select id="valLang" style="background:#08080a; border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:13px; padding:6px 12px; border-radius:6px;">
+                                <option value="cpp">C++ (g++)</option>
+                                <option value="python">Python 3</option>
+                            </select>
+                        </div>
+                        <textarea id="valCode" class="setter-textarea" style="min-height: 200px;" placeholder="// Input Validator Code\n#include <iostream>\nusing namespace std;\nint main() {\n    int n;\n    if (!(cin >> n) || n < 1 || n > 30000) return 1;\n    return 0;\n}"></textarea>
+                        
+                        <div style="margin-top: 16px;">
+                            <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: block;">Test Validator on Input:</label>
+                            <textarea id="valTestInput" class="setter-textarea" style="min-height: 80px;" placeholder="Paste sample input here..."></textarea>
+                            <button type="button" class="btn-ghost" onclick="runValidatorTest()" style="margin-top: 10px; font-size: 13px; color: #f59e0b; border-color: rgba(245,158,11,0.3);">
+                                🔍 Run Sandboxed Validator
+                            </button>
+                            <div id="valTestOutput" style="display:none; margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 13px; font-family: monospace; white-space:pre-wrap;"></div>
+                        </div>
+                    </div>
                 </div>
-                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Provide testcases as a valid JSON array of objects: <code>[{"input":"...", "output":"...", "explanation":"..."}]</code></p>
-                
-                <label style="font-size:12px; color:var(--text-muted); display:block;">Public Examples (Visible to students)</label>
-                <div id="sampleEditor" class="monaco-container"></div>
 
-                <label style="font-size:12px; color:var(--text-muted); display:block; margin-top: 24px; color: #ef4444;">Hidden Evaluation Testcases (Private)</label>
-                <div id="hiddenEditor" class="monaco-container" style="border-color: rgba(239, 68, 68, 0.3);"></div>
+                <!-- 5. CHECKER TAB -->
+                <div id="polygon-tab-checker" style="display:none;">
+                    <div class="editor-section">
+                        <div class="editor-section-title">
+                            <span>⚖️ Output Checker (Standard / Floating-Point / Custom)</span>
+                        </div>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Configure how participant outputs are evaluated against expected results.</p>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-size: 13px; color: #fff; margin-bottom: 8px; display: block;">Checker Type:</label>
+                            <select id="chkType" class="setter-input" style="max-width: 380px;" onchange="toggleCheckerType()">
+                                <option value="STANDARD">Standard Token Comparison (Normalized Whitespace)</option>
+                                <option value="FLOATING_POINT">Floating Point Comparison (Epsilon Tolerance)</option>
+                                <option value="CUSTOM">Custom Checker Script (Docker Sandboxed)</option>
+                            </select>
+                        </div>
+
+                        <div id="floatChkArea" style="display:none; margin-bottom: 20px; background: rgba(255,255,255,0.02); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 6px;">Epsilon Tolerance (Absolute & Relative):</label>
+                            <input type="number" id="chkEpsilon" class="setter-input" value="1e-6" step="1e-9" style="max-width: 240px;">
+                        </div>
+
+                        <div id="customChkArea" style="display:none;">
+                            <div style="display: flex; gap: 16px; margin-bottom: 12px; align-items: center;">
+                                <label style="font-size: 13px; color: #fff;">Checker Language:</label>
+                                <select id="chkLang" style="background:#08080a; border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:13px; padding:6px 12px; border-radius:6px;">
+                                    <option value="cpp">C++ (g++)</option>
+                                    <option value="python">Python 3</option>
+                                </select>
+                            </div>
+                            <textarea id="chkCode" class="setter-textarea" style="min-height: 200px;" placeholder="// Custom Checker receives 3 file paths in argv: input.txt, expected.txt, actual.txt\n// Exit 0 = ACCEPTED, Exit Non-zero = WRONG_ANSWER, stderr = Diagnostic Feedback"></textarea>
+                            
+                            <button type="button" class="btn-ghost" onclick="runCheckerTest()" style="margin-top: 12px; font-size: 13px; color: #a855f7; border-color: rgba(168,85,247,0.3);">
+                                🧪 Test Custom Checker
+                            </button>
+                            <div id="chkTestOutput" style="display:none; margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 13px; font-family: monospace; white-space:pre-wrap;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. TESTS TAB -->
+                <div id="polygon-tab-tests" style="display:none;">
+                    <div class="editor-section">
+                        <div class="editor-section-title" style="color: #10b981; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="display: flex; align-items: center; gap: 8px;">
+                                🧪 Testcase Pipeline Workspace
+                            </span>
+                            <div style="display:flex; gap:10px;">
+                                <button type="button" class="btn-ghost" onclick="openAddTestModal()" style="font-size: 12px; color: #10b981; border-color: rgba(16, 185, 129, 0.3); padding: 6px 14px;">
+                                    + Add Manual Testcase
+                                </button>
+                                <button type="button" class="btn-ghost" onclick="openGenModal()" style="font-size: 12px; color: #3B82F6; border-color: rgba(59, 130, 246, 0.3); padding: 6px 14px;">
+                                    ⚡ Run Generator Pipeline
+                                </button>
+                            </div>
+                        </div>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Individual testcases generated via Generator → Validator → Reference Solution pipeline or authored manually.</p>
+                        
+                        <div id="testcasesList">
+                            <table class="tc-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Source</th>
+                                        <th>Generator Args</th>
+                                        <th>Input Snippet</th>
+                                        <th>Expected Output</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="testcasesTableBody">
+                                    <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Loading testcases...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. REVIEW TAB -->
+                <div id="polygon-tab-review" style="display:none;">
+                    <div class="editor-section">
+                        <div class="editor-section-title" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>📋 Pre-Publication Review Checklist</span>
+                            <button type="button" class="btn-primary" onclick="publishProblem()" style="font-size:13px; padding:8px 20px;">
+                                🚀 Publish Problem to Platform
+                            </button>
+                        </div>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Automated 10-point audit scan verifying problem completeness before publishing.</p>
+
+                        <div id="reviewBanner" style="padding: 16px 20px; border-radius: 12px; margin-bottom: 20px; font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 10px;"></div>
+
+                        <div id="reviewChecklist"></div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -380,11 +559,58 @@
     <div class="setter-action-bar">
         <span id="saveMsg" style="font-size: 13px; display: none; margin-right: auto;"></span>
         <button id="deleteBtn" class="btn-ghost" style="color:#ef4444; border-color:rgba(239,68,68,0.2); display:none;" onclick="deleteProblem()">Delete</button>
-        <button id="saveBtn" class="btn-magnetic" style="padding: 10px 24px;" onclick="saveProblem()">Publish Problem</button>
+        <button id="saveBtn" class="btn-magnetic" style="padding: 10px 24px;" onclick="saveProblemConfig()">Save Problem Config</button>
     </div>
 
-    <!-- Monaco Editor Loader -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.js"></script>
+    <!-- TESTCASE GENERATOR MODAL -->
+    <div id="genModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(6,6,8,0.85); backdrop-filter:blur(12px); z-index:10000; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#0d0f17; border:1px solid rgba(255,255,255,0.1); border-radius:20px; max-width:850px; width:100%; max-height:90vh; overflow-y:auto; padding:32px; box-shadow:0 20px 40px rgba(0,0,0,0.6); position:relative;">
+            <button onclick="closeGenModal()" style="position:absolute; top:20px; right:20px; background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:20px;">✕</button>
+            <h3 style="font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; color:#fff; margin:0 0 6px 0;">⚡ Automated Testcase Generator Pipeline</h3>
+            <p style="color:var(--text-muted); font-size:13px; margin:0 0 20px 0; line-height:1.5;">Generator script runs in the Docker sandbox with each line of arguments to produce test inputs. Inputs pass through the Validator (if present) and Reference Solution to produce expected outputs.</p>
+            
+            <div style="margin-bottom:16px;">
+                <label style="font-size:12px; font-weight:600; color:#fff; display:block; margin-bottom:6px;">Generator Argument Lines (One test per line, e.g. "10 100")</label>
+                <textarea id="genArgLines" class="setter-textarea" style="height:120px;" placeholder="1 10 100&#10;2 50 500&#10;3 100 1000&#10;4 500 5000&#10;5 1000 10000"></textarea>
+            </div>
+
+            <div id="genStatusMsg" style="font-size:13px; margin-bottom:16px; display:none; padding:12px; border-radius:8px;"></div>
+
+            <div style="display:flex; justify-content:flex-end; gap:12px;">
+                <button class="btn-ghost" onclick="closeGenModal()" style="padding:10px 20px; font-size:14px;">Cancel</button>
+                <button class="btn-primary" id="runGenBtn" onclick="executeGeneratorPipeline()" style="padding:10px 24px; font-size:14px;">⚡ Run Sandboxed Pipeline</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD/EDIT TESTCASE MODAL -->
+    <div id="testModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(6,6,8,0.85); backdrop-filter:blur(12px); z-index:10000; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#0d0f17; border:1px solid rgba(255,255,255,0.1); border-radius:20px; max-width:650px; width:100%; padding:28px; position:relative;">
+            <button onclick="closeTestModal()" style="position:absolute; top:20px; right:20px; background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:20px;">✕</button>
+            <h3 id="testModalTitle" style="font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:700; color:#fff; margin:0 0 16px 0;">Add Manual Testcase</h3>
+            
+            <input type="hidden" id="editTestId" value="">
+            <div style="margin-bottom:16px;">
+                <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">Input Data</label>
+                <textarea id="modalTcInput" class="setter-textarea" style="height:120px;"></textarea>
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">Expected Output</label>
+                <textarea id="modalTcOutput" class="setter-textarea" style="height:100px;"></textarea>
+            </div>
+            <div style="margin-bottom:20px; display:flex; align-items:center; gap:10px;">
+                <input type="checkbox" id="modalTcSample" style="width:16px; height:16px;">
+                <label for="modalTcSample" style="font-size:13px; color:#fff;">Mark as Public Sample Testcase (Visible to participants)</label>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:12px;">
+                <button class="btn-ghost" onclick="closeTestModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveTestcaseModal()">Save Testcase</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Marked JS -->
     <script src="js/app.js"></script>
     
     <script>
@@ -392,270 +618,517 @@
         if (!token) window.location.href = 'login.html';
 
         let currentProblemId = null;
-        let sampleMonaco, hiddenMonaco;
-        let isMonacoReady = false;
 
-        // ── Monaco Init ──
-        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
-        require(['vs/editor/editor.main'], function() {
-            monaco.editor.defineTheme('niche-dark', {
-                base: 'vs-dark',
-                inherit: true,
-                rules: [{ background: '0a0a0c' }],
-                colors: {
-                    'editor.background': '#0a0a0c',
-                    'editor.lineHighlightBackground': '#1a1a1f',
-                }
+        function switchPolygonTab(tabKey, btn) {
+            document.querySelectorAll('.polygon-tab').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            const tabs = ['overview', 'statement', 'solution', 'validator', 'checker', 'tests', 'review'];
+            tabs.forEach(t => {
+                const el = document.getElementById('polygon-tab-' + t);
+                if (el) el.style.display = (t === tabKey) ? 'block' : 'none';
             });
 
-            const commonOptions = {
-                language: 'json',
-                theme: 'niche-dark',
-                minimap: { enabled: false },
-                fontSize: 13,
-                fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-                padding: { top: 12 },
-                formatOnPaste: true
-            };
-
-            sampleMonaco = monaco.editor.create(document.getElementById('sampleEditor'), {
-                ...commonOptions,
-                value: '[\n  {\n    "input": "",\n    "output": "",\n    "explanation": ""\n  }\n]'
-            });
-
-            hiddenMonaco = monaco.editor.create(document.getElementById('hiddenEditor'), {
-                ...commonOptions,
-                value: '[\n  {\n    "input": "",\n    "output": ""\n  }\n]'
-            });
-
-            isMonacoReady = true;
-            sampleMonaco.onDidChangeModelContent(() => updatePreview());
-        });
-
-        // ── Resizer Logic ──
-        const resizer = document.getElementById('resizer');
-        const editorPane = document.getElementById('editorPane');
-        let isDragging = false;
-
-        resizer.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            resizer.classList.add('dragging');
-            document.body.style.cursor = 'col-resize';
-            e.preventDefault();
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const containerWidth = document.body.clientWidth - 300; // minus sidebar
-            let pct = ((e.clientX - 300) / containerWidth) * 100;
-            if (pct < 30) pct = 30;
-            if (pct > 70) pct = 70;
-            editorPane.style.width = pct + '%';
-            editorPane.style.flex = 'none';
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                resizer.classList.remove('dragging');
-                document.body.style.cursor = 'default';
+            if (tabKey === 'tests' && currentProblemId) {
+                loadTestcasesList();
+            } else if (tabKey === 'review' && currentProblemId) {
+                runReviewChecklist();
             }
-        });
-
-        // ── Data Loading ──
-        async function loadSidebar() {
-            try {
-                const res = await fetch('/api/problems');
-                if (res.ok) {
-                    const problems = await res.json();
-                    const list = document.getElementById('problemList');
-                    list.innerHTML = `
-                        <div class="problem-item problem-item-new" onclick="selectProblem('new')">
-                            + Create New Problem
-                        </div>
-                    `;
-                    problems.forEach(p => {
-                        const div = document.createElement('div');
-                        div.className = 'problem-item';
-                        div.id = `sidebar-prob-${p.id}`;
-                        div.textContent = `[ID: ${p.id}] ${p.title}`;
-                        div.onclick = () => selectProblem(p.id);
-                        list.appendChild(div);
-                    });
-                }
-            } catch(e) {}
         }
 
-        async function loadContests() {
+        function downloadProblemPDF() {
+            if (!window.jspdf) {
+                alert("PDF Generator library is loading, please try again in a moment.");
+                return;
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const title = document.getElementById('pTitle').value || 'Problem Statement';
+            const description = document.getElementById('pDesc').value || 'No description provided.';
+            const inputFormat = document.getElementById('pInputFormat').value || 'Standard input format.';
+            const outputFormat = document.getElementById('pOutputFormat').value || 'Standard output format.';
+            const constraints = document.getElementById('pConstraints').value || 'Standard constraints.';
+
+            doc.setFontSize(20);
+            doc.setFont("helvetica", "bold");
+            doc.text(title, 20, 20);
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text("NicheCP Official Problem Statement", 20, 28);
+            doc.text("Time Limit: " + (document.getElementById('pTimeLimitMs').value / 1000) + "s | Memory Limit: " + document.getElementById('pMemoryLimitMb').value + "MB", 20, 34);
+            doc.line(20, 38, 190, 38);
+
+            let currentY = 48;
+
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.text("Problem Description", 20, currentY);
+            currentY += 8;
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            const splitDesc = doc.splitTextToSize(description, 170);
+            doc.text(splitDesc, 20, currentY);
+            currentY += (splitDesc.length * 6) + 8;
+
+            doc.save(`${title.replace(/\s+/g, '_')}_NicheCP.pdf`);
+        }
+
+        async function runSolutionTest() {
+            if (!currentProblemId) {
+                alert("Please save or select a problem first.");
+                return;
+            }
+
+            const lang = document.getElementById('mainsolLang').value;
+            const code = document.getElementById('mainsolCode').value;
+            const testInput = document.getElementById('valTestInput').value || "10 20";
+            const statusEl = document.getElementById('solRunStatus');
+            const outEl = document.getElementById('solRunOutput');
+
+            if (!code.trim()) {
+                alert("Please provide reference solution code first.");
+                return;
+            }
+
+            statusEl.textContent = "Running solution in Docker worker queue...";
+            outEl.style.display = "none";
+
             try {
-                const res = await fetch('/api/contests');
+                const res = await fetch(`/api/admin/problems/${currentProblemId}/run-solution`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        sol_code: code,
+                        sol_lang: lang,
+                        input: testInput
+                    })
+                });
+
+                const data = await res.json();
                 if (res.ok) {
-                    const data = await res.json();
-                    const contests = Array.isArray(data) ? data : (data.contests || []);
-                    const select = document.getElementById('pContestId');
-                    contests.forEach(c => {
-                        select.innerHTML += `<option value="${c.id}">${c.title}</option>`;
-                    });
+                    statusEl.textContent = `Completed successfully`;
+                    outEl.style.display = "block";
+                    outEl.textContent = `[STDOUT]\n${data.output}`;
+                } else {
+                    statusEl.textContent = "Execution Failed";
+                    outEl.style.display = "block";
+                    outEl.textContent = `[ERROR]\n${data.error}`;
                 }
-            } catch(e) {}
+            } catch(e) {
+                statusEl.textContent = "Network Error";
+            }
+        }
+
+        async function runValidatorTest() {
+            if (!currentProblemId) {
+                alert("Please save or select a problem first.");
+                return;
+            }
+
+            const lang = document.getElementById('valLang').value;
+            const code = document.getElementById('valCode').value;
+            const inputData = document.getElementById('valTestInput').value;
+            const outEl = document.getElementById('valTestOutput');
+
+            if (!code.trim()) {
+                alert("Please provide input validator code first.");
+                return;
+            }
+
+            outEl.style.display = "block";
+            outEl.style.background = "#060608";
+            outEl.textContent = "Running validator in Docker sandbox...";
+
+            try {
+                const res = await fetch(`/api/admin/problems/${currentProblemId}/validate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        val_code: code,
+                        val_lang: lang,
+                        input: inputData
+                    })
+                });
+
+                const data = await res.json();
+                if (data.valid) {
+                    outEl.style.border = "1px solid #10b981";
+                    outEl.style.color = "#10b981";
+                    outEl.textContent = `✓ [VALID]: Test input passed validator successfully\n${data.stdout || ''}`;
+                } else {
+                    outEl.style.border = "1px solid #ef4444";
+                    outEl.style.color = "#ef4444";
+                    outEl.textContent = `✗ [INVALID]: ${data.diagnostic || 'Rejected'}\n${data.stdout || ''}`;
+                }
+            } catch(e) {
+                outEl.textContent = "Network error testing validator.";
+            }
+        }
+
+        function toggleCheckerType() {
+            const type = document.getElementById('chkType').value;
+            document.getElementById('floatChkArea').style.display = (type === 'FLOATING_POINT') ? 'block' : 'none';
+            document.getElementById('customChkArea').style.display = (type === 'CUSTOM') ? 'block' : 'none';
+        }
+
+        async function runCheckerTest() {
+            if (!currentProblemId) {
+                alert("Please save or select a problem first.");
+                return;
+            }
+
+            const lang = document.getElementById('chkLang').value;
+            const code = document.getElementById('chkCode').value;
+            const outEl = document.getElementById('chkTestOutput');
+
+            if (!code.trim()) {
+                alert("Please provide custom checker code.");
+                return;
+            }
+
+            outEl.style.display = "block";
+            outEl.textContent = "Running checker test in Docker sandbox...";
+
+            try {
+                const res = await fetch(`/api/admin/problems/${currentProblemId}/run-checker`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        chk_code: code,
+                        chk_lang: lang,
+                        input: "10 20",
+                        expected_output: "30",
+                        actual_output: "30"
+                    })
+                });
+
+                const data = await res.json();
+                if (data.verdict === 'ACCEPTED') {
+                    outEl.style.border = "1px solid #10b981";
+                    outEl.style.color = "#10b981";
+                    outEl.textContent = `✓ [ACCEPTED]: Custom checker verified output as correct\n${data.feedback || ''}`;
+                } else {
+                    outEl.style.border = "1px solid #ef4444";
+                    outEl.style.color = "#ef4444";
+                    outEl.textContent = `✗ [${data.verdict}]: Custom checker rejected output\n${data.feedback || ''}`;
+                }
+            } catch(e) {
+                outEl.textContent = "Network error testing checker.";
+            }
+        }
+
+        async function runReviewChecklist() {
+            if (!currentProblemId) return;
+
+            const banner = document.getElementById('reviewBanner');
+            const listEl = document.getElementById('reviewChecklist');
+            listEl.innerHTML = '<div style="color:var(--text-muted); font-size:13px;">Running automated audit scan...</div>';
+
+            try {
+                const res = await fetch(`/api/admin/problems/${currentProblemId}/review`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) return;
+                const data = await res.json();
+
+                if (data.can_publish) {
+                    banner.style.background = "rgba(16, 185, 129, 0.15)";
+                    banner.style.border = "1px solid rgba(16, 185, 129, 0.3)";
+                    banner.style.color = "#10b981";
+                    banner.textContent = "✓ READY TO PUBLISH — All 10 pre-publication criteria passed.";
+                } else {
+                    banner.style.background = "rgba(245, 158, 11, 0.15)";
+                    banner.style.border = "1px solid rgba(245, 158, 11, 0.3)";
+                    banner.style.color = "#f59e0b";
+                    banner.textContent = "⚠️ ATTENTION REQUIRED — Fix flagged items before publishing.";
+                }
+
+                let html = "";
+                (data.checklist || []).forEach(c => {
+                    html += `
+                        <div class="review-card">
+                            <div>
+                                <div style="font-size: 14px; font-weight: 600; color: #fff;">${c.label}</div>
+                                <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">${c.diagnostic}</div>
+                            </div>
+                            ${c.passed ? 
+                                `<span class="tag" style="background: rgba(16,185,129,0.15); color:#10b981; padding: 4px 10px; border-radius: 4px; font-weight: 600;">PASSED</span>` : 
+                                `<span class="tag" style="background: rgba(239,68,68,0.15); color:#ef4444; padding: 4px 10px; border-radius: 4px; font-weight: 600;">REQUIRED</span>`
+                            }
+                        </div>
+                    `;
+                });
+                listEl.innerHTML = html;
+            } catch(e){}
+        }
+
+        async function publishProblem() {
+            if (!currentProblemId) return;
+
+            try {
+                const res = await fetch(`/api/admin/problems/${currentProblemId}/publish`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    alert("🚀 Problem published successfully! It is now live in the practice bank.");
+                    selectProblem(currentProblemId);
+                } else {
+                    alert("Publishing failed: " + data.error);
+                }
+            } catch(e) {
+                alert("Network error publishing problem.");
+            }
+        }
+
+        async function loadTestcasesList() {
+            if (!currentProblemId) return;
+            const tbody = document.getElementById('testcasesTableBody');
+
+            try {
+                const res = await fetch(`/api/admin/problems/${currentProblemId}/testcases`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) return;
+                const testcases = await res.json();
+
+                if (testcases.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">No testcases yet. Click "Add Manual Testcase" or "Run Generator Pipeline".</td></tr>`;
+                    return;
+                }
+
+                let html = "";
+                testcases.forEach(tc => {
+                    const inpSnip = (tc.input || '').substring(0, 30).replace(/\n/g, ' ') + ((tc.input || '').length > 30 ? '...' : '');
+                    const expSnip = (tc.expected_output || '').substring(0, 30).replace(/\n/g, ' ') + ((tc.expected_output || '').length > 30 ? '...' : '');
+                    const statusColor = tc.validation_status === 'valid' ? '#10b981' : (tc.validation_status === 'invalid' ? '#ef4444' : '#f59e0b');
+
+                    html += `
+                        <tr>
+                            <td>#${tc.test_index}</td>
+                            <td><span style="font-size:11px; padding:2px 8px; border-radius:4px; background:rgba(255,255,255,0.05);">${tc.source}</span></td>
+                            <td style="color:var(--text-muted);">${tc.generator_args || '-'}</td>
+                            <td>${inpSnip}</td>
+                            <td>${expSnip}</td>
+                            <td><span style="color:${statusColor}; font-weight:600;">${tc.validation_status || 'ready'}</span></td>
+                            <td>
+                                <button class="btn-ghost" onclick="deleteTestcase(${tc.id})" style="color:#ef4444; padding:2px 8px; font-size:11px;">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } catch(e){}
+        }
+
+        function openAddTestModal() {
+            document.getElementById('editTestId').value = '';
+            document.getElementById('modalTcInput').value = '';
+            document.getElementById('modalTcOutput').value = '';
+            document.getElementById('modalTcSample').checked = false;
+            document.getElementById('testModal').style.display = 'flex';
+        }
+
+        function closeTestModal() {
+            document.getElementById('testModal').style.display = 'none';
+        }
+
+        async function saveTestcaseModal() {
+            if (!currentProblemId) return;
+
+            const input = document.getElementById('modalTcInput').value;
+            const expected = document.getElementById('modalTcOutput').value;
+            const isSample = document.getElementById('modalTcSample').checked;
+
+            if (!input.trim()) {
+                alert("Input data is required.");
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/admin/problems/${currentProblemId}/testcases`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        input: input,
+                        expected_output: expected,
+                        is_sample: isSample
+                    })
+                });
+
+                if (res.ok) {
+                    closeTestModal();
+                    loadTestcasesList();
+                } else {
+                    alert("Failed to save testcase.");
+                }
+            } catch(e) {
+                alert("Network error saving testcase.");
+            }
+        }
+
+        async function deleteTestcase(tid) {
+            if (!currentProblemId || !confirm("Delete this testcase?")) return;
+
+            try {
+                const res = await fetch(`/api/admin/problems/${currentProblemId}/testcases/${tid}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    loadTestcasesList();
+                }
+            } catch(e){}
+        }
+
+        function updatePreview() {
+            const title = document.getElementById('pTitle').value || 'Problem Title';
+            const diff = document.getElementById('pDifficulty').value;
+            const tags = document.getElementById('pTags').value;
+            const desc = document.getElementById('pDesc').value;
+            const inputFmt = document.getElementById('pInputFormat').value;
+            const outputFmt = document.getElementById('pOutputFormat').value;
+            const constraints = document.getElementById('pConstraints').value;
+
+            document.getElementById('prevTitle').innerText = title;
+            document.getElementById('prevDiff').innerText = diff;
+            document.getElementById('prevTags').innerText = tags || 'No tags';
+
+            document.getElementById('prevDesc').innerHTML = window.marked ? marked.parse(desc || '') : desc;
+            document.getElementById('prevInput').innerHTML = window.marked ? marked.parse(inputFmt || '') : inputFmt;
+            document.getElementById('prevOutput').innerHTML = window.marked ? marked.parse(outputFmt || '') : outputFmt;
+            document.getElementById('prevConstraints').innerHTML = window.marked ? marked.parse(constraints || '') : constraints;
+        }
+
+        async function loadProblems() {
+            try {
+                const res = await fetch('/api/problems');
+                if (!res.ok) return;
+                const problems = await res.json();
+                
+                const list = document.getElementById('problemList');
+                let html = '<div class="problem-item problem-item-new" onclick="selectProblem(\'new\')">+ Create New Problem</div>';
+                problems.forEach(p => {
+                    const activeClass = (p.id === currentProblemId) ? 'active' : '';
+                    html += `
+                        <div class="problem-item ${activeClass}" onclick="selectProblem(${p.id})">
+                            <div style="font-weight:600;">NCP-${p.id}: ${p.title}</div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${p.difficulty || 'Medium'}</div>
+                        </div>
+                    `;
+                });
+                list.innerHTML = html;
+            } catch(e){}
         }
 
         async function selectProblem(id) {
-            document.querySelectorAll('.problem-item').forEach(el => el.classList.remove('active'));
-            
-            const btn = document.getElementById('saveBtn');
-            const delBtn = document.getElementById('deleteBtn');
-            
             if (id === 'new') {
                 currentProblemId = null;
-                document.querySelector('.problem-item-new').classList.add('active');
-                btn.textContent = 'Publish New Problem';
-                delBtn.style.display = 'none';
-                
                 document.getElementById('pTitle').value = '';
                 document.getElementById('pDifficulty').value = 'Medium';
                 document.getElementById('pTags').value = '';
-                document.getElementById('pContestId').value = '';
                 document.getElementById('pDesc').value = '';
                 document.getElementById('pInputFormat').value = '';
                 document.getElementById('pOutputFormat').value = '';
                 document.getElementById('pConstraints').value = '';
-                
-                if (isMonacoReady) {
-                    sampleMonaco.setValue('[\n  {\n    "input": "",\n    "output": "",\n    "explanation": ""\n  }\n]');
-                    hiddenMonaco.setValue('[\n  {\n    "input": "",\n    "output": ""\n  }\n]');
-                }
+                document.getElementById('pTimeLimitMs').value = 2000;
+                document.getElementById('pMemoryLimitMb').value = 256;
+                document.getElementById('pStatusBadge').textContent = 'DRAFT';
+                document.getElementById('pStatusBadge').className = 'status-badge-draft';
+                document.getElementById('deleteBtn').style.display = 'none';
                 updatePreview();
-            } else {
-                currentProblemId = id;
-                document.getElementById(`sidebar-prob-${id}`).classList.add('active');
-                btn.textContent = 'Save Updates';
-                delBtn.style.display = 'block';
-                
-                try {
-                    const res = await fetch(`/api/admin/problems/${id}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (res.ok) {
-                        const p = await res.json();
-                        document.getElementById('pTitle').value = p.title;
-                        document.getElementById('pDifficulty').value = p.difficulty;
-                        
-                        try {
-                            const tags = JSON.parse(p.tags);
-                            document.getElementById('pTags').value = Array.isArray(tags) ? tags.join(', ') : '';
-                        } catch(e) { document.getElementById('pTags').value = p.tags; }
-                        
-                        document.getElementById('pContestId').value = p.contest_id || '';
-                        document.getElementById('pDesc').value = p.description || '';
-                        document.getElementById('pInputFormat').value = p.input_format || '';
-                        document.getElementById('pOutputFormat').value = p.output_format || '';
-                        document.getElementById('pConstraints').value = p.constraints || '';
-                        
-                        if (isMonacoReady) {
-                            // Prettify JSON
-                            try {
-                                const s = JSON.parse(p.sample_testcases || '[]');
-                                sampleMonaco.setValue(JSON.stringify(s, null, 2));
-                            } catch(e) { sampleMonaco.setValue(p.sample_testcases || '[]'); }
-                            
-                            try {
-                                const h = JSON.parse(p.hidden_testcases || '[]');
-                                hiddenMonaco.setValue(JSON.stringify(h, null, 2));
-                            } catch(e) { hiddenMonaco.setValue(p.hidden_testcases || '[]'); }
-                        }
-                        updatePreview();
-                    }
-                } catch(e) {}
-            }
-        }
-
-        // ── Live Preview ──
-        function updatePreview() {
-            document.getElementById('prevTitle').textContent = document.getElementById('pTitle').value || 'Problem Title';
-            document.getElementById('prevDiff').textContent = document.getElementById('pDifficulty').value;
-            
-            const tags = document.getElementById('pTags').value;
-            document.getElementById('prevTags').textContent = tags ? tags : 'No tags';
-
-            document.getElementById('prevDesc').innerHTML = marked.parse(document.getElementById('pDesc').value || '*Description will appear here*');
-            document.getElementById('prevInput').innerHTML = marked.parse(document.getElementById('pInputFormat').value || '...');
-            document.getElementById('prevOutput').innerHTML = marked.parse(document.getElementById('pOutputFormat').value || '...');
-            document.getElementById('prevConstraints').innerHTML = marked.parse(document.getElementById('pConstraints').value || '...');
-
-            // Render samples
-            const samplesArea = document.getElementById('prevSamplesArea');
-            if (isMonacoReady) {
-                try {
-                    const samples = JSON.parse(sampleMonaco.getValue());
-                    let html = '';
-                    samples.forEach((s, i) => {
-                        html += `
-                            <div class="preview-section-title">Sample Input ${i+1}</div>
-                            <div class="preview-io-box">${s.input}</div>
-                            <div class="preview-section-title">Sample Output ${i+1}</div>
-                            <div class="preview-io-box">${s.output}</div>
-                        `;
-                        if (s.explanation) {
-                            html += `<div style="font-size:13px; color:var(--text-muted); margin-bottom:16px;"><strong>Explanation:</strong><br>${s.explanation}</div>`;
-                        }
-                    });
-                    samplesArea.innerHTML = html;
-                } catch (e) {
-                    samplesArea.innerHTML = '<div style="color:#ef4444; font-size:13px;">[Invalid JSON in Sample Testcases]</div>';
-                }
-            }
-        }
-
-        // ── Save Logic ──
-        function showMsg(msg, isError) {
-            const el = document.getElementById('saveMsg');
-            el.textContent = msg;
-            el.style.color = isError ? '#ef4444' : '#10b981';
-            el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 3000);
-        }
-
-        async function saveProblem() {
-            if (!isMonacoReady) return;
-            
-            const title = document.getElementById('pTitle').value;
-            if (!title) { showMsg('Title is required', true); return; }
-
-            const tagsRaw = document.getElementById('pTags').value;
-            const tagsArr = tagsRaw ? tagsRaw.split(',').map(t => t.trim()) : [];
-            const contestId = document.getElementById('pContestId').value;
-
-            let sJson, hJson;
-            try {
-                JSON.parse(sampleMonaco.getValue());
-                JSON.parse(hiddenMonaco.getValue());
-                sJson = sampleMonaco.getValue();
-                hJson = hiddenMonaco.getValue();
-            } catch(e) {
-                showMsg('Testcases must be valid JSON', true);
+                switchPolygonTab('overview', document.querySelector('.polygon-tab'));
                 return;
             }
 
-            const payload = {
+            currentProblemId = id;
+            try {
+                const res = await fetch(`/api/admin/problems/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) return;
+                const p = await res.json();
+
+                document.getElementById('pTitle').value = p.title || '';
+                document.getElementById('pDifficulty').value = p.difficulty || 'Medium';
+                document.getElementById('pTags').value = typeof p.tags === 'string' ? JSON.parse(p.tags || '[]').join(', ') : (p.tags || []).join(', ');
+                document.getElementById('pDesc').value = p.description || '';
+                document.getElementById('pInputFormat').value = p.input_format || '';
+                document.getElementById('pOutputFormat').value = p.output_format || '';
+                document.getElementById('pConstraints').value = p.constraints || '';
+                document.getElementById('pTimeLimitMs').value = p.time_limit_ms || 2000;
+                document.getElementById('pMemoryLimitMb').value = p.memory_limit_mb || 256;
+
+                const status = p.status || 'DRAFT';
+                const badge = document.getElementById('pStatusBadge');
+                badge.textContent = status;
+                badge.className = status === 'PUBLISHED' ? 'status-badge-published' : (status === 'READY_FOR_REVIEW' ? 'status-badge-review' : 'status-badge-draft');
+
+                // Load configs
+                if (p.solution_config) {
+                    document.getElementById('mainsolCode').value = p.solution_config.code || '';
+                    document.getElementById('mainsolLang').value = p.solution_config.language || 'cpp';
+                }
+                if (p.validator_config) {
+                    document.getElementById('valCode').value = p.validator_config.code || '';
+                    document.getElementById('valLang').value = p.validator_config.language || 'cpp';
+                }
+                if (p.checker_type) {
+                    document.getElementById('chkType').value = p.checker_type;
+                    toggleCheckerType();
+                }
+                if (p.checker_config) {
+                    document.getElementById('chkCode').value = p.checker_config.code || '';
+                    document.getElementById('chkLang').value = p.checker_config.language || 'cpp';
+                    if (p.checker_config.epsilon) document.getElementById('chkEpsilon').value = p.checker_config.epsilon;
+                }
+
+                document.getElementById('deleteBtn').style.display = 'inline-block';
+                updatePreview();
+                loadProblems();
+                switchPolygonTab('overview', document.querySelector('.polygon-tab'));
+            } catch(e){}
+        }
+
+        async function saveProblemConfig() {
+            const title = document.getElementById('pTitle').value.trim();
+            if (!title) {
+                alert('Problem Title is required');
+                return;
+            }
+
+            const tagsArr = document.getElementById('pTags').value.split(',').map(t => t.trim()).filter(Boolean);
+            const mainPayload = {
                 title: title,
-                difficulty: document.getElementById('pDifficulty').value,
-                tags: JSON.stringify(tagsArr),
                 description: document.getElementById('pDesc').value,
                 input_format: document.getElementById('pInputFormat').value,
                 output_format: document.getElementById('pOutputFormat').value,
                 constraints: document.getElementById('pConstraints').value,
-                sample_testcases: sJson,
-                hidden_testcases: hJson,
-                contest_id: contestId ? parseInt(contestId) : null
+                difficulty: document.getElementById('pDifficulty').value,
+                tags: tagsArr
             };
 
             const url = currentProblemId ? `/api/admin/problems/${currentProblemId}` : '/api/admin/problems';
             const method = currentProblemId ? 'PUT' : 'POST';
-            const btn = document.getElementById('saveBtn');
-            btn.disabled = true;
 
             try {
                 const res = await fetch(url, {
@@ -664,52 +1137,160 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(mainPayload)
                 });
+
+                if (!res.ok) {
+                    alert('Failed to save main problem fields.');
+                    return;
+                }
+
                 const data = await res.json();
-                if (res.ok) {
-                    showMsg(data.message || 'Saved successfully', false);
-                    if (!currentProblemId) {
-                        loadSidebar();
-                        selectProblem('new');
-                    } else {
-                        loadSidebar();
+                if (!currentProblemId && data.problem_id) currentProblemId = data.problem_id;
+
+                // Save problem setter config
+                const configPayload = {
+                    time_limit_ms: parseInt(document.getElementById('pTimeLimitMs').value) || 2000,
+                    memory_limit_mb: parseInt(document.getElementById('pMemoryLimitMb').value) || 256,
+                    checker_type: document.getElementById('chkType').value,
+                    checker_config: {
+                        code: document.getElementById('chkCode').value,
+                        language: document.getElementById('chkLang').value,
+                        epsilon: parseFloat(document.getElementById('chkEpsilon').value) || 1e-6
+                    },
+                    validator_config: {
+                        code: document.getElementById('valCode').value,
+                        language: document.getElementById('valLang').value
+                    },
+                    solution_config: {
+                        code: document.getElementById('mainsolCode').value,
+                        language: document.getElementById('mainsolLang').value
                     }
-                } else {
-                    showMsg(data.error || 'Failed to save', true);
+                };
+
+                const cfgRes = await fetch(`/api/admin/problems/${currentProblemId}/config`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(configPayload)
+                });
+
+                if (cfgRes.ok) {
+                    const saveMsg = document.getElementById('saveMsg');
+                    saveMsg.style.display = 'inline';
+                    saveMsg.style.color = '#10b981';
+                    saveMsg.innerText = '✓ Configuration saved successfully!';
+                    setTimeout(() => saveMsg.style.display = 'none', 3000);
+                    loadProblems();
                 }
             } catch(e) {
-                showMsg('Network error', true);
-            } finally {
-                btn.disabled = false;
+                alert('Network error saving problem.');
             }
         }
 
         async function deleteProblem() {
-            if (!currentProblemId || !confirm('Are you sure you want to delete this problem?')) return;
+            if (!currentProblemId) return;
+            if (!confirm('Are you sure you want to delete this problem?')) return;
+
             try {
                 const res = await fetch(`/api/admin/problems/${currentProblemId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
-                    loadSidebar();
                     selectProblem('new');
-                    showMsg('Problem deleted', false);
+                    loadProblems();
+                }
+            } catch(e){}
+        }
+
+        function openGenModal() {
+            document.getElementById('genModal').style.display = 'flex';
+        }
+
+        function closeGenModal() {
+            document.getElementById('genModal').style.display = 'none';
+        }
+
+        async function executeGeneratorPipeline() {
+            if (!currentProblemId) {
+                alert('Please save the problem metadata first before running the generator pipeline.');
+                return;
+            }
+
+            const rawArgs = document.getElementById('genArgLines').value.trim();
+            const argLines = rawArgs.split('\n').map(l => l.trim()).filter(Boolean);
+            const statusEl = document.getElementById('genStatusMsg');
+            const runBtn = document.getElementById('runGenBtn');
+
+            if (argLines.length === 0) {
+                alert('Please provide at least one line of generator arguments.');
+                return;
+            }
+
+            statusEl.style.display = 'block';
+            statusEl.style.background = 'rgba(59, 130, 246, 0.15)';
+            statusEl.style.color = '#3B82F6';
+            statusEl.innerText = '⚡ Executing sandboxed Generator → Validator → Solution pipeline on worker...';
+            runBtn.disabled = true;
+
+            try {
+                const res = await fetch(`/api/admin/problems/${currentProblemId}/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        arg_lines: argLines,
+                        generator: {
+                            code: document.getElementById('genCode') ? document.getElementById('genCode').value : '',
+                            language: document.getElementById('genLang') ? document.getElementById('genLang').value : 'cpp'
+                        },
+                        validator: {
+                            code: document.getElementById('valCode').value,
+                            language: document.getElementById('valLang').value
+                        },
+                        solution: {
+                            code: document.getElementById('mainsolCode').value,
+                            language: document.getElementById('mainsolLang').value
+                        },
+                        replace_all: false
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    statusEl.style.background = 'rgba(16, 185, 129, 0.15)';
+                    statusEl.style.color = '#10b981';
+                    statusEl.innerText = `✓ ${data.message}`;
+
+                    setTimeout(() => {
+                        closeGenModal();
+                        statusEl.style.display = 'none';
+                        runBtn.disabled = false;
+                        loadTestcasesList();
+                    }, 1200);
                 } else {
-                    showMsg('Failed to delete', true);
+                    statusEl.style.background = 'rgba(239, 68, 68, 0.15)';
+                    statusEl.style.color = '#ef4444';
+                    statusEl.innerText = `✗ Pipeline Failed: ${data.error}`;
+                    runBtn.disabled = false;
                 }
             } catch(e) {
-                showMsg('Network error', true);
+                statusEl.style.background = 'rgba(239, 68, 68, 0.15)';
+                statusEl.style.color = '#ef4444';
+                statusEl.innerText = '✗ Network error executing generator pipeline.';
+                runBtn.disabled = false;
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadContests();
-            loadSidebar();
-            selectProblem('new');
+            loadProblems();
         });
     </script>
-<script src="js/components.js"></script>
+    <script src="js/components.js"></script>
 </body>
 </html>

@@ -67,6 +67,7 @@ type SandboxResult struct {
 	Stdout       string
 	Stderr       string
 	TimeExceeded bool
+	ExitCode     int
 }
 
 type CompilationResult struct {
@@ -338,6 +339,101 @@ func (s *DockerSandboxSession) Close() error {
 	return cmd.Run()
 }
 
+// RunWithArgs executes the compiled program with command-line arguments and a configurable timeout.
+// Used by generators (args = seed/size params) and checkers (args = file paths).
+// stdin can be empty for generators or contain input for validators/solutions.
+func (s *DockerSandboxSession) RunWithArgs(input string, extraArgs []string, timeoutSec float64) (*SandboxResult, error) {
+	var runCmd []string
+	switch s.language {
+	case "python":
+		runCmd = []string{"python3", "-u", "/workspace/main.py"}
+	case "go", "cpp", "c":
+		runCmd = []string{"/workspace/main"}
+	case "java":
+		runCmd = []string{"java", "-Xmx200m", "-cp", "/workspace", "Main"}
+	}
+
+	if timeoutSec <= 0 {
+		timeoutSec = 5.0
+	}
+	timeoutStr := fmt.Sprintf("%.1fs", timeoutSec)
+
+	// Build: docker exec -i <container> timeout <X>s <runCmd> <extraArgs...>
+	args := []string{"exec", "-i", s.containerName, "timeout", timeoutStr}
+	args = append(args, runCmd...)
+	args = append(args, extraArgs...)
+
+	// Go context timeout = timeout + 3s safety margin
+	ctxTimeout := time.Duration(timeoutSec*1000+3000) * time.Millisecond
+	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, "docker", args...)
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	if input != "" {
+		cmd.Stdin = strings.NewReader(input)
+	}
+
+	err := cmd.Run()
+
+	// Clean up orphans and /tmp between executions to prevent state leakage
+	cleanupCmd := exec.Command("docker", "exec", "-u", "0", s.containerName, "sh", "-c", "pkill -9 -U 1000 2>/dev/null || true; rm -rf /tmp/* 2>/dev/null || true")
+	_ = cleanupCmd.Run()
+
+	if ctx.Err() == context.DeadlineExceeded || (err != nil && (strings.Contains(err.Error(), "exit status 124") || strings.Contains(err.Error(), "exit status 143"))) {
+		return &SandboxResult{
+			Stdout:       stdout.String(),
+			Stderr:       "Execution killed: Time Limit Exceeded",
+			TimeExceeded: true,
+		}, nil
+	}
+
+	return &SandboxResult{
+		Stdout:       stdout.String(),
+		Stderr:       stderr.String(),
+		TimeExceeded: false,
+		ExitCode:     exitCodeFromError(err),
+	}, nil
+}
+
+// InjectFile writes content to a path inside the container's writable /tmp.
+// Used by checkers to inject input.txt, expected.txt, actual.txt before execution.
+func (s *DockerSandboxSession) InjectFile(containerPath, content string) error {
+	// Use 'docker exec -i' to pipe content via stdin into a file
+	// This avoids docker cp overhead and works with the read-only rootfs + /tmp tmpfs
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, "docker", "exec", "-i", "-u", "1000:1000", s.containerName,
+		"sh", "-c", fmt.Sprintf("cat > %s", containerPath))
+	cmd.Stdin = strings.NewReader(content)
+
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to inject file %s: %v (%s)", containerPath, err, stderr.String())
+	}
+	return nil
+}
+
+// exitCodeFromError extracts the exit code from an exec error.
+// Returns 0 if err is nil, -1 if the exit code cannot be determined.
+func exitCodeFromError(err error) int {
+	if err == nil {
+		return 0
+	}
+	// exec.ExitError contains the exit code
+	if exitErr, ok := err.(*exec.ExitError); ok {
+		return exitErr.ExitCode()
+	}
+	return -1
+}
+
+
 // NsJailSandbox is the experimental, ultra-low-latency kernel sandbox.
 // Note: Requires nsjail to be installed on the host and unprivileged cgroup v2 delegation.
 type NsJailSandbox struct{}
@@ -423,4 +519,79 @@ func (s *NsJailSandboxSession) RunTestcase(input string) (*SandboxResult, error)
 
 func (s *NsJailSandboxSession) Close() error {
 	return nil // No-op for NsJail since it spins up in 2ms per testcase anyway
+}
+
+// RunWithArgs executes with args and configurable timeout (NsJail variant).
+func (s *NsJailSandboxSession) RunWithArgs(input string, extraArgs []string, timeoutSec float64) (*SandboxResult, error) {
+	// For NsJail, we reuse RunTestcase but append extra args.
+	// This is a simplified version; full NsJail arg support would need --time_limit override.
+	var runCmd []string
+	switch s.language {
+	case "python":
+		runCmd = []string{"/usr/bin/python3", "/workspace/main.py"}
+	case "go", "cpp", "c":
+		runCmd = []string{"/workspace/main"}
+	case "java":
+		runCmd = []string{"/usr/bin/java", "-Xmx200m", "-cp", "/workspace", "Main"}
+	default:
+		return nil, fmt.Errorf("unsupported language: %s", s.language)
+	}
+	runCmd = append(runCmd, extraArgs...)
+
+	if timeoutSec <= 0 {
+		timeoutSec = 5.0
+	}
+	timeLimitStr := fmt.Sprintf("%d", int(timeoutSec))
+
+	nsjailArgs := []string{
+		"--quiet", "-Mo",
+		"--chroot", "/",
+		"--user", "1000", "--group", "1000",
+		"--disable_clone_newnet",
+		"--bindmount_ro", fmt.Sprintf("%s:/workspace", s.artifactDir),
+		"--time_limit", timeLimitStr,
+		"--cgroup_mem_max", "268435456",
+		"--cgroup_cpu_ms_per_sec", "1000",
+		"--cgroup_pids_max", "50",
+		"--",
+	}
+	nsjailArgs = append(nsjailArgs, runCmd...)
+
+	ctxTimeout := time.Duration(timeoutSec*1000+1000) * time.Millisecond
+	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, "nsjail", nsjailArgs...)
+	if s.language == "python" {
+		cmd.Env = append(cmd.Env, "PYTHONUNBUFFERED=1")
+	}
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	if input != "" {
+		cmd.Stdin = strings.NewReader(input)
+	}
+
+	err := cmd.Run()
+
+	if ctx.Err() == context.DeadlineExceeded || (err != nil && strings.Contains(err.Error(), "signal: killed")) {
+		return &SandboxResult{
+			Stdout:       stdout.String(),
+			Stderr:       "Execution killed: Time Limit Exceeded",
+			TimeExceeded: true,
+		}, nil
+	}
+
+	return &SandboxResult{
+		Stdout:       stdout.String(),
+		Stderr:       stderr.String(),
+		TimeExceeded: false,
+		ExitCode:     exitCodeFromError(err),
+	}, nil
+}
+
+// InjectFile is a no-op for NsJail since it uses per-execution tmpfs.
+func (s *NsJailSandboxSession) InjectFile(containerPath, content string) error {
+	return fmt.Errorf("InjectFile not supported in NsJail sandbox")
 }

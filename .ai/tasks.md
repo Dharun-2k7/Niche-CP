@@ -1,5 +1,10 @@
 # NicheCP Task Tracking
 
+- [x] **Generator Pipeline Deep Fix & Postgres Migration (2026-08-25)**:
+  - Fixed missing `genCode`/`genLang` textareas in Generator Modal, restoring full generator code editing capabilities.
+  - Extended `saveProblemConfig()` and `selectProblem()` to persist and retrieve `generator_config` in database.
+  - Updated worker `psGenerate()` to evaluate reference solution success on `ExitCode == 0` (preventing harmless stderr warnings from causing `SOL_FAILED`).
+  - Applied `001_problem_setter_pipeline.sql` migration on production PostgreSQL database.
 - [x] **Problem Setter & Judge Pipeline Architecture Upgrade (2026-08-24)**:
   - Security Isolation: Enqueued all problem-setter execution to Redis `problem_setter_queue` consumed by Docker worker process (zero host `os/exec`).
   - Docker Sandbox Extensions: Implemented `RunWithArgs()` for generator args/timeouts and `InjectFile()` for tmpfs input files.

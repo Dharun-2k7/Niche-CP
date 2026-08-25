@@ -39,6 +39,11 @@ The NicheCP platform is currently in late-stage development/stabilization. A mas
 *   The connection flow between the main API server and the Docker execution workers requires ongoing monitoring to ensure high concurrency doesn't cause race conditions or memory leaks in Redis.
 
 ## Recent Major Changes
+*   (2026-08-25) Generator Pipeline Deep Fix & Database Migration:
+    - Fixed missing `genCode` / `genLang` DOM elements in Generator Modal, restoring full generator code editing capabilities.
+    - Updated `saveProblemConfig()` and `selectProblem()` to save and load `generator_config` persistently in Postgres.
+    - Updated worker `psGenerate()` so solution stderr output (warnings) does not cause false `SOL_FAILED` verdicts (only non-zero exit code or timeouts cause failure).
+    - Executed SQL migration `001_problem_setter_pipeline.sql` on Postgres container, creating missing `testcases` table and problem setter columns (`status`, `time_limit_ms`, `memory_limit_mb`, `checker_type`, `checker_config`, `generator_config`, `solution_config`, `validator_config`).
 *   (2026-08-24) Problem Setter & Judge Pipeline Architecture Upgrade:
     - Queue-Delegated Execution Architecture: Removed all host `os/exec` calls in API handlers; all problem-setter code (generators, validators, solutions, checkers) is compiled and run inside Docker sandbox containers via Redis `problem_setter_queue` consumed by the worker.
     - Docker Sandbox API Extensions: Added `RunWithArgs()` for parameterizable generator/checker execution with command-line arguments and custom timeouts, and `InjectFile()` for writing testcase input files into container tmpfs `/tmp`.

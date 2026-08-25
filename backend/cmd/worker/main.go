@@ -746,14 +746,19 @@ func psGenerate(ctx context.Context, workerID int, job *ProblemSetterJob) PSResu
 		solRes, err := solSession.RunTestcase(input)
 		solSession.Close()
 
-		if err != nil || solRes.TimeExceeded || solRes.Stderr != "" {
+		// Fail only on actual execution error, timeout, or non-zero exit code.
+		// Stderr warnings (e.g. from C++ runtime) are NOT treated as failures.
+		if err != nil || solRes.TimeExceeded || solRes.ExitCode != 0 {
 			testResult.Status = "SOL_FAILED"
 			diag := "Reference solution failed"
 			if solRes != nil {
 				if solRes.TimeExceeded {
 					diag = "Reference Solution Time Limit Exceeded"
-				} else if solRes.Stderr != "" {
-					diag = "Runtime Error: " + strings.TrimSpace(solRes.Stderr)
+				} else if solRes.ExitCode != 0 {
+					diag = fmt.Sprintf("Non-zero exit code: %d", solRes.ExitCode)
+					if solRes.Stderr != "" {
+						diag += " — " + strings.TrimSpace(solRes.Stderr)
+					}
 				}
 			}
 			if err != nil {
@@ -767,7 +772,8 @@ func psGenerate(ctx context.Context, workerID int, job *ProblemSetterJob) PSResu
 		testResult.ExpectedOutput = solRes.Stdout
 		testResult.Status = "READY"
 		results = append(results, testResult)
-		log.Printf("[Worker %d][PS] Test #%d generated successfully", workerID, i+1)
+		log.Printf("[Worker %d][PS] Test #%d generated successfully: input=%d bytes, output=%d bytes",
+			workerID, i+1, len(input), len(solRes.Stdout))
 	}
 
 	return PSResult{Success: true, Data: results}

@@ -9,6 +9,10 @@
     
     <!-- Marked.js for Live Preview -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- KaTeX Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
     <!-- jsPDF for Problem Statement PDF Download -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
@@ -17,20 +21,20 @@
         
         .setter-layout {
             display: flex;
-            height: 100vh;
+            height: calc(100vh - 60px);
             width: 100vw;
+            margin-top: 60px;
             overflow: hidden;
         }
 
-        /* ── Polygon Workspace Tabs ── */
+        /* ── Polygon Permanent Navigation Tabs Bar ── */
         .polygon-nav-tabs {
+            flex-shrink: 0;
             display: flex;
             gap: 6px;
             padding: 12px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
             background: #08080a;
-            position: sticky;
-            top: 0;
             z-index: 100;
             overflow-x: auto;
         }
@@ -61,7 +65,7 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px;
-            padding: 16px 24px;
+            padding: 14px 24px;
             display: flex;
             align-items: center;
             gap: 16px;
@@ -129,11 +133,16 @@
             display: flex;
             flex-direction: column;
             background: #0d0d0f;
-            overflow-y: auto;
+            overflow: hidden;
         }
         .setter-editor-content {
+            flex: 1;
+            overflow-y: auto;
             padding: 24px 36px 100px 36px;
         }
+        .setter-editor-content::-webkit-scrollbar { width: 6px; }
+        .setter-editor-content::-webkit-scrollbar-track { background: transparent; }
+        .setter-editor-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
         .editor-section {
             margin-bottom: 32px;
@@ -169,7 +178,8 @@
             min-height: 120px;
             background: #08080a;
             border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 8px;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
             padding: 12px 14px;
             color: #fff;
             font-family: monospace;
@@ -182,13 +192,43 @@
             border-color: #3B82F6;
         }
 
+        /* ── Markdown Formatting Toolbar ── */
+        .md-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            background: #060608;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-bottom: none;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            padding: 6px 10px;
+            align-items: center;
+        }
+        .md-toolbar-btn {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 5px;
+            color: #d1d5db;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .md-toolbar-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3B82F6;
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
         .status-badge-draft { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
         .status-badge-review { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
         .status-badge-published { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
 
-        /* Resizer & Preview Pane */
+        /* Resizer & Original Live Preview Pane */
         .setter-resizer {
-            width: 4px;
+            width: 5px;
             background: rgba(255,255,255,0.05);
             cursor: col-resize;
             transition: background 0.2s;
@@ -196,12 +236,13 @@
         .setter-resizer:hover { background: #3B82F6; }
 
         .setter-preview-pane {
-            width: 420px;
-            background: #08080a;
+            width: 440px;
+            background: #0a0a0c;
             border-left: 1px solid rgba(255,255,255,0.05);
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            transition: width 0.3s ease;
         }
         .preview-header {
             padding: 16px 24px;
@@ -214,14 +255,57 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: #0a0a0d;
         }
         .preview-content {
             flex: 1;
-            padding: 32px;
+            padding: 32px 40px;
             overflow-y: auto;
             color: #d1d5db;
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.7;
+        }
+        .preview-content::-webkit-scrollbar { width: 6px; }
+        .preview-content::-webkit-scrollbar-track { background: transparent; }
+        .preview-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        .preview-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .preview-meta {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            font-size: 13px;
+        }
+        .preview-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .preview-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .preview-io-box {
+            background: #060608;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            margin-bottom: 16px;
         }
 
         .tc-table {
@@ -260,13 +344,13 @@
 
     <div id="global-nav-container" style="position:fixed; top:0; left:0; width:100%; z-index:9999;"></div>
 
-    <div class="setter-layout" style="padding-top: 60px;">
+    <div class="setter-layout">
         
         <!-- Sidebar -->
         <div class="setter-sidebar">
             <div class="setter-sidebar-header">
                 <div style="font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; color: #fff;">Polygon Problem Setter</div>
-                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">NicheCP Problem Workspace</div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">NicheCP Authoring Workspace</div>
             </div>
             <div class="setter-problem-list" id="problemList">
                 <div class="problem-item problem-item-new" onclick="selectProblem('new')">
@@ -278,15 +362,14 @@
         <!-- Main Editor Workspace Pane -->
         <div class="setter-editor-pane" id="editorPane">
             
-            <!-- Polygon 7-Section Navigation Tabs -->
-            <div class="polygon-nav-tabs">
+            <!-- Polygon Permanent Navigation Tabs Bar (6 Tabs: Overview, Statement, Solution, Checker, Tests, Review) -->
+            <div class="polygon-nav-tabs" id="polygonTabsBar">
                 <button class="polygon-tab active" onclick="switchPolygonTab('overview', this)">1. OVERVIEW</button>
                 <button class="polygon-tab" onclick="switchPolygonTab('statement', this)">2. STATEMENT</button>
                 <button class="polygon-tab" onclick="switchPolygonTab('solution', this)">3. SOLUTION</button>
-                <button class="polygon-tab" onclick="switchPolygonTab('validator', this)">4. VALIDATOR</button>
-                <button class="polygon-tab" onclick="switchPolygonTab('checker', this)">5. CHECKER</button>
-                <button class="polygon-tab" onclick="switchPolygonTab('tests', this)">6. TESTS</button>
-                <button class="polygon-tab" onclick="switchPolygonTab('review', this)">7. REVIEW</button>
+                <button class="polygon-tab" onclick="switchPolygonTab('checker', this)">4. CHECKER</button>
+                <button class="polygon-tab" onclick="switchPolygonTab('tests', this)">5. TESTS</button>
+                <button class="polygon-tab" onclick="switchPolygonTab('review', this)">6. REVIEW</button>
             </div>
 
             <div class="setter-editor-content">
@@ -327,11 +410,11 @@
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                             <div>
                                 <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Time Limit (Milliseconds)</label>
-                                <input type="number" id="pTimeLimitMs" class="setter-input" value="2000" min="200" max="10000">
+                                <input type="number" id="pTimeLimitMs" class="setter-input" value="2000" min="200" max="10000" oninput="updatePreview()">
                             </div>
                             <div>
                                 <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Memory Limit (MB)</label>
-                                <input type="number" id="pMemoryLimitMb" class="setter-input" value="256" min="16" max="1024">
+                                <input type="number" id="pMemoryLimitMb" class="setter-input" value="256" min="16" max="1024" oninput="updatePreview()">
                             </div>
                         </div>
                     </div>
@@ -346,23 +429,53 @@
                                 📄 DOWNLOAD PROBLEM AS PDF
                             </button>
                         </div>
-                        <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Description (Markdown supported)</label>
-                        <textarea id="pDesc" class="setter-textarea" placeholder="Write the problem description here..." oninput="updatePreview()"></textarea>
+                        
+                        <label style="font-size:12px; color:var(--text-muted); margin-bottom:6px; display:block;">Problem Description (Markdown & KaTeX Math supported)</label>
+                        <!-- Markdown Toolbar for Description -->
+                        <div class="md-toolbar">
+                            <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pDesc', '**', '**')" title="Bold"><b>B</b></button>
+                            <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pDesc', '*', '*')" title="Italic"><i>I</i></button>
+                            <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pDesc', '### ', '')" title="Heading 3">H3</button>
+                            <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pDesc', '`', '`')" title="Inline Code"><code>&lt;&gt;</code></button>
+                            <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pDesc', '```cpp\n', '\n```')" title="Code Block">``` Code</button>
+                            <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pDesc', '$', '$')" title="Inline Math">$x$</button>
+                            <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pDesc', '$$\n', '\n$$')" title="Block Math">$$\sum$$</button>
+                            <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pDesc', '- ', '')" title="Unordered List">• List</button>
+                            <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pDesc', '1. ', '')" title="Ordered List">1. List</button>
+                            <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pDesc', '| Header 1 | Header 2 |\n|---|---|\n| Cell 1 | Cell 2 |', '')" title="Table">⊞ Table</button>
+                            <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pDesc', '[', '](https://)')" title="Link">🔗 Link</button>
+                        </div>
+                        <textarea id="pDesc" class="setter-textarea" style="border-top:none; min-height: 180px;" placeholder="Write the problem description here...\nUse $1 \\le n \\le 10^5$ for inline math and $$\\sum_{i=1}^n a_i$$ for equations." oninput="updatePreview()"></textarea>
                         
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
                             <div>
-                                <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Input Format</label>
-                                <textarea id="pInputFormat" class="setter-textarea" style="min-height: 100px;" placeholder="The first line contains t (1 ≤ t ≤ 30000)..." oninput="updatePreview()"></textarea>
+                                <label style="font-size:12px; color:var(--text-muted); margin-bottom:6px; display:block;">Input Format</label>
+                                <div class="md-toolbar">
+                                    <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pInputFormat', '$', '$')">$x$</button>
+                                    <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pInputFormat', '**', '**')"><b>B</b></button>
+                                    <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pInputFormat', '`', '`')"><code>&lt;&gt;</code></button>
+                                </div>
+                                <textarea id="pInputFormat" class="setter-textarea" style="border-top:none; min-height: 100px;" placeholder="The first line contains t (1 ≤ t ≤ 30000)..." oninput="updatePreview()"></textarea>
                             </div>
                             <div>
-                                <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Output Format</label>
-                                <textarea id="pOutputFormat" class="setter-textarea" style="min-height: 100px;" placeholder="For each test case, print YES or NO..." oninput="updatePreview()"></textarea>
+                                <label style="font-size:12px; color:var(--text-muted); margin-bottom:6px; display:block;">Output Format</label>
+                                <div class="md-toolbar">
+                                    <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pOutputFormat', '$', '$')">$x$</button>
+                                    <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pOutputFormat', '**', '**')"><b>B</b></button>
+                                    <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pOutputFormat', '`', '`')"><code>&lt;&gt;</code></button>
+                                </div>
+                                <textarea id="pOutputFormat" class="setter-textarea" style="border-top:none; min-height: 100px;" placeholder="For each test case, print YES or NO..." oninput="updatePreview()"></textarea>
                             </div>
                         </div>
 
                         <div style="margin-top: 20px;">
-                            <label style="font-size:12px; color:var(--text-muted); margin-bottom:8px; display:block;">Constraints</label>
-                            <textarea id="pConstraints" class="setter-textarea" style="min-height: 80px;" placeholder="1 ≤ n ≤ 30000, 1 ≤ a_i ≤ 10^6" oninput="updatePreview()"></textarea>
+                            <label style="font-size:12px; color:var(--text-muted); margin-bottom:6px; display:block;">Constraints</label>
+                            <div class="md-toolbar">
+                                <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pConstraints', '$', '$')">$x$</button>
+                                <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pConstraints', '$$\n', '\n$$')">$$\sum$$</button>
+                                <button type="button" class="md-toolbar-btn" onclick="insertFormatting('pConstraints', '- ', '')">• List</button>
+                            </div>
+                            <textarea id="pConstraints" class="setter-textarea" style="border-top:none; min-height: 90px;" placeholder="1 ≤ n ≤ 30000, 1 ≤ a_i ≤ 10^6" oninput="updatePreview()"></textarea>
                         </div>
                     </div>
                 </div>
@@ -382,7 +495,7 @@
                                 <option value="python">Python 3</option>
                             </select>
                         </div>
-                        <textarea id="mainsolCode" class="setter-textarea" style="min-height: 240px;" placeholder="// Official AC Reference Solution Code (C++ or Python)\n#include <iostream>\nusing namespace std;\nint main() {\n    // Solution implementation\n    return 0;\n}"></textarea>
+                        <textarea id="mainsolCode" class="setter-textarea" style="min-height: 240px; border-radius:8px;" placeholder="// Official AC Reference Solution Code (C++ or Python)\n#include <iostream>\nusing namespace std;\nint main() {\n    // Solution implementation\n    return 0;\n}"></textarea>
                         
                         <div style="margin-top: 16px; display: flex; gap: 12px; align-items: center;">
                             <button type="button" class="btn-ghost" onclick="runSolutionTest()" style="font-size: 13px; color: #3B82F6; border-color: rgba(59,130,246,0.3);">
@@ -394,35 +507,7 @@
                     </div>
                 </div>
 
-                <!-- 4. VALIDATOR TAB -->
-                <div id="polygon-tab-validator" style="display:none;">
-                    <div class="editor-section">
-                        <div class="editor-section-title">
-                            <span>🛡️ Input Validator Script</span>
-                        </div>
-                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Write a validator to verify that generated input files strictly satisfy all constraints (Exit Code 0 = PASS, Non-zero = REJECT).</p>
-                        
-                        <div style="display: flex; gap: 16px; margin-bottom: 12px; align-items: center;">
-                            <label style="font-size: 13px; color: #fff;">Validator Language:</label>
-                            <select id="valLang" style="background:#08080a; border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:13px; padding:6px 12px; border-radius:6px;">
-                                <option value="cpp">C++ (g++)</option>
-                                <option value="python">Python 3</option>
-                            </select>
-                        </div>
-                        <textarea id="valCode" class="setter-textarea" style="min-height: 200px;" placeholder="// Input Validator Code\n#include <iostream>\nusing namespace std;\nint main() {\n    int n;\n    if (!(cin >> n) || n < 1 || n > 30000) return 1;\n    return 0;\n}"></textarea>
-                        
-                        <div style="margin-top: 16px;">
-                            <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: block;">Test Validator on Input:</label>
-                            <textarea id="valTestInput" class="setter-textarea" style="min-height: 80px;" placeholder="Paste sample input here..."></textarea>
-                            <button type="button" class="btn-ghost" onclick="runValidatorTest()" style="margin-top: 10px; font-size: 13px; color: #f59e0b; border-color: rgba(245,158,11,0.3);">
-                                🔍 Run Sandboxed Validator
-                            </button>
-                            <div id="valTestOutput" style="display:none; margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 13px; font-family: monospace; white-space:pre-wrap;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 5. CHECKER TAB -->
+                <!-- 4. CHECKER TAB -->
                 <div id="polygon-tab-checker" style="display:none;">
                     <div class="editor-section">
                         <div class="editor-section-title">
@@ -452,7 +537,7 @@
                                     <option value="python">Python 3</option>
                                 </select>
                             </div>
-                            <textarea id="chkCode" class="setter-textarea" style="min-height: 200px;" placeholder="// Custom Checker receives 3 file paths in argv: input.txt, expected.txt, actual.txt\n// Exit 0 = ACCEPTED, Exit Non-zero = WRONG_ANSWER, stderr = Diagnostic Feedback"></textarea>
+                            <textarea id="chkCode" class="setter-textarea" style="min-height: 200px; border-radius:8px;" placeholder="// Custom Checker receives 3 file paths in argv: input.txt, expected.txt, actual.txt\n// Exit 0 = ACCEPTED, Exit Non-zero = WRONG_ANSWER, stderr = Diagnostic Feedback"></textarea>
                             
                             <button type="button" class="btn-ghost" onclick="runCheckerTest()" style="margin-top: 12px; font-size: 13px; color: #a855f7; border-color: rgba(168,85,247,0.3);">
                                 🧪 Test Custom Checker
@@ -462,7 +547,7 @@
                     </div>
                 </div>
 
-                <!-- 6. TESTS TAB -->
+                <!-- 5. TESTS TAB -->
                 <div id="polygon-tab-tests" style="display:none;">
                     <div class="editor-section">
                         <div class="editor-section-title" style="color: #10b981; display: flex; justify-content: space-between; align-items: center;">
@@ -478,7 +563,7 @@
                                 </button>
                             </div>
                         </div>
-                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Individual testcases generated via Generator → Validator → Reference Solution pipeline or authored manually.</p>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Individual testcases generated via Generator → Reference Solution pipeline or authored manually.</p>
                         
                         <div id="testcasesList">
                             <table class="tc-table">
@@ -501,7 +586,7 @@
                     </div>
                 </div>
 
-                <!-- 7. REVIEW TAB -->
+                <!-- 6. REVIEW TAB -->
                 <div id="polygon-tab-review" style="display:none;">
                     <div class="editor-section">
                         <div class="editor-section-title" style="display:flex; justify-content:space-between; align-items:center;">
@@ -510,7 +595,7 @@
                                 🚀 Publish Problem to Platform
                             </button>
                         </div>
-                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Automated 10-point audit scan verifying problem completeness before publishing.</p>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Automated 9-point audit scan verifying problem completeness before publishing.</p>
 
                         <div id="reviewBanner" style="padding: 16px 20px; border-radius: 12px; margin-bottom: 20px; font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 10px;"></div>
 
@@ -525,11 +610,16 @@
         <!-- Resizer -->
         <div class="setter-resizer" id="resizer"></div>
 
-        <!-- Preview Pane -->
+        <!-- Restored Original Live Preview Pane -->
         <div class="setter-preview-pane" id="previewPane">
             <div class="preview-header">
                 <span>Live Preview</span>
-                <span id="previewStatus" style="color: #10b981; font-size: 11px;">Syncing...</span>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <span id="previewStatus" style="color: #10b981; font-size: 11px;">Syncing...</span>
+                    <button type="button" onclick="togglePreviewCollapse()" class="btn-ghost" style="padding: 4px 8px; font-size: 11px; border-color: rgba(255,255,255,0.1);" title="Toggle Preview Width">
+                        ◨ <span id="togglePreviewText">Collapse</span>
+                    </button>
+                </div>
             </div>
             <div class="preview-content" id="previewContent">
                 <div class="preview-title" id="prevTitle">Problem Title</div>
@@ -564,14 +654,36 @@
 
     <!-- TESTCASE GENERATOR MODAL -->
     <div id="genModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(6,6,8,0.85); backdrop-filter:blur(12px); z-index:10000; align-items:center; justify-content:center; padding:20px;">
-        <div style="background:#0d0f17; border:1px solid rgba(255,255,255,0.1); border-radius:20px; max-width:850px; width:100%; max-height:90vh; overflow-y:auto; padding:32px; box-shadow:0 20px 40px rgba(0,0,0,0.6); position:relative;">
+        <div style="background:#0d0f17; border:1px solid rgba(255,255,255,0.1); border-radius:20px; max-width:900px; width:100%; max-height:92vh; overflow-y:auto; padding:32px; box-shadow:0 20px 40px rgba(0,0,0,0.6); position:relative;">
             <button onclick="closeGenModal()" style="position:absolute; top:20px; right:20px; background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:20px;">✕</button>
             <h3 style="font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; color:#fff; margin:0 0 6px 0;">⚡ Automated Testcase Generator Pipeline</h3>
-            <p style="color:var(--text-muted); font-size:13px; margin:0 0 20px 0; line-height:1.5;">Generator script runs in the Docker sandbox with each line of arguments to produce test inputs. Inputs pass through the Validator (if present) and Reference Solution to produce expected outputs.</p>
-            
-            <div style="margin-bottom:16px;">
-                <label style="font-size:12px; font-weight:600; color:#fff; display:block; margin-bottom:6px;">Generator Argument Lines (One test per line, e.g. "10 100")</label>
-                <textarea id="genArgLines" class="setter-textarea" style="height:120px;" placeholder="1 10 100&#10;2 50 500&#10;3 100 1000&#10;4 500 5000&#10;5 1000 10000"></textarea>
+            <p style="color:var(--text-muted); font-size:13px; margin:0 0 24px 0; line-height:1.5;">Generator script runs in the Docker sandbox with each line of arguments to produce test inputs. Inputs pass through the Reference Solution to produce expected outputs.</p>
+
+            <!-- Generator Code -->
+            <div style="margin-bottom:20px;">
+                <div style="display:flex; gap:16px; align-items:center; margin-bottom:8px;">
+                    <label style="font-size:12px; font-weight:600; color:#fff;">Generator Script Language:</label>
+                    <select id="genLang" style="background:#08080a; border:1px solid rgba(255,255,255,0.12); color:#fff; font-size:13px; padding:6px 12px; border-radius:6px;">
+                        <option value="cpp">C++ (g++)</option>
+                        <option value="python">Python 3</option>
+                    </select>
+                </div>
+                <label style="font-size:12px; font-weight:600; color:#fff; display:block; margin-bottom:6px;">Generator Script Code (receives args as <code style="color:#a78bfa;">argv</code>, prints test input to <code style="color:#a78bfa;">stdout</code>)</label>
+                <textarea id="genCode" class="setter-textarea" style="height:160px; border-radius:8px; font-family:monospace;" placeholder="// C++ Example: reads argc, argv and prints a random graph\n#include <bits/stdc++.h>\nusing namespace std;\nint main(int argc, char* argv[]) {\n    int seed = atoi(argv[1]);\n    int n = atoi(argv[2]);\n    mt19937 rng(seed);\n    cout << n << '\\n';\n    for (int i = 0; i < n-1; i++)\n        cout << (rng() % (i+1)) << ' ' << i+1 << '\\n';\n    return 0;\n}"></textarea>
+                <p style="font-size:11px; color:var(--text-muted); margin-top:6px;">💡 Tip: This code is pre-populated from the saved generator config. You can also override it here per-run.</p>
+            </div>
+
+            <!-- Argument Lines -->
+            <div style="margin-bottom:20px;">
+                <label style="font-size:12px; font-weight:600; color:#fff; display:block; margin-bottom:6px;">Generator Argument Lines (One test per line — each line becomes argv for one test)</label>
+                <textarea id="genArgLines" class="setter-textarea" style="height:120px; border-radius:8px;" placeholder="1 10 100&#10;2 50 500&#10;3 100 1000&#10;4 500 5000&#10;5 1000 10000"></textarea>
+                <p style="font-size:11px; color:var(--text-muted); margin-top:6px;">Each line = one generated testcase. E.g. <code style="color:#a78bfa;">1 10 100</code> → argv[1]=1 (seed), argv[2]=10 (n), argv[3]=100 (maxval)</p>
+            </div>
+
+            <!-- Replace toggle -->
+            <div style="margin-bottom:20px; display:flex; align-items:center; gap:10px;">
+                <input type="checkbox" id="genReplaceAll" style="width:16px; height:16px;">
+                <label for="genReplaceAll" style="font-size:13px; color:#fff;">Replace all existing generated testcases before inserting new ones</label>
             </div>
 
             <div id="genStatusMsg" style="font-size:13px; margin-bottom:16px; display:none; padding:12px; border-radius:8px;"></div>
@@ -592,11 +704,11 @@
             <input type="hidden" id="editTestId" value="">
             <div style="margin-bottom:16px;">
                 <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">Input Data</label>
-                <textarea id="modalTcInput" class="setter-textarea" style="height:120px;"></textarea>
+                <textarea id="modalTcInput" class="setter-textarea" style="height:120px; border-radius:8px;"></textarea>
             </div>
             <div style="margin-bottom:16px;">
                 <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">Expected Output</label>
-                <textarea id="modalTcOutput" class="setter-textarea" style="height:100px;"></textarea>
+                <textarea id="modalTcOutput" class="setter-textarea" style="height:100px; border-radius:8px;"></textarea>
             </div>
             <div style="margin-bottom:20px; display:flex; align-items:center; gap:10px;">
                 <input type="checkbox" id="modalTcSample" style="width:16px; height:16px;">
@@ -610,7 +722,7 @@
         </div>
     </div>
 
-    <!-- Marked JS -->
+    <!-- App JS -->
     <script src="js/app.js"></script>
     
     <script>
@@ -618,12 +730,14 @@
         if (!token) window.location.href = 'login.html';
 
         let currentProblemId = null;
+        let isPreviewCollapsed = false;
 
+        // Polygon Tab Switcher (6 Tabs: overview, statement, solution, checker, tests, review)
         function switchPolygonTab(tabKey, btn) {
             document.querySelectorAll('.polygon-tab').forEach(b => b.classList.remove('active'));
             if (btn) btn.classList.add('active');
 
-            const tabs = ['overview', 'statement', 'solution', 'validator', 'checker', 'tests', 'review'];
+            const tabs = ['overview', 'statement', 'solution', 'checker', 'tests', 'review'];
             tabs.forEach(t => {
                 const el = document.getElementById('polygon-tab-' + t);
                 if (el) el.style.display = (t === tabKey) ? 'block' : 'none';
@@ -633,6 +747,37 @@
                 loadTestcasesList();
             } else if (tabKey === 'review' && currentProblemId) {
                 runReviewChecklist();
+            }
+        }
+
+        // Markdown Formatting Helper
+        function insertFormatting(elementId, prefix, suffix) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const start = el.selectionStart;
+            const end = el.selectionEnd;
+            const val = el.value;
+            const selected = val.substring(start, end);
+            const replacement = prefix + (selected || 'text') + suffix;
+            el.value = val.substring(0, start) + replacement + val.substring(end);
+            el.focus();
+            el.selectionStart = start + prefix.length;
+            el.selectionEnd = start + prefix.length + (selected ? selected.length : 4);
+            updatePreview();
+        }
+
+        // Preview Collapse/Expand Toggle
+        function togglePreviewCollapse() {
+            const pane = document.getElementById('previewPane');
+            const text = document.getElementById('togglePreviewText');
+            if (isPreviewCollapsed) {
+                pane.style.width = '440px';
+                text.textContent = 'Collapse';
+                isPreviewCollapsed = false;
+            } else {
+                pane.style.width = '0px';
+                text.textContent = 'Expand';
+                isPreviewCollapsed = true;
             }
         }
 
@@ -684,7 +829,7 @@
 
             const lang = document.getElementById('mainsolLang').value;
             const code = document.getElementById('mainsolCode').value;
-            const testInput = document.getElementById('valTestInput').value || "10 20";
+            const testInput = "10 20";
             const statusEl = document.getElementById('solRunStatus');
             const outEl = document.getElementById('solRunOutput');
 
@@ -722,55 +867,6 @@
                 }
             } catch(e) {
                 statusEl.textContent = "Network Error";
-            }
-        }
-
-        async function runValidatorTest() {
-            if (!currentProblemId) {
-                alert("Please save or select a problem first.");
-                return;
-            }
-
-            const lang = document.getElementById('valLang').value;
-            const code = document.getElementById('valCode').value;
-            const inputData = document.getElementById('valTestInput').value;
-            const outEl = document.getElementById('valTestOutput');
-
-            if (!code.trim()) {
-                alert("Please provide input validator code first.");
-                return;
-            }
-
-            outEl.style.display = "block";
-            outEl.style.background = "#060608";
-            outEl.textContent = "Running validator in Docker sandbox...";
-
-            try {
-                const res = await fetch(`/api/admin/problems/${currentProblemId}/validate`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        val_code: code,
-                        val_lang: lang,
-                        input: inputData
-                    })
-                });
-
-                const data = await res.json();
-                if (data.valid) {
-                    outEl.style.border = "1px solid #10b981";
-                    outEl.style.color = "#10b981";
-                    outEl.textContent = `✓ [VALID]: Test input passed validator successfully\n${data.stdout || ''}`;
-                } else {
-                    outEl.style.border = "1px solid #ef4444";
-                    outEl.style.color = "#ef4444";
-                    outEl.textContent = `✗ [INVALID]: ${data.diagnostic || 'Rejected'}\n${data.stdout || ''}`;
-                }
-            } catch(e) {
-                outEl.textContent = "Network error testing validator.";
             }
         }
 
@@ -849,7 +945,7 @@
                     banner.style.background = "rgba(16, 185, 129, 0.15)";
                     banner.style.border = "1px solid rgba(16, 185, 129, 0.3)";
                     banner.style.color = "#10b981";
-                    banner.textContent = "✓ READY TO PUBLISH — All 10 pre-publication criteria passed.";
+                    banner.textContent = "✓ READY TO PUBLISH — All 9 pre-publication criteria passed.";
                 } else {
                     banner.style.background = "rgba(245, 158, 11, 0.15)";
                     banner.style.border = "1px solid rgba(245, 158, 11, 0.3)";
@@ -897,6 +993,8 @@
             }
         }
 
+        let currentTestcasesData = [];
+
         async function loadTestcasesList() {
             if (!currentProblemId) return;
             const tbody = document.getElementById('testcasesTableBody');
@@ -907,9 +1005,11 @@
                 });
                 if (!res.ok) return;
                 const testcases = await res.json();
+                currentTestcasesData = testcases;
 
                 if (testcases.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">No testcases yet. Click "Add Manual Testcase" or "Run Generator Pipeline".</td></tr>`;
+                    updatePreview();
                     return;
                 }
 
@@ -921,7 +1021,7 @@
 
                     html += `
                         <tr>
-                            <td>#${tc.test_index}</td>
+                            <td>#${tc.test_index} ${tc.is_sample ? '<span style="color:#10b981; font-weight:bold;">[Sample]</span>' : ''}</td>
                             <td><span style="font-size:11px; padding:2px 8px; border-radius:4px; background:rgba(255,255,255,0.05);">${tc.source}</span></td>
                             <td style="color:var(--text-muted);">${tc.generator_args || '-'}</td>
                             <td>${inpSnip}</td>
@@ -934,6 +1034,7 @@
                     `;
                 });
                 tbody.innerHTML = html;
+                updatePreview();
             } catch(e){}
         }
 
@@ -1000,23 +1101,50 @@
             } catch(e){}
         }
 
+        // Restored Original Live Preview Renderer
         function updatePreview() {
-            const title = document.getElementById('pTitle').value || 'Problem Title';
-            const diff = document.getElementById('pDifficulty').value;
+            document.getElementById('prevTitle').textContent = document.getElementById('pTitle').value || 'Problem Title';
+            document.getElementById('prevDiff').textContent = document.getElementById('pDifficulty').value || 'Medium';
+            
             const tags = document.getElementById('pTags').value;
-            const desc = document.getElementById('pDesc').value;
-            const inputFmt = document.getElementById('pInputFormat').value;
-            const outputFmt = document.getElementById('pOutputFormat').value;
-            const constraints = document.getElementById('pConstraints').value;
+            document.getElementById('prevTags').textContent = tags ? tags : 'No tags';
 
-            document.getElementById('prevTitle').innerText = title;
-            document.getElementById('prevDiff').innerText = diff;
-            document.getElementById('prevTags').innerText = tags || 'No tags';
+            document.getElementById('prevDesc').innerHTML = window.marked ? marked.parse(document.getElementById('pDesc').value || '*Description will appear here*') : (document.getElementById('pDesc').value || '');
+            document.getElementById('prevInput').innerHTML = window.marked ? marked.parse(document.getElementById('pInputFormat').value || '...') : (document.getElementById('pInputFormat').value || '');
+            document.getElementById('prevOutput').innerHTML = window.marked ? marked.parse(document.getElementById('pOutputFormat').value || '...') : (document.getElementById('pOutputFormat').value || '');
+            document.getElementById('prevConstraints').innerHTML = window.marked ? marked.parse(document.getElementById('pConstraints').value || '...') : (document.getElementById('pConstraints').value || '');
 
-            document.getElementById('prevDesc').innerHTML = window.marked ? marked.parse(desc || '') : desc;
-            document.getElementById('prevInput').innerHTML = window.marked ? marked.parse(inputFmt || '') : inputFmt;
-            document.getElementById('prevOutput').innerHTML = window.marked ? marked.parse(outputFmt || '') : outputFmt;
-            document.getElementById('prevConstraints').innerHTML = window.marked ? marked.parse(constraints || '') : constraints;
+            // Render samples
+            const samplesArea = document.getElementById('prevSamplesArea');
+            const sampleCases = currentTestcasesData.filter(tc => tc.is_sample);
+            if (sampleCases.length > 0) {
+                let html = '';
+                sampleCases.forEach((s, i) => {
+                    html += `
+                        <div class="preview-section-title">Sample Input ${i+1}</div>
+                        <div class="preview-io-box">${s.input}</div>
+                        <div class="preview-section-title">Sample Output ${i+1}</div>
+                        <div class="preview-io-box">${s.expected_output || ''}</div>
+                    `;
+                });
+                samplesArea.innerHTML = html;
+            } else {
+                samplesArea.innerHTML = '';
+            }
+
+            // Render KaTeX Math Expressions
+            const prevContent = document.getElementById('previewContent');
+            if (window.renderMathInElement && prevContent) {
+                window.renderMathInElement(prevContent, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
         }
 
         async function loadProblems() {
@@ -1043,6 +1171,7 @@
         async function selectProblem(id) {
             if (id === 'new') {
                 currentProblemId = null;
+                currentTestcasesData = [];
                 document.getElementById('pTitle').value = '';
                 document.getElementById('pDifficulty').value = 'Medium';
                 document.getElementById('pTags').value = '';
@@ -1088,9 +1217,9 @@
                     document.getElementById('mainsolCode').value = p.solution_config.code || '';
                     document.getElementById('mainsolLang').value = p.solution_config.language || 'cpp';
                 }
-                if (p.validator_config) {
-                    document.getElementById('valCode').value = p.validator_config.code || '';
-                    document.getElementById('valLang').value = p.validator_config.language || 'cpp';
+                if (p.generator_config) {
+                    document.getElementById('genCode').value = p.generator_config.code || '';
+                    document.getElementById('genLang').value = p.generator_config.language || 'cpp';
                 }
                 if (p.checker_type) {
                     document.getElementById('chkType').value = p.checker_type;
@@ -1103,7 +1232,7 @@
                 }
 
                 document.getElementById('deleteBtn').style.display = 'inline-block';
-                updatePreview();
+                loadTestcasesList();
                 loadProblems();
                 switchPolygonTab('overview', document.querySelector('.polygon-tab'));
             } catch(e){}
@@ -1124,7 +1253,9 @@
                 output_format: document.getElementById('pOutputFormat').value,
                 constraints: document.getElementById('pConstraints').value,
                 difficulty: document.getElementById('pDifficulty').value,
-                tags: tagsArr
+                tags: JSON.stringify(tagsArr),
+                sample_testcases: '[]',
+                hidden_testcases: '[]'
             };
 
             const url = currentProblemId ? `/api/admin/problems/${currentProblemId}` : '/api/admin/problems';
@@ -1140,13 +1271,17 @@
                     body: JSON.stringify(mainPayload)
                 });
 
+                const data = await res.json().catch(() => ({}));
+
                 if (!res.ok) {
-                    alert('Failed to save main problem fields.');
+                    alert(`Failed to save problem metadata: ${data.error || data.message || 'Server error (' + res.status + ')'}`);
                     return;
                 }
 
-                const data = await res.json();
-                if (!currentProblemId && data.problem_id) currentProblemId = data.problem_id;
+                const savedId = data.problem_id || data.id;
+                if (savedId) {
+                    currentProblemId = savedId;
+                }
 
                 // Save problem setter config
                 const configPayload = {
@@ -1158,9 +1293,9 @@
                         language: document.getElementById('chkLang').value,
                         epsilon: parseFloat(document.getElementById('chkEpsilon').value) || 1e-6
                     },
-                    validator_config: {
-                        code: document.getElementById('valCode').value,
-                        language: document.getElementById('valLang').value
+                    generator_config: {
+                        code: document.getElementById('genCode').value,
+                        language: document.getElementById('genLang').value
                     },
                     solution_config: {
                         code: document.getElementById('mainsolCode').value,
@@ -1177,6 +1312,8 @@
                     body: JSON.stringify(configPayload)
                 });
 
+                const cfgData = await cfgRes.json().catch(() => ({}));
+
                 if (cfgRes.ok) {
                     const saveMsg = document.getElementById('saveMsg');
                     saveMsg.style.display = 'inline';
@@ -1184,9 +1321,13 @@
                     saveMsg.innerText = '✓ Configuration saved successfully!';
                     setTimeout(() => saveMsg.style.display = 'none', 3000);
                     loadProblems();
+                    loadTestcasesList();
+                    updatePreview();
+                } else {
+                    alert(`Saved main metadata, but failed to save execution config: ${cfgData.error || 'Server error'}`);
                 }
             } catch(e) {
-                alert('Network error saving problem.');
+                alert('Network error saving problem: ' + e.message);
             }
         }
 
@@ -1220,11 +1361,21 @@
                 return;
             }
 
+            const genCodeVal = document.getElementById('genCode').value.trim();
+            const genLangVal = document.getElementById('genLang').value;
             const rawArgs = document.getElementById('genArgLines').value.trim();
             const argLines = rawArgs.split('\n').map(l => l.trim()).filter(Boolean);
+            const replaceAll = document.getElementById('genReplaceAll').checked;
             const statusEl = document.getElementById('genStatusMsg');
             const runBtn = document.getElementById('runGenBtn');
 
+            if (!genCodeVal) {
+                statusEl.style.display = 'block';
+                statusEl.style.background = 'rgba(239, 68, 68, 0.15)';
+                statusEl.style.color = '#ef4444';
+                statusEl.innerText = '✗ Generator code is required. Paste your generator script above or save the problem config first (the generator code will be pre-loaded from the saved config).';
+                return;
+            }
             if (argLines.length === 0) {
                 alert('Please provide at least one line of generator arguments.');
                 return;
@@ -1233,7 +1384,7 @@
             statusEl.style.display = 'block';
             statusEl.style.background = 'rgba(59, 130, 246, 0.15)';
             statusEl.style.color = '#3B82F6';
-            statusEl.innerText = '⚡ Executing sandboxed Generator → Validator → Solution pipeline on worker...';
+            statusEl.innerText = `⚡ Executing sandboxed Generator → Reference Solution pipeline (${argLines.length} test(s)) on worker...`;
             runBtn.disabled = true;
 
             try {
@@ -1246,46 +1397,70 @@
                     body: JSON.stringify({
                         arg_lines: argLines,
                         generator: {
-                            code: document.getElementById('genCode') ? document.getElementById('genCode').value : '',
-                            language: document.getElementById('genLang') ? document.getElementById('genLang').value : 'cpp'
-                        },
-                        validator: {
-                            code: document.getElementById('valCode').value,
-                            language: document.getElementById('valLang').value
+                            code: genCodeVal,
+                            language: genLangVal
                         },
                         solution: {
                             code: document.getElementById('mainsolCode').value,
                             language: document.getElementById('mainsolLang').value
                         },
-                        replace_all: false
+                        replace_all: replaceAll
                     })
                 });
 
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
                 if (res.ok) {
+                    const saved = data.saved_count || 0;
+                    const failed = data.failed_count || 0;
                     statusEl.style.background = 'rgba(16, 185, 129, 0.15)';
                     statusEl.style.color = '#10b981';
-                    statusEl.innerText = `✓ ${data.message}`;
+                    statusEl.innerText = `✓ ${data.message || 'Pipeline complete'} — ${saved} test(s) saved${failed > 0 ? ', ' + failed + ' failed' : ''}`;
 
                     setTimeout(() => {
                         closeGenModal();
                         statusEl.style.display = 'none';
                         runBtn.disabled = false;
+                        document.getElementById('genReplaceAll').checked = false;
                         loadTestcasesList();
-                    }, 1200);
+                    }, 1500);
                 } else {
                     statusEl.style.background = 'rgba(239, 68, 68, 0.15)';
                     statusEl.style.color = '#ef4444';
-                    statusEl.innerText = `✗ Pipeline Failed: ${data.error}`;
+                    statusEl.innerText = `✗ Pipeline Failed: ${data.error || 'Server error (' + res.status + ')'}`;
                     runBtn.disabled = false;
                 }
             } catch(e) {
                 statusEl.style.background = 'rgba(239, 68, 68, 0.15)';
                 statusEl.style.color = '#ef4444';
-                statusEl.innerText = '✗ Network error executing generator pipeline.';
+                statusEl.innerText = `✗ Execution error: ${e.message}`;
                 runBtn.disabled = false;
             }
         }
+
+        // Resizer Drag Logic
+        const resizer = document.getElementById('resizer');
+        const previewPane = document.getElementById('previewPane');
+        let isResizing = false;
+
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            const newWidth = document.body.clientWidth - e.clientX;
+            if (newWidth >= 300 && newWidth <= 800) {
+                previewPane.style.width = newWidth + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isResizing = false;
+            document.body.style.cursor = 'default';
+            document.body.style.userSelect = 'auto';
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             loadProblems();

@@ -5,7 +5,7 @@
   - Docker Sandbox Extensions: Implemented `RunWithArgs()` for generator args/timeouts and `InjectFile()` for tmpfs input files.
   - Relational Testcase Tracking: Created `testcases` database table with per-test source, generator args, validation status (`valid`, `invalid`, `pending`).
   - Checker Engine Abstraction: Implemented `STANDARD`, `FLOATING_POINT`, and `CUSTOM` checker types with sandbox execution.
-  - Polygon Workspace & Lifecycle: Overhauled `admin_problems.html` with 7-section workspace, 10-point review checklist, and `DRAFT` → `READY` → `PUBLISHED` state machine.
+  - Polygon Workspace & Workflow Simplification: Overhauled `admin_problems.html` layout with sticky 6 Polygon tabs bar (`Overview | Statement | Solution | Checker | Tests | Review`) permanently visible at all times. Removed Validator tab and validator publication requirements while preserving database schemas and API handlers for 100% backward compatibility. Full contestant-style Live Preview with KaTeX math parsing (`$ ... $` and `$$ ... $$`), collapsible preview pane, Markdown statement formatting toolbar (**Bold**, *Italic*, Headings, Code, Code Blocks, Math, Lists, Tables, Links), 9-point audit scan, and `DRAFT` → `READY` → `PUBLISHED` state machine.
 - [x] **Targeted Product Refinement (4 Core Overhauls)**:
   - CHANGE 1 (Navbar & Profile Avatar Consistency): Global path resolution (`/uploads/...`) & fallback `onerror` handling.
   - CHANGE 2 (NicheCP Resources & 16-Step Visual Roadmap): 16-node sequential progression roadmap in `learn.html` with difficulty badges, prerequisites, interactive modals, and resource tabs.

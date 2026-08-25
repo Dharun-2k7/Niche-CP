@@ -198,28 +198,56 @@ func DemoteFromAdmin(c *gin.Context) {
 }
 
 type CreateProblemRequest struct {
-	Title           string `json:"title" binding:"required"`
-	Difficulty      string `json:"difficulty"`
-	Tags            string `json:"tags"`             // JSON array string
-	Description     string `json:"description" binding:"required"`
-	InputFormat     string `json:"input_format"`
-	OutputFormat    string `json:"output_format"`
-	Constraints     string `json:"constraints"`
-	SampleTestcases string `json:"sample_testcases"` // JSON array string
-	HiddenTestcases string `json:"hidden_testcases" binding:"required"` // JSON array string
-	ContestID       *int   `json:"contest_id"`
+	Title           string      `json:"title" binding:"required"`
+	Difficulty      string      `json:"difficulty"`
+	Tags            interface{} `json:"tags"`             // Can accept string or array
+	Description     string      `json:"description"`
+	InputFormat     string      `json:"input_format"`
+	OutputFormat    string      `json:"output_format"`
+	Constraints     string      `json:"constraints"`
+	SampleTestcases interface{} `json:"sample_testcases"` // Can accept string or array
+	HiddenTestcases interface{} `json:"hidden_testcases"` // Can accept string or array
+	ContestID       *int        `json:"contest_id"`
+}
+
+func parseJSONString(input interface{}, defaultJSON string) string {
+	if input == nil {
+		return defaultJSON
+	}
+	switch v := input.(type) {
+	case string:
+		v = strings.TrimSpace(v)
+		if v == "" {
+			return defaultJSON
+		}
+		var js interface{}
+		if json.Unmarshal([]byte(v), &js) == nil {
+			return v
+		}
+		b, _ := json.Marshal([]string{v})
+		return string(b)
+	default:
+		b, err := json.Marshal(v)
+		if err != nil {
+			return defaultJSON
+		}
+		return string(b)
+	}
 }
 
 func CreateProblem(c *gin.Context) {
 	var req CreateProblemRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload: " + err.Error()})
 		return
 	}
 
-	if req.Tags == "" { req.Tags = "[]" }
-	if req.SampleTestcases == "" { req.SampleTestcases = "[]" }
-	if req.Difficulty == "" { req.Difficulty = "Medium" }
+	tagsStr := parseJSONString(req.Tags, "[]")
+	sampleStr := parseJSONString(req.SampleTestcases, "[]")
+	hiddenStr := parseJSONString(req.HiddenTestcases, "[]")
+	if req.Difficulty == "" {
+		req.Difficulty = "Medium"
+	}
 
 	// Insert into DB
 	var problemID int
@@ -227,10 +255,10 @@ func CreateProblem(c *gin.Context) {
 		INSERT INTO problems (title, difficulty, tags, description, input_format, output_format, constraints, sample_testcases, hidden_testcases, status)
 		VALUES ($1, $2, $3::jsonb, $4, $5, $6, $7, $8::jsonb, $9::jsonb, 'DRAFT')
 		RETURNING id
-	`, req.Title, req.Difficulty, req.Tags, req.Description, req.InputFormat, req.OutputFormat, req.Constraints, req.SampleTestcases, req.HiddenTestcases).Scan(&problemID)
+	`, req.Title, req.Difficulty, tagsStr, req.Description, req.InputFormat, req.OutputFormat, req.Constraints, sampleStr, hiddenStr).Scan(&problemID)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create problem"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create problem: " + err.Error()})
 		return
 	}
 
@@ -241,7 +269,7 @@ func CreateProblem(c *gin.Context) {
 		db.DB.Exec(`INSERT INTO contest_problems (contest_id, problem_id, order_index) VALUES ($1, $2, $3)`, *req.ContestID, problemID, orderIndex)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Problem created successfully!", "problem_id": problemID})
+	c.JSON(http.StatusOK, gin.H{"message": "Problem created successfully!", "problem_id": problemID, "id": problemID})
 }
 
 type CreateContestRequest struct {
@@ -709,13 +737,13 @@ func GetAdminProblem(c *gin.Context) {
 type UpdateProblemRequest struct {
 	Title           string      `json:"title" binding:"required"`
 	Difficulty      string      `json:"difficulty"`
-	Tags            string      `json:"tags"` // JSON string array
-	Description     string      `json:"description" binding:"required"`
+	Tags            interface{} `json:"tags"` // Can accept string or array
+	Description     string      `json:"description"`
 	InputFormat     string      `json:"input_format"`
 	OutputFormat    string      `json:"output_format"`
 	Constraints     string      `json:"constraints"`
-	SampleTestcases string      `json:"sample_testcases"` // JSON string array of objects
-	HiddenTestcases string      `json:"hidden_testcases"` // JSON string array of objects
+	SampleTestcases interface{} `json:"sample_testcases"` // Can accept string or array
+	HiddenTestcases interface{} `json:"hidden_testcases"` // Can accept string or array
 	ContestID       *int        `json:"contest_id"`
 	Status          string      `json:"status"`
 }
@@ -724,21 +752,28 @@ func UpdateProblem(c *gin.Context) {
 	id := c.Param("id")
 	var req UpdateProblemRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload: " + err.Error()})
 		return
+	}
+
+	tagsStr := parseJSONString(req.Tags, "[]")
+	sampleStr := parseJSONString(req.SampleTestcases, "[]")
+	hiddenStr := parseJSONString(req.HiddenTestcases, "[]")
+	if req.Difficulty == "" {
+		req.Difficulty = "Medium"
 	}
 
 	tx, err := db.DB.Begin()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction: " + err.Error()})
 		return
 	}
 
 	query := `
 		UPDATE problems 
-		SET title=$1, difficulty=$2, tags=$3, description=$4, input_format=$5, output_format=$6, constraints=$7, sample_testcases=$8, hidden_testcases=$9
+		SET title=$1, difficulty=$2, tags=$3::jsonb, description=$4, input_format=$5, output_format=$6, constraints=$7, sample_testcases=$8::jsonb, hidden_testcases=$9::jsonb
 	`
-	args := []interface{}{req.Title, req.Difficulty, req.Tags, req.Description, req.InputFormat, req.OutputFormat, req.Constraints, req.SampleTestcases, req.HiddenTestcases}
+	args := []interface{}{req.Title, req.Difficulty, tagsStr, req.Description, req.InputFormat, req.OutputFormat, req.Constraints, sampleStr, hiddenStr}
 	
 	if req.Status != "" {
 		query += `, status=$10 WHERE id=$11`
@@ -752,7 +787,7 @@ func UpdateProblem(c *gin.Context) {
 	
 	if err != nil {
 		tx.Rollback()
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update problem"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update problem: " + err.Error()})
 		return
 	}
 

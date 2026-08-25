@@ -34,7 +34,13 @@ type ProblemConfigPayload struct {
 
 // SaveProblemConfig updates the problem setter configuration for a problem
 func SaveProblemConfig(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	probID, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid problem ID: " + idStr})
+		return
+	}
+
 	var req ProblemConfigPayload
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid payload: " + err.Error()})
@@ -63,7 +69,7 @@ func SaveProblemConfig(c *gin.Context) {
 		    validator_config = $6::jsonb, solution_config = $7::jsonb,
 		    updated_at = CURRENT_TIMESTAMP
 		WHERE id = $8
-	`, req.TimeLimitMs, req.MemoryLimitMb, req.CheckerType, string(chkJSON), string(genJSON), string(valJSON), string(solJSON), id)
+	`, req.TimeLimitMs, req.MemoryLimitMb, req.CheckerType, string(chkJSON), string(genJSON), string(valJSON), string(solJSON), probID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save configuration: " + err.Error()})
@@ -81,19 +87,24 @@ func SaveProblemConfig(c *gin.Context) {
 
 // GetProblemConfig retrieves the problem setter configuration
 func GetProblemConfig(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	probID, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid problem ID: " + idStr})
+		return
+	}
 
 	var status, checkerType string
 	var timeLimitMs, memoryLimitMb int
 	var chkStr, genStr, valStr, solStr string
 
-	err := db.DB.QueryRow(`
+	err = db.DB.QueryRow(`
 		SELECT COALESCE(status, 'DRAFT'), COALESCE(time_limit_ms, 2000), COALESCE(memory_limit_mb, 256),
 		       COALESCE(checker_type, 'STANDARD'), COALESCE(checker_config::text, '{}'),
 		       COALESCE(generator_config::text, '{}'), COALESCE(validator_config::text, '{}'),
 		       COALESCE(solution_config::text, '{}')
 		FROM problems WHERE id = $1
-	`, id).Scan(&status, &timeLimitMs, &memoryLimitMb, &checkerType, &chkStr, &genStr, &valStr, &solStr)
+	`, probID).Scan(&status, &timeLimitMs, &memoryLimitMb, &checkerType, &chkStr, &genStr, &valStr, &solStr)
 
 	if err == sql.ErrNoRows {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Problem not found"})
@@ -110,7 +121,7 @@ func GetProblemConfig(c *gin.Context) {
 	_ = json.Unmarshal([]byte(solStr), &solConfig)
 
 	c.JSON(http.StatusOK, gin.H{
-		"id":               id,
+		"id":               probID,
 		"status":           status,
 		"time_limit_ms":    timeLimitMs,
 		"memory_limit_mb":   memoryLimitMb,
@@ -288,16 +299,30 @@ func GenerateTests(c *gin.Context) {
 		}
 	}
 
+	// Count failed tests (status != READY)
+	failedCount := 0
+	for _, tc := range result.Data {
+		if tc.Status != "READY" {
+			failedCount++
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message":      fmt.Sprintf("Pipeline finished: %d testcases created/updated", savedCount),
 		"saved_count":  savedCount,
+		"failed_count": failedCount,
 		"results":      result.Data,
 	})
 }
 
 // ValidateTestInput validates a testcase input using the problem's validator
 func ValidateTestInput(c *gin.Context) {
-	probID := c.Param("id")
+	probIDStr := c.Param("id")
+	probID, err := strconv.Atoi(probIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid problem ID: " + probIDStr})
+		return
+	}
 
 	var req struct {
 		Input    string `json:"input" binding:"required"`
@@ -377,7 +402,12 @@ func ValidateTestInput(c *gin.Context) {
 
 // RunReferenceSolution executes the reference solution on input
 func RunReferenceSolution(c *gin.Context) {
-	probID := c.Param("id")
+	probIDStr := c.Param("id")
+	probID, err := strconv.Atoi(probIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid problem ID: " + probIDStr})
+		return
+	}
 
 	var req struct {
 		Input   string `json:"input"`
@@ -452,7 +482,12 @@ func RunReferenceSolution(c *gin.Context) {
 
 // RunCheckerTest tests a custom checker against test values
 func RunCheckerTest(c *gin.Context) {
-	probID := c.Param("id")
+	probIDStr := c.Param("id")
+	probID, err := strconv.Atoi(probIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid problem ID: " + probIDStr})
+		return
+	}
 
 	var req struct {
 		Input          string `json:"input"`
@@ -689,12 +724,17 @@ func UpdateTestcase(c *gin.Context) {
 
 // DeleteTestcase removes a testcase and re-indexes remaining testcases
 func DeleteTestcase(c *gin.Context) {
-	probID := c.Param("id")
+	probIDStr := c.Param("id")
+	probID, err := strconv.Atoi(probIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid problem ID: " + probIDStr})
+		return
+	}
 	tid := c.Param("tid")
 
 	res, err := db.DB.Exec("DELETE FROM testcases WHERE id = $1 AND problem_id = $2", tid, probID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete testcase"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete testcase: " + err.Error()})
 		return
 	}
 

@@ -4,6 +4,11 @@ All notable changes to the NicheCP project will be documented in this file.
 
 ## [Unreleased]
 
+### Beginner-Friendly Testcase Generation (2026-08-25)
+- Replaced the developer-facing generator modal with a guided **Generate Test Cases** experience: test count, visual input fields, ranges, seeds, reference-solution execution, and testcase saving.
+- Added Simple Generator support for numbers, strings, arrays, matrices, permutations, pairs/intervals, repeated values, trees, and graphs; C++/Python authoring remains available in Advanced Generator.
+- Added versioned generator configuration storage and compatibility for legacy `{code, language}` configurations. Simple definitions are compiled into trusted C++ and still execute through the unchanged Redis/Docker worker pipeline.
+
 ### Problem Setter & Judge Pipeline Architecture Upgrade (2026-08-24)
 - **Queue-Delegated Problem Setter Architecture**: Replaced all host `os/exec` code execution in API handlers with Redis queue delegation (`problem_setter_queue`) to the Docker worker process, strictly enforcing ADR 011 and closing all potential host arbitrary code execution vectors.
 - **Docker Sandbox API Extensions**: Extended `DockerSandboxSession` with `RunWithArgs()` for parameterizable generator/checker execution and `InjectFile()` for writing testcase input files into container tmpfs `/tmp`.

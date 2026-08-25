@@ -5,6 +5,9 @@
   - Extended `saveProblemConfig()` and `selectProblem()` to persist and retrieve `generator_config` in database.
   - Updated worker `psGenerate()` to evaluate reference solution success on `ExitCode == 0` (preventing harmless stderr warnings from causing `SOL_FAILED`).
   - Applied `001_problem_setter_pipeline.sql` migration on production PostgreSQL database.
+- [x] **Beginner-Friendly Simple Generator (2026-08-25)**:
+  - Added a code-free visual input builder with ranges, seed planning, and common contest input structures, while retaining an Advanced C++/Python mode.
+  - Kept the existing Redis/Docker testcase generation flow and backward-compatible legacy generator configuration support.
 - [x] **Problem Setter & Judge Pipeline Architecture Upgrade (2026-08-24)**:
   - Security Isolation: Enqueued all problem-setter execution to Redis `problem_setter_queue` consumed by Docker worker process (zero host `os/exec`).
   - Docker Sandbox Extensions: Implemented `RunWithArgs()` for generator args/timeouts and `InjectFile()` for tmpfs input files.
@@ -46,4 +49,3 @@
 ## Technical Debt & Bugs
 - [ ] **Concurrency Monitoring**: Ensure the Redis connection pool doesn't exhaust during high traffic.
 - [ ] **Mobile Responsiveness Auditing**: Continuously verify complex data grids don't overflow on small mobile screens.
-

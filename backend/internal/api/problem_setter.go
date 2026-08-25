@@ -23,13 +23,13 @@ type CodeConfig struct {
 
 // ProblemConfigPayload represents the full configuration payload for a problem
 type ProblemConfigPayload struct {
-	TimeLimitMs     int         `json:"time_limit_ms"`
-	MemoryLimitMb    int         `json:"memory_limit_mb"`
-	CheckerType     string      `json:"checker_type"`
-	CheckerConfig   CodeConfig  `json:"checker_config"`
-	GeneratorConfig CodeConfig  `json:"generator_config"`
-	ValidatorConfig CodeConfig  `json:"validator_config"`
-	SolutionConfig  CodeConfig  `json:"solution_config"`
+	TimeLimitMs     int             `json:"time_limit_ms"`
+	MemoryLimitMb   int             `json:"memory_limit_mb"`
+	CheckerType     string          `json:"checker_type"`
+	CheckerConfig   CodeConfig      `json:"checker_config"`
+	GeneratorConfig GeneratorConfig `json:"generator_config"`
+	ValidatorConfig CodeConfig      `json:"validator_config"`
+	SolutionConfig  CodeConfig      `json:"solution_config"`
 }
 
 // SaveProblemConfig updates the problem setter configuration for a problem
@@ -114,7 +114,8 @@ func GetProblemConfig(c *gin.Context) {
 		return
 	}
 
-	var chkConfig, genConfig, valConfig, solConfig CodeConfig
+	var chkConfig, valConfig, solConfig CodeConfig
+	var genConfig GeneratorConfig
 	_ = json.Unmarshal([]byte(chkStr), &chkConfig)
 	_ = json.Unmarshal([]byte(genStr), &genConfig)
 	_ = json.Unmarshal([]byte(valStr), &valConfig)
@@ -124,7 +125,7 @@ func GetProblemConfig(c *gin.Context) {
 		"id":               probID,
 		"status":           status,
 		"time_limit_ms":    timeLimitMs,
-		"memory_limit_mb":   memoryLimitMb,
+		"memory_limit_mb":  memoryLimitMb,
 		"checker_type":     checkerType,
 		"checker_config":   chkConfig,
 		"generator_config": genConfig,
@@ -135,11 +136,11 @@ func GetProblemConfig(c *gin.Context) {
 
 // GenerateTestsRequest defines the payload for invoking the generator pipeline
 type GenerateTestsRequest struct {
-	ArgLines  []string    `json:"arg_lines"`           // List of argument lines (one per test)
-	Generator *CodeConfig `json:"generator,omitempty"` // Optional override
-	Validator *CodeConfig `json:"validator,omitempty"` // Optional override
-	Solution  *CodeConfig `json:"solution,omitempty"`  // Optional override
-	ReplaceAll bool       `json:"replace_all"`         // If true, delete existing generated testcases first
+	ArgLines   []string         `json:"arg_lines"`           // Advanced mode: one line per test
+	Generator  *GeneratorConfig `json:"generator,omitempty"` // Optional simple or advanced override
+	Validator  *CodeConfig      `json:"validator,omitempty"` // Optional override
+	Solution   *CodeConfig      `json:"solution,omitempty"`  // Optional override
+	ReplaceAll bool             `json:"replace_all"`         // If true, delete existing generated testcases first
 }
 
 // GenerateTests delegates generation to the Redis worker queue and persists testcases
@@ -157,11 +158,6 @@ func GenerateTests(c *gin.Context) {
 		return
 	}
 
-	if len(req.ArgLines) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "arg_lines cannot be empty"})
-		return
-	}
-
 	// Load DB configs if overrides not provided
 	var genStr, valStr, solStr string
 	err = db.DB.QueryRow(`
@@ -175,10 +171,22 @@ func GenerateTests(c *gin.Context) {
 	}
 
 	genConfig := req.Generator
-	if genConfig == nil || genConfig.Code == "" {
-		var cfg CodeConfig
+	if genConfig == nil {
+		var cfg GeneratorConfig
 		_ = json.Unmarshal([]byte(genStr), &cfg)
 		genConfig = &cfg
+	}
+	resolvedGenerator, simpleArgs, genErr := genConfig.resolve()
+	if genErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": genErr.Error()})
+		return
+	}
+	if genConfig.Mode == "simple" {
+		req.ArgLines = simpleArgs
+	}
+	if len(req.ArgLines) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "add at least one test plan entry"})
+		return
 	}
 
 	valConfig := req.Validator
@@ -199,10 +207,6 @@ func GenerateTests(c *gin.Context) {
 		solConfig = &cfg
 	}
 
-	if genConfig.Code == "" || genConfig.Language == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Generator code and language are required"})
-		return
-	}
 	if solConfig.Code == "" || solConfig.Language == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Reference solution code and language are required"})
 		return
@@ -213,7 +217,7 @@ func GenerateTests(c *gin.Context) {
 	jobPayload := map[string]interface{}{
 		"request_id": requestID,
 		"action":     "ps_generate",
-		"generator":  genConfig,
+		"generator":  resolvedGenerator,
 		"solution":   solConfig,
 		"arg_lines":  req.ArgLines,
 	}
@@ -240,7 +244,7 @@ func GenerateTests(c *gin.Context) {
 	}
 
 	var result struct {
-		Success bool `json:"success"`
+		Success bool   `json:"success"`
 		Error   string `json:"error,omitempty"`
 		Data    []struct {
 			Index          int    `json:"index"`
@@ -325,9 +329,9 @@ func ValidateTestInput(c *gin.Context) {
 	}
 
 	var req struct {
-		Input    string `json:"input" binding:"required"`
-		ValCode  string `json:"val_code"`
-		ValLang  string `json:"val_lang"`
+		Input   string `json:"input" binding:"required"`
+		ValCode string `json:"val_code"`
+		ValLang string `json:"val_lang"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -377,7 +381,7 @@ func ValidateTestInput(c *gin.Context) {
 	}
 
 	var result struct {
-		Success bool `json:"success"`
+		Success bool   `json:"success"`
 		Error   string `json:"error"`
 		Data    struct {
 			Valid      bool   `json:"valid"`
@@ -461,7 +465,7 @@ func RunReferenceSolution(c *gin.Context) {
 	}
 
 	var result struct {
-		Success bool `json:"success"`
+		Success bool   `json:"success"`
 		Error   string `json:"error"`
 		Data    struct {
 			Output string `json:"output"`
@@ -547,7 +551,7 @@ func RunCheckerTest(c *gin.Context) {
 	}
 
 	var result struct {
-		Success bool `json:"success"`
+		Success bool   `json:"success"`
 		Error   string `json:"error"`
 		Data    struct {
 			Verdict  string `json:"verdict"`

@@ -39,6 +39,10 @@ The NicheCP platform is currently in late-stage development/stabilization. A mas
 *   The connection flow between the main API server and the Docker execution workers requires ongoing monitoring to ensure high concurrency doesn't cause race conditions or memory leaks in Redis.
 
 ## Recent Major Changes
+*   (2026-08-25) Beginner-Friendly Testcase Generation:
+    - Replaced the developer-centric generator modal with a Simple Generator visual input builder and an explicit Advanced C++/Python mode.
+    - Simple definitions are translated by the API into deterministic, trusted C++ generators and dispatched through the existing Redis → Docker worker pipeline; no sandbox/security boundary changed.
+    - Added versioned generator configuration compatibility so legacy code generators and all existing testcase rows continue to work.
 *   (2026-08-25) Generator Pipeline Deep Fix & Database Migration:
     - Fixed missing `genCode` / `genLang` DOM elements in Generator Modal, restoring full generator code editing capabilities.
     - Updated `saveProblemConfig()` and `selectProblem()` to save and load `generator_config` persistently in Postgres.

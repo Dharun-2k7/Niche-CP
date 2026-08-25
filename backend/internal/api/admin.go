@@ -46,8 +46,12 @@ func GetAllUsers(c *gin.Context) {
 	limit := 50
 	fmt.Sscanf(pageStr, "%d", &page)
 	fmt.Sscanf(limitStr, "%d", &limit)
-	if page < 1 { page = 1 }
-	if limit < 1 || limit > 100 { limit = 50 }
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 100 {
+		limit = 50
+	}
 	offset := (page - 1) * limit
 
 	// Build dynamic WHERE clause
@@ -147,7 +151,7 @@ func DemoteFromAdmin(c *gin.Context) {
 	var callerRole, callerEmail string
 	err := db.DB.QueryRow(`SELECT role, email FROM users WHERE id = $1`, userID).Scan(&callerRole, &callerEmail)
 	normCallerRole := strings.ToLower(strings.TrimSpace(callerRole))
-	
+
 	superadminEmailsEnv := os.Getenv("SUPERADMIN_EMAILS")
 	isSuperAdminCaller := normCallerRole == "superadmin"
 	if !isSuperAdminCaller && superadminEmailsEnv != "" {
@@ -200,7 +204,7 @@ func DemoteFromAdmin(c *gin.Context) {
 type CreateProblemRequest struct {
 	Title           string      `json:"title" binding:"required"`
 	Difficulty      string      `json:"difficulty"`
-	Tags            interface{} `json:"tags"`             // Can accept string or array
+	Tags            interface{} `json:"tags"` // Can accept string or array
 	Description     string      `json:"description"`
 	InputFormat     string      `json:"input_format"`
 	OutputFormat    string      `json:"output_format"`
@@ -463,7 +467,7 @@ func PromoteToAdmin(c *gin.Context) {
 	var callerRole, callerEmail string
 	err := db.DB.QueryRow(`SELECT role, email FROM users WHERE id = $1`, userID).Scan(&callerRole, &callerEmail)
 	normCallerRole := strings.ToLower(strings.TrimSpace(callerRole))
-	
+
 	superadminEmailsEnv := os.Getenv("SUPERADMIN_EMAILS")
 	isSuperAdminCaller := normCallerRole == "superadmin"
 	if !isSuperAdminCaller && superadminEmailsEnv != "" {
@@ -706,7 +710,8 @@ func GetAdminProblem(c *gin.Context) {
 		return
 	}
 
-	var chkConfig, genConfig, valConfig, solConfig CodeConfig
+	var chkConfig, valConfig, solConfig CodeConfig
+	var genConfig GeneratorConfig
 	_ = json.Unmarshal([]byte(chkStr), &chkConfig)
 	_ = json.Unmarshal([]byte(genStr), &genConfig)
 	_ = json.Unmarshal([]byte(valStr), &valConfig)
@@ -725,7 +730,7 @@ func GetAdminProblem(c *gin.Context) {
 		"hidden_testcases": hiddenTestcases,
 		"status":           status,
 		"time_limit_ms":    timeLimitMs,
-		"memory_limit_mb":   memoryLimitMb,
+		"memory_limit_mb":  memoryLimitMb,
 		"checker_type":     checkerType,
 		"checker_config":   chkConfig,
 		"generator_config": genConfig,
@@ -774,7 +779,7 @@ func UpdateProblem(c *gin.Context) {
 		SET title=$1, difficulty=$2, tags=$3::jsonb, description=$4, input_format=$5, output_format=$6, constraints=$7, sample_testcases=$8::jsonb, hidden_testcases=$9::jsonb
 	`
 	args := []interface{}{req.Title, req.Difficulty, tagsStr, req.Description, req.InputFormat, req.OutputFormat, req.Constraints, sampleStr, hiddenStr}
-	
+
 	if req.Status != "" {
 		query += `, status=$10 WHERE id=$11`
 		args = append(args, req.Status, id)
@@ -784,7 +789,7 @@ func UpdateProblem(c *gin.Context) {
 	}
 
 	res, err := tx.Exec(query, args...)
-	
+
 	if err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update problem: " + err.Error()})
@@ -802,11 +807,11 @@ func UpdateProblem(c *gin.Context) {
 	if req.ContestID != nil {
 		var existingCount int
 		tx.QueryRow(`SELECT COUNT(*) FROM contest_problems WHERE problem_id = $1 AND contest_id = $2`, id, *req.ContestID).Scan(&existingCount)
-		
+
 		if existingCount == 0 {
 			var maxOrder sql.NullInt64
 			tx.QueryRow(`SELECT MAX(order_index) FROM contest_problems WHERE contest_id = $1`, *req.ContestID).Scan(&maxOrder)
-			
+
 			nextOrder := 1
 			if maxOrder.Valid {
 				nextOrder = int(maxOrder.Int64) + 1
@@ -816,7 +821,7 @@ func UpdateProblem(c *gin.Context) {
 				INSERT INTO contest_problems (contest_id, problem_id, order_index)
 				VALUES ($1, $2, $3)
 			`, *req.ContestID, id, nextOrder)
-			
+
 			if err != nil {
 				tx.Rollback()
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to link problem to contest"})

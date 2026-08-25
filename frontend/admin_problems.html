@@ -192,6 +192,23 @@
             border-color: #3B82F6;
         }
 
+        /* ── Testcase generation wizard ── */
+        .generator-mode-toggle { display:flex; gap:8px; margin:20px 0; padding:5px; background:#08080a; border:1px solid rgba(255,255,255,.08); border-radius:10px; }
+        .generator-mode-toggle button { flex:1; border:0; border-radius:7px; padding:10px 12px; background:transparent; color:var(--text-muted); cursor:pointer; font:600 13px 'Inter',sans-serif; }
+        .generator-mode-toggle button.active { background:rgba(59,130,246,.18); color:#93c5fd; }
+        .gen-stepper { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin:18px 0 22px; }
+        .gen-step { padding:8px; border-radius:8px; color:var(--text-muted); background:rgba(255,255,255,.035); font-size:11px; text-align:center; line-height:1.35; }
+        .gen-step.active { background:rgba(59,130,246,.16); color:#bfdbfe; border:1px solid rgba(59,130,246,.3); }
+        .gen-card { background:rgba(255,255,255,.025); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:16px; margin-bottom:14px; }
+        .gen-card h4 { color:#fff; margin:0 0 5px; font:600 14px 'Space Grotesk',sans-serif; }
+        .gen-card p { color:var(--text-muted); font-size:12px; line-height:1.45; margin:0 0 12px; }
+        .gen-field-row { display:grid; grid-template-columns:1.2fr 1fr 1fr auto; gap:8px; align-items:end; margin-top:8px; }
+        .gen-field-row label, .gen-card label { display:block; color:var(--text-muted); font-size:11px; margin-bottom:5px; }
+        .gen-field-row .setter-input, .gen-card .setter-input { padding:8px 10px; }
+        .gen-help { border-left:3px solid #3b82f6; padding:10px 12px; background:rgba(59,130,246,.08); border-radius:0 8px 8px 0; color:#bfdbfe; font-size:12px; line-height:1.45; }
+        .gen-advanced { border:1px dashed rgba(168,85,247,.4); background:rgba(168,85,247,.04); }
+        @media(max-width:700px) { .gen-stepper { grid-template-columns:repeat(2,1fr); } .gen-field-row { grid-template-columns:1fr 1fr; } }
+
         /* ── Markdown Formatting Toolbar ── */
         .md-toolbar {
             display: flex;
@@ -559,11 +576,11 @@
                                     + Add Manual Testcase
                                 </button>
                                 <button type="button" class="btn-ghost" onclick="openGenModal()" style="font-size: 12px; color: #3B82F6; border-color: rgba(59, 130, 246, 0.3); padding: 6px 14px;">
-                                    ⚡ Run Generator Pipeline
+                                    ✨ Generate Test Cases
                                 </button>
                             </div>
                         </div>
-                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Individual testcases generated via Generator → Reference Solution pipeline or authored manually.</p>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Create test inputs with a guided builder, then NicheCP runs your reference solution and saves the expected outputs.</p>
                         
                         <div id="testcasesList">
                             <table class="tc-table">
@@ -571,7 +588,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Source</th>
-                                        <th>Generator Args</th>
+                                        <th>Generation Details</th>
                                         <th>Input Snippet</th>
                                         <th>Expected Output</th>
                                         <th>Status</th>
@@ -652,45 +669,41 @@
         <button id="saveBtn" class="btn-magnetic" style="padding: 10px 24px;" onclick="saveProblemConfig()">Save Problem Config</button>
     </div>
 
-    <!-- TESTCASE GENERATOR MODAL -->
+    <!-- TESTCASE GENERATION WIZARD -->
     <div id="genModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(6,6,8,0.85); backdrop-filter:blur(12px); z-index:10000; align-items:center; justify-content:center; padding:20px;">
         <div style="background:#0d0f17; border:1px solid rgba(255,255,255,0.1); border-radius:20px; max-width:900px; width:100%; max-height:92vh; overflow-y:auto; padding:32px; box-shadow:0 20px 40px rgba(0,0,0,0.6); position:relative;">
             <button onclick="closeGenModal()" style="position:absolute; top:20px; right:20px; background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:20px;">✕</button>
-            <h3 style="font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; color:#fff; margin:0 0 6px 0;">⚡ Automated Testcase Generator Pipeline</h3>
-            <p style="color:var(--text-muted); font-size:13px; margin:0 0 24px 0; line-height:1.5;">Generator script runs in the Docker sandbox with each line of arguments to produce test inputs. Inputs pass through the Reference Solution to produce expected outputs.</p>
-
-            <!-- Generator Code -->
-            <div style="margin-bottom:20px;">
-                <div style="display:flex; gap:16px; align-items:center; margin-bottom:8px;">
-                    <label style="font-size:12px; font-weight:600; color:#fff;">Generator Script Language:</label>
-                    <select id="genLang" style="background:#08080a; border:1px solid rgba(255,255,255,0.12); color:#fff; font-size:13px; padding:6px 12px; border-radius:6px;">
-                        <option value="cpp">C++ (g++)</option>
-                        <option value="python">Python 3</option>
-                    </select>
-                </div>
-                <label style="font-size:12px; font-weight:600; color:#fff; display:block; margin-bottom:6px;">Generator Script Code (receives args as <code style="color:#a78bfa;">argv</code>, prints test input to <code style="color:#a78bfa;">stdout</code>)</label>
-                <textarea id="genCode" class="setter-textarea" style="height:160px; border-radius:8px; font-family:monospace;" placeholder="// C++ Example: reads argc, argv and prints a random graph\n#include <bits/stdc++.h>\nusing namespace std;\nint main(int argc, char* argv[]) {\n    int seed = atoi(argv[1]);\n    int n = atoi(argv[2]);\n    mt19937 rng(seed);\n    cout << n << '\\n';\n    for (int i = 0; i < n-1; i++)\n        cout << (rng() % (i+1)) << ' ' << i+1 << '\\n';\n    return 0;\n}"></textarea>
-                <p style="font-size:11px; color:var(--text-muted); margin-top:6px;">💡 Tip: This code is pre-populated from the saved generator config. You can also override it here per-run.</p>
+            <h3 style="font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; color:#fff; margin:0 0 6px 0;">✨ Generate Test Cases</h3>
+            <p style="color:var(--text-muted); font-size:13px; margin:0; line-height:1.5;">Describe the input in plain language. We create the inputs, run your reference solution safely, and save the correct outputs.</p>
+            <div class="generator-mode-toggle">
+                <button type="button" id="simpleGenMode" class="active" onclick="setGeneratorMode('simple')">Simple Generator <small>— no code</small></button>
+                <button type="button" id="advancedGenMode" onclick="setGeneratorMode('advanced')">Advanced Generator <small>— C++ / Python</small></button>
             </div>
-
-            <!-- Argument Lines -->
-            <div style="margin-bottom:20px;">
-                <label style="font-size:12px; font-weight:600; color:#fff; display:block; margin-bottom:6px;">Generator Argument Lines (One test per line — each line becomes argv for one test)</label>
-                <textarea id="genArgLines" class="setter-textarea" style="height:120px; border-radius:8px;" placeholder="1 10 100&#10;2 50 500&#10;3 100 1000&#10;4 500 5000&#10;5 1000 10000"></textarea>
-                <p style="font-size:11px; color:var(--text-muted); margin-top:6px;">Each line = one generated testcase. E.g. <code style="color:#a78bfa;">1 10 100</code> → argv[1]=1 (seed), argv[2]=10 (n), argv[3]=100 (maxval)</p>
+            <div id="simpleGenArea">
+                <div class="gen-stepper"><div class="gen-step active">1. Choose tests</div><div class="gen-step active">2. Define input</div><div class="gen-step active">3. Set ranges & seeds</div><div class="gen-step">4. Create inputs</div><div class="gen-step">5. Save outputs</div></div>
+                <div class="gen-card"><h4>How many test cases?</h4><p>Use a fixed starting seed when you want this exact set again.</p><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;"><div><label>Number of tests</label><input id="simpleCount" class="setter-input" type="number" min="1" max="100" value="10"></div><div><label>Starting seed</label><input id="simpleSeed" class="setter-input" type="number" value="1001"></div><div><label>Seed behavior</label><select id="simpleSeedMode" class="setter-input"><option value="sequential">Different seed per test</option><option value="fixed">Repeat the same input</option></select></div></div></div>
+                <div class="gen-card"><h4>What does one input look like?</h4><p>Add fields in the same order they appear in the problem input. Pick a type, then give it sensible limits.</p><div id="simpleFields"></div><button type="button" class="btn-ghost" onclick="addSimpleField()" style="margin-top:10px;color:#60a5fa;border-color:rgba(96,165,250,.35);">+ Add an input field</button></div>
+                <div class="gen-help">Examples: use <b>Number</b> for <code>n</code>, <b>Array</b> for a line of values, <b>Permutation</b> for shuffled 1…n, and <b>Tree</b>/<b>Graph</b> for edge lists. Need a bespoke format? Switch to Advanced Generator.</div>
+            </div>
+            <div id="advancedGenArea" style="display:none;">
+                <div class="gen-card gen-advanced"><h4>Advanced Generator</h4><p>For custom formats, write the generator program and provide one parameter set per line. This runs in the same protected Docker environment.</p>
+                    <div style="display:flex;gap:16px;align-items:center;margin-bottom:8px;"><label style="margin:0;">Language</label><select id="genLang" class="setter-input" style="width:auto;"><option value="cpp">C++ (g++)</option><option value="python">Python 3</option></select></div>
+                    <textarea id="genCode" class="setter-textarea" style="height:160px;border-radius:8px;font-family:monospace;" placeholder="Write your custom C++ or Python testcase generator here."></textarea>
+                    <label style="margin-top:12px;">One parameter set per test case</label><textarea id="genArgLines" class="setter-textarea" style="height:100px;border-radius:8px;" placeholder="Example: 1001 10 100&#10;1002 50 500"></textarea>
+                </div>
             </div>
 
             <!-- Replace toggle -->
             <div style="margin-bottom:20px; display:flex; align-items:center; gap:10px;">
                 <input type="checkbox" id="genReplaceAll" style="width:16px; height:16px;">
-                <label for="genReplaceAll" style="font-size:13px; color:#fff;">Replace all existing generated testcases before inserting new ones</label>
+                <label for="genReplaceAll" style="font-size:13px; color:#fff;">Replace existing generated test cases (manual and sample tests are kept)</label>
             </div>
 
             <div id="genStatusMsg" style="font-size:13px; margin-bottom:16px; display:none; padding:12px; border-radius:8px;"></div>
 
             <div style="display:flex; justify-content:flex-end; gap:12px;">
                 <button class="btn-ghost" onclick="closeGenModal()" style="padding:10px 20px; font-size:14px;">Cancel</button>
-                <button class="btn-primary" id="runGenBtn" onclick="executeGeneratorPipeline()" style="padding:10px 24px; font-size:14px;">⚡ Run Sandboxed Pipeline</button>
+                <button class="btn-primary" id="runGenBtn" onclick="executeGeneratorPipeline()" style="padding:10px 24px; font-size:14px;">✨ Generate & Save Test Cases</button>
             </div>
         </div>
     </div>
@@ -994,21 +1007,71 @@
         }
 
         let currentTestcasesData = [];
+        let generatorMode = 'simple';
+        let simpleGeneratorConfig = { count: 10, seed: 1001, seed_mode: 'sequential', fields: [] };
+
+        const simpleFieldDefaults = {
+            number: { min: 1, max: 100 }, string: { length_min: 1, length_max: 20, alphabet: 'abcdefghijklmnopqrstuvwxyz' },
+            array: { min: 1, max: 100, length_min: 1, length_max: 20 }, matrix: { min: 1, max: 100, rows: 3, columns: 3 },
+            permutation: { length_min: 2, length_max: 20 }, pair: { min: 1, max: 100 }, interval: { min: 1, max: 100 },
+            graph: { length_min: 2, length_max: 20, count_min: 1, count_max: 30 }, tree: { length_min: 2, length_max: 20 }, repeat: { min: 1, max: 100, length_min: 1, length_max: 10 }
+        };
+
+        function setGeneratorMode(mode) {
+            generatorMode = mode;
+            document.getElementById('simpleGenMode').classList.toggle('active', mode === 'simple');
+            document.getElementById('advancedGenMode').classList.toggle('active', mode === 'advanced');
+            document.getElementById('simpleGenArea').style.display = mode === 'simple' ? 'block' : 'none';
+            document.getElementById('advancedGenArea').style.display = mode === 'advanced' ? 'block' : 'none';
+        }
+
+        function addSimpleField(type = 'number') {
+            const field = { type, name: '', ...simpleFieldDefaults[type] };
+            simpleGeneratorConfig.fields.push(field);
+            renderSimpleFields();
+        }
+
+        function renderSimpleFields() {
+            const host = document.getElementById('simpleFields');
+            if (!simpleGeneratorConfig.fields.length) {
+                host.innerHTML = '<div style="color:var(--text-muted);font-size:12px;padding:8px 0;">Start with a number, list, or string. You can add more fields for multi-line inputs.</div>';
+                return;
+            }
+            host.innerHTML = simpleGeneratorConfig.fields.map((field, index) => {
+                const safeName = String(field.name || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const safeAlphabet = String(field.alphabet || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const type = field.type;
+                const range = ['string', 'permutation', 'tree', 'graph'].includes(type)
+                    ? `<div><label>Length / nodes from</label><input class="setter-input" type="number" min="1" value="${field.length_min || 1}" onchange="updateSimpleField(${index}, 'length_min', this.value)"></div><div><label>To</label><input class="setter-input" type="number" min="1" value="${field.length_max || 1}" onchange="updateSimpleField(${index}, 'length_max', this.value)"></div>`
+                    : `<div><label>Smallest value</label><input class="setter-input" type="number" value="${field.min ?? 1}" onchange="updateSimpleField(${index}, 'min', this.value)"></div><div><label>Largest value</label><input class="setter-input" type="number" value="${field.max ?? 100}" onchange="updateSimpleField(${index}, 'max', this.value)"></div>`;
+                const extra = ['array','repeat'].includes(type) ? `<div><label>Items from</label><input class="setter-input" type="number" min="1" value="${field.length_min || 1}" onchange="updateSimpleField(${index}, 'length_min', this.value)"></div><div><label>To</label><input class="setter-input" type="number" min="1" value="${field.length_max || 1}" onchange="updateSimpleField(${index}, 'length_max', this.value)"></div>` : type === 'matrix' ? `<div><label>Rows</label><input class="setter-input" type="number" min="1" value="${field.rows || 1}" onchange="updateSimpleField(${index}, 'rows', this.value)"></div><div><label>Columns</label><input class="setter-input" type="number" min="1" value="${field.columns || 1}" onchange="updateSimpleField(${index}, 'columns', this.value)"></div>` : type === 'graph' ? `<div><label>Edges from</label><input class="setter-input" type="number" min="0" value="${field.count_min || 0}" onchange="updateSimpleField(${index}, 'count_min', this.value)"></div><div><label>To</label><input class="setter-input" type="number" min="0" value="${field.count_max || 1}" onchange="updateSimpleField(${index}, 'count_max', this.value)"></div>` : type === 'string' ? `<div style="grid-column:span 2"><label>Characters to use</label><input class="setter-input" value="${safeAlphabet}" onchange="updateSimpleField(${index}, 'alphabet', this.value)"></div>` : '';
+                return `<div class="gen-field-row"><div><label>What is this? (optional)</label><input class="setter-input" placeholder="e.g. Number of cities" value="${safeName}" onchange="updateSimpleField(${index}, 'name', this.value)"></div><div><label>Field ${index+1} type</label><select class="setter-input" onchange="changeSimpleFieldType(${index}, this.value)"><option value="number" ${type==='number'?'selected':''}>Number</option><option value="string" ${type==='string'?'selected':''}>Text string</option><option value="array" ${type==='array'?'selected':''}>List of numbers</option><option value="matrix" ${type==='matrix'?'selected':''}>Number grid</option><option value="permutation" ${type==='permutation'?'selected':''}>Permutation</option><option value="pair" ${type==='pair'?'selected':''}>Pair</option><option value="interval" ${type==='interval'?'selected':''}>Interval</option><option value="repeat" ${type==='repeat'?'selected':''}>Repeated values</option><option value="tree" ${type==='tree'?'selected':''}>Tree edge list</option><option value="graph" ${type==='graph'?'selected':''}>Graph edge list</option></select></div>${range}<button class="btn-ghost" type="button" onclick="removeSimpleField(${index})" style="padding:8px;color:#f87171;">Remove</button>${extra}</div>`;
+            }).join('');
+        }
+        function updateSimpleField(index, key, value) { simpleGeneratorConfig.fields[index][key] = key === 'alphabet' ? value : Number(value); }
+        function changeSimpleFieldType(index, type) { simpleGeneratorConfig.fields[index] = { type, name: '', ...simpleFieldDefaults[type] }; renderSimpleFields(); }
+        function removeSimpleField(index) { simpleGeneratorConfig.fields.splice(index, 1); renderSimpleFields(); }
+        function readSimpleGenerator() { return { count: Number(document.getElementById('simpleCount').value), seed: Number(document.getElementById('simpleSeed').value), seed_mode: document.getElementById('simpleSeedMode').value, fields: simpleGeneratorConfig.fields }; }
+        function loadSimpleGenerator(config) { simpleGeneratorConfig = config || { count:10, seed:1001, seed_mode:'sequential', fields:[] }; document.getElementById('simpleCount').value = simpleGeneratorConfig.count || 10; document.getElementById('simpleSeed').value = simpleGeneratorConfig.seed ?? 1001; document.getElementById('simpleSeedMode').value = simpleGeneratorConfig.seed_mode || 'sequential'; renderSimpleFields(); }
 
         async function loadTestcasesList() {
             if (!currentProblemId) return;
             const tbody = document.getElementById('testcasesTableBody');
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">⏳ Loading testcases...</td></tr>`;
 
             try {
                 const res = await fetch(`/api/admin/problems/${currentProblemId}/testcases`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (!res.ok) return;
+                if (!res.ok) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#ef4444; padding:20px;">Failed to load testcases (${res.status}). Try refreshing.</td></tr>`;
+                    return;
+                }
                 const testcases = await res.json();
                 currentTestcasesData = testcases;
 
-                if (testcases.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">No testcases yet. Click "Add Manual Testcase" or "Run Generator Pipeline".</td></tr>`;
+                if (!Array.isArray(testcases) || testcases.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">No test cases yet. Add one manually or use “Generate Test Cases”.</td></tr>`;
                     updatePreview();
                     return;
                 }
@@ -1017,7 +1080,8 @@
                 testcases.forEach(tc => {
                     const inpSnip = (tc.input || '').substring(0, 30).replace(/\n/g, ' ') + ((tc.input || '').length > 30 ? '...' : '');
                     const expSnip = (tc.expected_output || '').substring(0, 30).replace(/\n/g, ' ') + ((tc.expected_output || '').length > 30 ? '...' : '');
-                    const statusColor = tc.validation_status === 'valid' ? '#10b981' : (tc.validation_status === 'invalid' ? '#ef4444' : '#f59e0b');
+                    const vStatus = tc.validation_status || 'pending';
+                    const statusColor = vStatus === 'valid' ? '#10b981' : (vStatus === 'invalid' ? '#ef4444' : '#f59e0b');
 
                     html += `
                         <tr>
@@ -1026,7 +1090,7 @@
                             <td style="color:var(--text-muted);">${tc.generator_args || '-'}</td>
                             <td>${inpSnip}</td>
                             <td>${expSnip}</td>
-                            <td><span style="color:${statusColor}; font-weight:600;">${tc.validation_status || 'ready'}</span></td>
+                            <td><span style="color:${statusColor}; font-weight:600;">${vStatus}</span></td>
                             <td>
                                 <button class="btn-ghost" onclick="deleteTestcase(${tc.id})" style="color:#ef4444; padding:2px 8px; font-size:11px;">Delete</button>
                             </td>
@@ -1035,7 +1099,9 @@
                 });
                 tbody.innerHTML = html;
                 updatePreview();
-            } catch(e){}
+            } catch(e) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#ef4444; padding:20px;">Network error: ${e.message}</td></tr>`;
+            }
         }
 
         function openAddTestModal() {
@@ -1183,6 +1249,10 @@
                 document.getElementById('pMemoryLimitMb').value = 256;
                 document.getElementById('pStatusBadge').textContent = 'DRAFT';
                 document.getElementById('pStatusBadge').className = 'status-badge-draft';
+                document.getElementById('genCode').value = '';
+                document.getElementById('genLang').value = 'cpp';
+                loadSimpleGenerator();
+                setGeneratorMode('simple');
                 document.getElementById('deleteBtn').style.display = 'none';
                 updatePreview();
                 switchPolygonTab('overview', document.querySelector('.polygon-tab'));
@@ -1218,8 +1288,12 @@
                     document.getElementById('mainsolLang').value = p.solution_config.language || 'cpp';
                 }
                 if (p.generator_config) {
-                    document.getElementById('genCode').value = p.generator_config.code || '';
-                    document.getElementById('genLang').value = p.generator_config.language || 'cpp';
+                    const gen = p.generator_config;
+                    document.getElementById('genCode').value = (gen.advanced && gen.advanced.code) || gen.code || '';
+                    document.getElementById('genLang').value = (gen.advanced && gen.advanced.language) || gen.language || 'cpp';
+                    loadSimpleGenerator(gen.simple);
+                    // Legacy code-only configurations must remain in their familiar mode.
+                    setGeneratorMode(gen.mode === 'simple' ? 'simple' : ((gen.mode === 'advanced' || gen.code) ? 'advanced' : 'simple'));
                 }
                 if (p.checker_type) {
                     document.getElementById('chkType').value = p.checker_type;
@@ -1294,8 +1368,10 @@
                         epsilon: parseFloat(document.getElementById('chkEpsilon').value) || 1e-6
                     },
                     generator_config: {
-                        code: document.getElementById('genCode').value,
-                        language: document.getElementById('genLang').value
+                        version: 1,
+                        mode: generatorMode,
+                        advanced: { code: document.getElementById('genCode').value, language: document.getElementById('genLang').value },
+                        simple: readSimpleGenerator()
                     },
                     solution_config: {
                         code: document.getElementById('mainsolCode').value,
@@ -1348,6 +1424,7 @@
         }
 
         function openGenModal() {
+            renderSimpleFields();
             document.getElementById('genModal').style.display = 'flex';
         }
 
@@ -1365,26 +1442,29 @@
             const genLangVal = document.getElementById('genLang').value;
             const rawArgs = document.getElementById('genArgLines').value.trim();
             const argLines = rawArgs.split('\n').map(l => l.trim()).filter(Boolean);
+            const simpleConfig = readSimpleGenerator();
             const replaceAll = document.getElementById('genReplaceAll').checked;
             const statusEl = document.getElementById('genStatusMsg');
             const runBtn = document.getElementById('runGenBtn');
 
-            if (!genCodeVal) {
+            if (generatorMode === 'advanced' && !genCodeVal) {
                 statusEl.style.display = 'block';
                 statusEl.style.background = 'rgba(239, 68, 68, 0.15)';
                 statusEl.style.color = '#ef4444';
-                statusEl.innerText = '✗ Generator code is required. Paste your generator script above or save the problem config first (the generator code will be pre-loaded from the saved config).';
+                statusEl.innerText = '✗ Add your custom generator code before creating test cases.';
                 return;
             }
-            if (argLines.length === 0) {
-                alert('Please provide at least one line of generator arguments.');
+            if (generatorMode === 'advanced' && argLines.length === 0) {
+                alert('Please provide at least one parameter set for the custom generator.');
                 return;
             }
+            if (generatorMode === 'simple' && simpleConfig.fields.length === 0) { alert('Add at least one input field so we know what to create.'); return; }
 
             statusEl.style.display = 'block';
             statusEl.style.background = 'rgba(59, 130, 246, 0.15)';
             statusEl.style.color = '#3B82F6';
-            statusEl.innerText = `⚡ Executing sandboxed Generator → Reference Solution pipeline (${argLines.length} test(s)) on worker...`;
+            const testCount = generatorMode === 'simple' ? simpleConfig.count : argLines.length;
+            statusEl.innerText = `Creating ${testCount} input${testCount === 1 ? '' : 's'} → running the reference solution → saving expected outputs…`;
             runBtn.disabled = true;
 
             try {
@@ -1395,10 +1475,12 @@
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        arg_lines: argLines,
+                        arg_lines: generatorMode === 'advanced' ? argLines : [],
                         generator: {
-                            code: genCodeVal,
-                            language: genLangVal
+                            version: 1,
+                            mode: generatorMode,
+                            advanced: { code: genCodeVal, language: genLangVal },
+                            simple: simpleConfig
                         },
                         solution: {
                             code: document.getElementById('mainsolCode').value,
@@ -1414,7 +1496,7 @@
                     const failed = data.failed_count || 0;
                     statusEl.style.background = 'rgba(16, 185, 129, 0.15)';
                     statusEl.style.color = '#10b981';
-                    statusEl.innerText = `✓ ${data.message || 'Pipeline complete'} — ${saved} test(s) saved${failed > 0 ? ', ' + failed + ' failed' : ''}`;
+                    statusEl.innerText = `✓ Test inputs created, expected outputs generated, and ${saved} testcase${saved === 1 ? '' : 's'} saved${failed > 0 ? ', ' + failed + ' need attention' : ''}.`;
 
                     setTimeout(() => {
                         closeGenModal();

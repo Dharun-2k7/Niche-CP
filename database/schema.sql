@@ -132,3 +132,15 @@ CREATE TABLE IF NOT EXISTS contest_violations (
     event_type VARCHAR(50) NOT NULL, -- 'fullscreen_exit', 'tab_switched', 'blur'
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS blogs (
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    category TEXT NOT NULL,
+    author_id INTEGER REFERENCES users(id),
+    content TEXT NOT NULL,
+    summary TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

@@ -131,17 +131,53 @@
     <div class="noise-bg" style="opacity: 0.4;"></div>
     <div id="global-nav-container"></div>
 
+        /* Admin Write Panel */
+        .admin-write-panel {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 40px;
+            display: none;
+        }
+        .admin-write-panel.active { display: block; }
+        .admin-write-panel input, .admin-write-panel textarea {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-family: inherit;
+        }
+        .admin-write-panel textarea { min-height: 200px; }
+    </style>
+</head>
+<body data-theme="quantum">
+    <div class="noise-bg" style="opacity: 0.4;"></div>
+    <div id="global-nav-container"></div>
     <main class="app-container" style="padding-top: 100px; max-width: 1200px; margin: 0 auto; padding-left: 20px; padding-right: 20px;">
         
-            <div class="blog-meta" style="margin-bottom: 16px;">
-                <span class="tag" style="background: rgba(168,85,247,0.15); color: #A855F7; border: 1px solid rgba(168,85,247,0.3);">FEATURED ENGINEERING</span>
-                <span>12 min read &middot; Aug 2026 &middot; By Dharun Kaarthick</span>
+        <!-- Admin Write Blog Section -->
+        <div class="admin-write-panel" id="adminWritePanel">
+            <h2 style="font-size:20px; color:#fff; margin-bottom:20px;">Create New Blog Post</h2>
+            <input type="text" id="blogTitle" placeholder="Title">
+            <input type="text" id="blogSlug" placeholder="Slug (e.g. build-sub-10ms-sandbox)">
+            <input type="text" id="blogCategory" placeholder="Category (e.g. engineering)">
+            <textarea id="blogContent" placeholder="Content (Markdown supported)"></textarea>
+            <input type="text" id="blogSummary" placeholder="Short Summary">
+            <button class="btn-primary" onclick="submitBlog()">Publish Blog Post</button>
+            <button class="btn-ghost" onclick="toggleAdminPanel()">Cancel</button>
+        </div>
+        
+        <!-- Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 32px;">
+            <div>
+                <div style="font-size: 13px; font-weight: 600; color: var(--primary-accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px;">Journal</div>
+                <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; color: #fff; margin: 0;">Technical Publications</h1>
             </div>
-            <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 12px;">Building a Sub-10ms Code Sandbox Engine in Docker & Redis</h2>
-            <p style="color: var(--text-muted); font-size: 15px; line-height: 1.6; margin-bottom: 20px; max-width: 850px;">A deep architectural breakdown of how NicheCP compiles static binaries, offloads code execution jobs to a Redis queue, and runs untrusted code under millisecond cgroup limits without risking host security.</p>
-            <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #A855F7;">
-                Read Full Technical Deep Dive &rarr;
-            </div>
+            <button id="adminToggleBtn" class="btn-secondary" style="display:none;" onclick="toggleAdminPanel()">+ Write Blog</button>
         </div>
 
         <!-- Category Filters -->
@@ -207,8 +243,44 @@
 
     <script src="js/app.js"></script>
     <script src="js/components.js"></script>
-    <script>
-        const articlesDB = {
+        <script>
+            function toggleAdminPanel() {
+                document.getElementById('adminWritePanel').classList.toggle('active');
+            }
+
+            async function submitBlog() {
+                const res = await fetch('/api/admin/blogs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
+                    },
+                    body: JSON.stringify({
+                        title: document.getElementById('blogTitle').value,
+                        slug: document.getElementById('blogSlug').value,
+                        category: document.getElementById('blogCategory').value,
+                        content: document.getElementById('blogContent').value,
+                        summary: document.getElementById('blogSummary').value
+                    })
+                });
+                if(res.ok) { alert('Blog published!'); toggleAdminPanel(); }
+                else alert('Failed to publish');
+            }
+
+            // Check admin status
+            (async () => {
+                const token = localStorage.getItem('jwt_token');
+                if(!token) return;
+                try {
+                    const res = await fetch('/api/profile', { headers: {'Authorization': 'Bearer ' + token} });
+                    const user = await res.json();
+                    if(user.role === 'admin' || user.role === 'superadmin') {
+                        document.getElementById('adminToggleBtn').style.display = 'block';
+                    }
+                } catch(e) {}
+            })();
+        </script>
+
             'sandbox': {
                 category: 'ENGINEERING ARCHITECTURE',
                 title: 'Building a Sub-10ms Code Sandbox Engine in Docker & Redis',

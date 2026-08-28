@@ -499,8 +499,34 @@ func PromoteToAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User successfully promoted to Admin"})
 }
 
-// GetContestDetails returns contest metadata for the delete confirmation modal
-func GetContestDetails(c *gin.Context) {
+// CreateBlog saves a new blog post
+func CreateBlog(c *gin.Context) {
+	var req struct {
+		Title    string `json:"title" binding:"required"`
+		Slug     string `json:"slug" binding:"required"`
+		Category string `json:"category" binding:"required"`
+		Content  string `json:"content" binding:"required"`
+		Summary  string `json:"summary"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID, _ := c.Get("user_id")
+
+	_, err := db.DB.Exec(`
+		INSERT INTO blogs (title, slug, category, author_id, content, summary)
+		VALUES ($1, $2, $3, $4, $5, $6)
+	`, req.Title, req.Slug, req.Category, userID, req.Content, req.Summary)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create blog: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Blog created successfully"})
+}
 	contestID := c.Param("id")
 
 	var title string

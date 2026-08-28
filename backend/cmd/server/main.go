@@ -159,6 +159,7 @@ func main() {
 		admin.PUT("/problems/:id/config", api.SaveProblemConfig)
 		admin.GET("/problems/:id/config", api.GetProblemConfig)
 		admin.POST("/problems/:id/generate", api.GenerateTests)
+		admin.POST("/blogs", api.CreateBlog)
 		admin.POST("/problems/:id/validate", api.ValidateTestInput)
 		admin.POST("/problems/:id/run-solution", api.RunReferenceSolution)
 		admin.POST("/problems/:id/run-checker", api.RunCheckerTest)

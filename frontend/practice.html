@@ -39,18 +39,17 @@
         }
         .collection-card {
             background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 14px;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
             padding: 24px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
             cursor: pointer;
             text-decoration: none;
             color: inherit;
         }
         .collection-card:hover {
             background: rgba(255, 255, 255, 0.04);
-            border-color: rgba(59, 130, 246, 0.3);
-            transform: translateY(-2px);
+            border-color: var(--primary-accent);
         }
         .practice-grid {
             display: grid;

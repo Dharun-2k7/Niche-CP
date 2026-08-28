@@ -183,8 +183,7 @@ func GenerateTests(c *gin.Context) {
 	}
 	if genConfig.Mode == "simple" {
 		req.ArgLines = simpleArgs
-	}
-	if len(req.ArgLines) == 0 {
+	} else if len(req.ArgLines) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "add at least one test plan entry"})
 		return
 	}
